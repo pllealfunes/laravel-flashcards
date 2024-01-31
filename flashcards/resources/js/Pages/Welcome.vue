@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link} from '@inertiajs/vue3';
 
 defineProps({
     canLogin: {
@@ -7,16 +7,24 @@ defineProps({
     },
     canRegister: {
         type: Boolean,
-    },
-    laravelVersion: {
-        type: String,
-        required: true,
-    },
-    phpVersion: {
-        type: String,
-        required: true,
-    },
+    }
 });
+
+const questions = [
+"What artery supplies the retroperitoneal rectum?",
+"Ich verstehe",
+"Expansion Diffusion",
+"What is the French word for rebirth?",
+"What is a ratio?"
+];
+
+let randomQuestion = (() => {
+    let question = questions[Math.floor(Math.random()*questions.length)];
+    return question;
+});
+
+let question = setInterval(randomQuestion, 2000);
+
 </script>
 
 <template>
@@ -57,12 +65,38 @@ defineProps({
 
 <div class="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
     <div class="flex flex-col items-center p-20">
-        <h5 class="text-xl text-center font-medium text-gray-900 dark:text-white">What artery supplies the retroperitoneal rectum?</h5>
+        <h5 class="text-xl text-center font-medium text-gray-900 dark:text-white">{{ question }}</h5>
     </div>
 </div>
 
         </div>
     </div>
+
+<section class="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+<a href="#" class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
+    <img class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-s-lg" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZnEweGVweXJjdmx2b3BoNjZqdm1wMzV3d2EwNGR3eTU1aXlkbTh0ZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/YWmA09jP7J0duykcE4/giphy.gif" alt="">
+    <div class="flex flex-col justify-between p-4 leading-normal">
+        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Create Flashacards</h5>
+        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Create decks, organize them by subject, and search for the one you need for your next study session.</p>
+    </div>
+</a>
+<a href="#" class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
+    <img class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-s-lg" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExenlhNW01OWlwMnlmZHVoaWx0bXFrM2JtNWNydDhwZHJ2bHRlZXhoeSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l8Ri2pm57hRD5gCdKW/giphy.gif" alt="">
+    <div class="flex flex-col justify-between p-4 leading-normal">
+        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Quiz Yourself</h5>
+        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Quiz yourself before the big day and walk out of class with a smile.</p>
+    </div>
+</a>
+<a href="#" class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
+    <img class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-s-lg" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ3lqN2pkOW9xcjF3NDVqdjQ0cnk4N2MycWx4b3N2aHN2aHpwb2E2ZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/xZVQndT22cYfYryopX/giphy.gif" alt="">
+    <div class="flex flex-col justify-between p-4 leading-normal">
+        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Learning is Fun</h5>
+        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Learning is more fun with games. Study with your decks and have fun doing it with one of our games.</p>
+    </div>
+</a>
+
+</section>
 </template>
 
 <style>
