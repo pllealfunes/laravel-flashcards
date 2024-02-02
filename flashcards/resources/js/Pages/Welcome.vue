@@ -15,11 +15,11 @@ const props = defineProps({
 <template>
     <Head title="Welcome" />
 
-    <nav class="bg-white border-gray-200 dark:bg-gray-900">
+    <nav class="bg-white border-gray-200 dark:bg-gray-900 sm:right-0">
         <div
-            class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4"
+            class="flex justify-between items-center mx-auto max-w-screen-xl p-4"
         >
-            <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
+            <a href="#">
                 <span
                     class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
                     >Flash</span
@@ -55,23 +55,6 @@ const props = defineProps({
                         >
                     </template>
                 </div>
-                <ul
-                    v-else
-                    class="flex flex-row font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm"
-                >
-                    <Link
-                        :href="route('login')"
-                        class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                        >Log in</Link
-                    >
-
-                    <Link
-                        v-if="canRegister"
-                        :href="route('register')"
-                        class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                        >Register</Link
-                    >
-                </ul>
             </div>
         </div>
     </nav>
