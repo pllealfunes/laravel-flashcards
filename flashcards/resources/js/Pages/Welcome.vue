@@ -1,7 +1,8 @@
 <script setup>
 import { Head, Link } from "@inertiajs/vue3";
+import { defineProps } from "vue";
 
-defineProps({
+const props = defineProps({
     canLogin: {
         type: Boolean,
     },
@@ -9,48 +10,25 @@ defineProps({
         type: Boolean,
     },
 });
-
-const questions = [
-    "What artery supplies the retroperitoneal rectum?",
-    "Ich verstehe",
-    "Expansion Diffusion",
-    "What is the French word for rebirth?",
-    "What is a ratio?",
-];
-
-let randomQuestion = () => {
-    let question = questions[Math.floor(Math.random() * questions.length)];
-    return question;
-};
-
-let question = setInterval(randomQuestion, 2000);
 </script>
 
 <template>
     <Head title="Welcome" />
 
-    <section
-        class="relative sm:flex sm:justify-center sm:items-center bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white p-44"
-    >
+    <nav class="bg-white border-gray-200 dark:bg-gray-900">
         <div
-            class="grid max-w-screen-xl px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12"
+            class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4"
         >
-            <div class="mr-auto place-self-center lg:col-span-7">
-                <h1
-                    class="max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl dark:text-white"
+            <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
+                <span
+                    class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
+                    >Flash</span
                 >
-                    Flash
-                </h1>
-                <p
-                    class="max-w-2xl mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400"
-                >
-                    Study in a flash with decks, quizzes, and games. Let us help
-                    you get ready for the big day.
-                </p>
-
+            </a>
+            <div class="w-full md:w-auto" id="navbar-default">
                 <div
                     v-if="canLogin"
-                    class="sm:fixed sm:top-0 sm:right-0 p-6 text-end"
+                    class="text-end sm:top-0 sm:right-0 p-6 text-end"
                 >
                     <Link
                         v-if="$page.props.auth.user"
@@ -77,18 +55,47 @@ let question = setInterval(randomQuestion, 2000);
                         >
                     </template>
                 </div>
-            </div>
-            <div
-                class="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
-            >
-                <div class="flex flex-col items-center p-20">
-                    <h5
-                        class="text-xl text-center font-medium text-gray-900 dark:text-white"
+                <ul
+                    v-else
+                    class="flex flex-row font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm"
+                >
+                    <Link
+                        :href="route('login')"
+                        class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                        >Log in</Link
                     >
-                        {{ question }}
-                    </h5>
-                </div>
+
+                    <Link
+                        v-if="canRegister"
+                        :href="route('register')"
+                        class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                        >Register</Link
+                    >
+                </ul>
             </div>
+        </div>
+    </nav>
+
+    <section
+        class="relative flex justify-center items-center bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white py-10"
+    >
+        <div
+            class="grid max-w-screen-xl px-4 py-8 w-100 mx-auto sm:max-w-2xl md:max-w-3xl lg:max-w-5xl xl:max-w-7xl"
+        >
+            <div class="text-center">
+                <h1
+                    class="max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl dark:text-white"
+                >
+                    Study Smarter Not Harder.
+                </h1>
+                <p
+                    class="max-w-2xl mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400"
+                >
+                    Study in a flash with decks, quizzes, and games. Let us help
+                    you get ready for the big day.
+                </p>
+            </div>
+            <img class="lg:mx-5" src="/images/study.png" />
         </div>
     </section>
 
@@ -171,7 +178,7 @@ let question = setInterval(randomQuestion, 2000);
         </div>
     </section>
 
-    <footer class="rounded-lg shadow dark:bg-gray-900 mt-10">
+    <footer class="shadow dark:bg-gray-900 mt-10">
         <div class="mx-auto p-4 md:py-8">
             <div class="sm:flex sm:items-end sm:justify-end">
                 <ul
