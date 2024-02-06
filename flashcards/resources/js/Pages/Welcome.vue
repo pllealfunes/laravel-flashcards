@@ -78,7 +78,11 @@ const props = defineProps({
                     you get ready for the big day.
                 </p>
             </div>
-            <img class="lg:mx-5" src="/images/study.png" />
+            <img
+                class="lg:mx-5"
+                src="/images/study.png"
+                alt="A backpack with a computer on its left and a open notebook with pencil on the right"
+            />
         </div>
     </section>
 
