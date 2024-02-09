@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DeckController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -29,10 +30,10 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-
-Route::get('/createdeck', function () {
-    return Inertia::render('CreateDeck');
-})->middleware(['auth', 'verified'])->name('createdeck');
+Route::middleware('auth')->group(function () {
+    Route::get('/deck', [DeckController::class, 'index'])->name('deck.index');
+    Route::get('/createdeck', [DeckController::class, 'create'])->name('deck.create');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

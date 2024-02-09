@@ -1,7 +1,8 @@
 <script setup>
-import { useForm } from "@inertiajs/vue3";
+import { useForm, Head } from "@inertiajs/vue3";
+import InputError from "@/Components/InputError.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head } from "@inertiajs/vue3";
 import { formToJSON } from "axios";
 
 const form = useForm({
@@ -34,7 +35,11 @@ const deleteCard = (index) => {
         </template>
         <div>
             <form
-                @submit.prevent="form.post('/createdeck')"
+                @submit.prevent="
+                    form.post(route('deck.store'), {
+                        onSuccess: () => form.reset(),
+                    })
+                "
                 class="max-w-md mx-auto mt-8"
             >
                 <!-- deck title -->
@@ -52,12 +57,7 @@ const deleteCard = (index) => {
                         class="w-full"
                         name="title"
                     />
-                    <div
-                        v-if="form.errors.title"
-                        class="text-xs mt-1 text-red-100"
-                    >
-                        {{ form.errors.title }}
-                    </div>
+                    <InputError :message="form.errors.title" class="mt-2" />
                 </div>
                 <button
                     type="button"
@@ -96,12 +96,6 @@ const deleteCard = (index) => {
                         name="question"
                         :aria-label="`Card $(index+1) question`"
                     />
-                    <div
-                        v-if="form.errors[`cards.${index}.question`]"
-                        class="ml-8 text-ms mt-1 text-red-600"
-                    >
-                        {{ form.errors[`cards.${index}.question`] }}
-                    </div>
                     <!-- answer -->
                     <label
                         for="answer"
@@ -119,12 +113,6 @@ const deleteCard = (index) => {
                         name="answer"
                         :aria-label="`Card $(index+1) answer`"
                     />
-                    <div
-                        v-if="form.errors[`cards.${index}.answer`]"
-                        class="ml-8 text-ms mt-1 text-red-600"
-                    >
-                        {{ form.errors[`cards.${index}.answer`] }}
-                    </div>
                     <!-- hint -->
                     <label
                         for="hint"
@@ -142,12 +130,6 @@ const deleteCard = (index) => {
                         name="hint"
                         :aria-label="`Card $(index+1) hint`"
                     />
-                    <div
-                        v-if="form.errors[`cards.${index}.hint`]"
-                        class="ml-8 text-ms mt-1 text-red-600"
-                    >
-                        {{ form.errors[`cards.${index}.hint`] }}
-                    </div>
                     <!-- difficulty level -->
                     <label
                         for="points"
@@ -168,12 +150,6 @@ const deleteCard = (index) => {
                         <option>intermediate</option>
                         <option>hard</option>
                     </select>
-                    <div
-                        v-if="form.errors[`cards.${index}.difficultylevel`]"
-                        class="ml-8 text-ms mt-1 text-red-600"
-                    >
-                        {{ form.errors[`cards.${index}.difficultylevel`] }}
-                    </div>
                     <!-- points -->
                     <label
                         for="points"
@@ -194,12 +170,6 @@ const deleteCard = (index) => {
                         <option>3</option>
                         <option>5</option>
                     </select>
-                    <div
-                        v-if="form.errors[`cards.${index}.points`]"
-                        class="ml-8 text-ms mt-1 text-red-600"
-                    >
-                        {{ form.errors[`cards.${index}.points`] }}
-                    </div>
                 </div>
                 <!-- submit -->
                 <button

@@ -38,8 +38,8 @@ const showingNavigationDropdown = ref(false);
                                     Dashboard
                                 </NavLink>
                                 <NavLink
-                                    :href="route('createdeck')"
-                                    :active="route().current('createdeck')"
+                                    :href="route('deck.create')"
+                                    :active="route().current('deck.create')"
                                 >
                                     Create Deck
                                 </NavLink>
@@ -152,6 +152,14 @@ const showingNavigationDropdown = ref(false);
                         </ResponsiveNavLink>
                     </div>
 
+                    <div class="pt-2 pb-3 space-y-1">
+                        <ResponsiveNavLink
+                            :href="route('deck.create')"
+                            :active="route().current('deck.create')"
+                        >
+                            Create Deck
+                        </ResponsiveNavLink>
+                    </div>
                     <!-- Responsive Settings Options -->
                     <div class="pt-4 pb-1 border-t border-gray-200">
                         <div class="px-4">
