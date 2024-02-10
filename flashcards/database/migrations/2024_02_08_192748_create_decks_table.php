@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('decks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->json('cards');
+            $table->string('title');
+            $table->json('cards')->nullable();
             $table->timestamps();
         });
     }

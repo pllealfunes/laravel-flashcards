@@ -33,6 +33,7 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/deck', [DeckController::class, 'index'])->name('deck.index');
     Route::get('/createdeck', [DeckController::class, 'create'])->name('deck.create');
+    Route::post('/createdeck', [DeckController::class, 'store'])->name('deck.store');
 });
 
 Route::middleware('auth')->group(function () {

@@ -43,6 +43,7 @@ const deleteCard = (index) => {
                 class="max-w-md mx-auto mt-8"
             >
                 <!-- deck title -->
+                <InputError :message="form.errors.title" class="m-2" />
                 <div
                     class="rounded-lg border-violet-800 p-3 bg-violet-950 mb-5"
                 >
@@ -57,7 +58,6 @@ const deleteCard = (index) => {
                         class="w-full"
                         name="title"
                     />
-                    <InputError :message="form.errors.title" class="mt-2" />
                 </div>
                 <button
                     type="button"
@@ -70,7 +70,7 @@ const deleteCard = (index) => {
                 <div
                     v-for="(card, index) in form.cards"
                     :key="index"
-                    class="rounded-lg border-violet-800 p-3 bg-violet-950 mb-5"
+                    class="rounded-lg border-4 border-violet-800 p-3 mb-5"
                 >
                     <button
                         type="button"
@@ -79,10 +79,19 @@ const deleteCard = (index) => {
                     >
                         Delete
                     </button>
+                    <div v-if="card.question">
+                        {{ card.question }}
+                    </div>
+                    <InputError
+                        :message="
+                            form.errors(`Question $(index+1) is required`)
+                        "
+                        class="m-2 text-white"
+                    />
                     <!-- question -->
                     <label
                         for="question"
-                        class="block mb-2 uppercase font-bold text-xs text-slate-50 m-1"
+                        class="block mb-2 uppercase font-bold text-xs m-1"
                         >Question :</label
                     >
                     <input
@@ -99,7 +108,7 @@ const deleteCard = (index) => {
                     <!-- answer -->
                     <label
                         for="answer"
-                        class="block mb-2 uppercase font-bold text-xs text-slate-50 m-1"
+                        class="block mb-2 uppercase font-bold text-xs m-1"
                         >Answer :</label
                     >
                     <input
@@ -116,7 +125,7 @@ const deleteCard = (index) => {
                     <!-- hint -->
                     <label
                         for="hint"
-                        class="block mb-2 uppercase font-bold text-xs text-slate-50 m-1"
+                        class="block mb-2 uppercase font-bold text-xs m-1"
                         >Hint :</label
                     >
                     <input
@@ -133,7 +142,7 @@ const deleteCard = (index) => {
                     <!-- difficulty level -->
                     <label
                         for="points"
-                        class="block mb-2 uppercase font-bold text-xs text-slate-50 m-1"
+                        class="block mb-2 uppercase font-bold text-xs m-1"
                         >difficulty level :</label
                     >
                     <select

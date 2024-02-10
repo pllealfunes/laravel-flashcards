@@ -34,13 +34,13 @@ class DeckController extends Controller
         $validated = $request->validate([
 
             'title' => 'required|string|max:255',
-            'cards'=> [
-            'question' => 'required|string|max:255',
-            'answer' => 'required|string|max:255',
-            'hint' => 'required|string|max:255',
-            'difficultylevel' => 'required|string|max:255',
-            'points' => 'required|smallint|unsigned'
-            ]
+            'cards'=> 'required|array"min:2',
+            'cards' => 'required|array|min:1',
+            'cards.*.question' => 'required|string|max:255',
+            'cards.*.answer' => 'required|string|max:255',
+            'cards.*.hint' => 'required|string|max:255',
+            'cards.*.difficultylevel' => 'required|string',
+            'cards.*.points' => 'required|tinyint',
         ]);
 
  
