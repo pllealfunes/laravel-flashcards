@@ -1,6 +1,9 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { Head } from "@inertiajs/vue3";
+import Deck from "@/Pages/Decks/Index.vue";
+
+defineProps(["decks"]);
 </script>
 
 <template>
@@ -8,7 +11,9 @@ import { Head } from '@inertiajs/vue3';
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Dashboard
+            </h2>
         </template>
 
         <div class="py-12">
@@ -17,6 +22,10 @@ import { Head } from '@inertiajs/vue3';
                     <div class="p-6 text-gray-900">You're logged in!</div>
                 </div>
             </div>
+        </div>
+
+        <div class="mt-6 bg-white shadow-sm rounded-lg divide-y">
+            <Deck v-for="deck in decks" :key="deck.id" :deck="deck" />
         </div>
     </AuthenticatedLayout>
 </template>

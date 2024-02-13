@@ -21,9 +21,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password',
-        'title',
-        'cards'
+        'password'
     ];
 
     /**
@@ -46,7 +44,7 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function cdecks(): HasMany
+    public function decks(): HasMany
 
     {
 

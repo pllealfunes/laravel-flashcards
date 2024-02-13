@@ -5,6 +5,8 @@ use App\Http\Controllers\DeckController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Models\Deck;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,11 +29,14 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    $user = Auth::user(); 
+    $decks = Deck::where('user_id', $user->id)->latest()->get();
+    return Inertia::render('Dashboard')->with('decks', $decks);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
 Route::middleware('auth')->group(function () {
-    Route::get('/deck', [DeckController::class, 'index'])->name('deck.index');
+    Route::get('/index', [DeckController::class, 'index'])->name('deck.index');
     Route::get('/createdeck', [DeckController::class, 'create'])->name('deck.create');
     Route::post('/createdeck', [DeckController::class, 'store'])->name('deck.store');
 });

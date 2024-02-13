@@ -1,10 +1,12 @@
 <script setup>
+import { ref } from "vue";
 import { useForm, Head } from "@inertiajs/vue3";
 import InputError from "@/Components/InputError.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { formToJSON } from "axios";
 
+const cardsLength = ref(false);
 const form = useForm({
     title: null,
     cards: [],
@@ -23,26 +25,21 @@ const addCard = () => {
 const deleteCard = (index) => {
     form.cards.splice(index, 1);
 };
+
+const submit = () => {
+    form.post(route("deck.store"), {
+        onSuccess: () => form.reset(),
+    });
+};
 </script>
 
 <template>
     <Head title="Create Deck" />
     <AuthenticatedLayout>
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Create Deck
-            </h2>
-        </template>
         <div>
-            <form
-                @submit.prevent="
-                    form.post(route('deck.store'), {
-                        onSuccess: () => form.reset(),
-                    })
-                "
-                class="max-w-md mx-auto mt-8"
-            >
+            <form @submit.prevent="submit" class="max-w-md mx-auto mt-8">
                 <!-- deck title -->
+                <InputError :message="form.errors.cards" class="m-2" />
                 <InputError :message="form.errors.title" class="m-2" />
                 <div
                     class="rounded-lg border-violet-800 p-3 bg-violet-950 mb-5"
@@ -79,15 +76,6 @@ const deleteCard = (index) => {
                     >
                         Delete
                     </button>
-                    <div v-if="card.question">
-                        {{ card.question }}
-                    </div>
-                    <InputError
-                        :message="
-                            form.errors(`Question $(index+1) is required`)
-                        "
-                        class="m-2 text-white"
-                    />
                     <!-- question -->
                     <label
                         for="question"

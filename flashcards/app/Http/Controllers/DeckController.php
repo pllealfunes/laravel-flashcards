@@ -13,9 +13,13 @@ class DeckController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): Response
     {
-        //
+        return Inertia::render('Decks/Index', [
+
+            'decks' => Deck::all()->latest()->get(),
+
+        ]);
     }
 
     /**
@@ -34,13 +38,12 @@ class DeckController extends Controller
         $validated = $request->validate([
 
             'title' => 'required|string|max:255',
-            'cards'=> 'required|array"min:2',
-            'cards' => 'required|array|min:1',
+            'cards'=> 'required|array|min:2',
             'cards.*.question' => 'required|string|max:255',
             'cards.*.answer' => 'required|string|max:255',
             'cards.*.hint' => 'required|string|max:255',
             'cards.*.difficultylevel' => 'required|string',
-            'cards.*.points' => 'required|tinyint',
+            'cards.*.points' => 'required|integer',
         ]);
 
  
@@ -49,7 +52,7 @@ class DeckController extends Controller
 
  
 
-        return redirect(route('decks.index'));
+        return redirect(route('dashboard'));
     }
 
     /**
