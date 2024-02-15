@@ -12,7 +12,8 @@ class Deck extends Model
 
     protected $fillable = [
         'title',
-        'cards'
+        'cards',
+        'lastviewed'
     ];
 
 

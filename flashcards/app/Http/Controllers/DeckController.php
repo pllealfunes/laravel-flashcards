@@ -68,7 +68,39 @@ class DeckController extends Controller
      */
     public function edit(Deck $deck)
     {
-        //
+        return redirect(route('dashboard'));
+    }
+
+
+    public function getLastViewed()
+    {
+        
+    $lastViewed = Deck::orderByDesc('lastviewed')->value('lastviewed');
+
+    return response()->json(['lastviewed' => $lastViewed]);
+    }
+
+
+        /**
+     * Show the form for editing the specified resource.
+     */
+    public function editLastViewed(Request $request, Deck $deck)
+    {
+        $this->authorize('update', $deck);
+
+ 
+
+        $validated = $request->validate([
+
+            'lastviewed' => 'required|date',
+
+        ]);
+
+ 
+
+        $deck->update($validated);
+
+        return response()->json(['lastviewed'=> $deck->lastviewed]);
     }
 
     /**
