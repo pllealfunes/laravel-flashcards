@@ -24,7 +24,9 @@ defineProps(["decks"]);
             </div>
         </div>
 
-        <div class="mt-6 bg-white shadow-sm rounded-lg divide-y">
+        <div
+            class="mt-6 flex flex-row flex-wrap justify-center items-center gap-4"
+        >
             <Deck v-for="deck in decks" :key="deck.id" :deck="deck" />
         </div>
     </AuthenticatedLayout>
