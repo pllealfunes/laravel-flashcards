@@ -1,24 +1,10 @@
 <script setup>
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useForm } from "@inertiajs/vue3";
+import { Link } from "@inertiajs/vue3";
 
 const props = defineProps(["deck"]);
 dayjs.extend(relativeTime);
-const form = useForm({
-    lastviewed: null,
-});
-
-const editLastViewed = () => {
-    form.put(route("deck.editLastViewed", props.deck.id), {
-        lastviewed: new Date(),
-        onSuccess: (response) => {
-            console.log("success");
-            console.log(response);
-            //props.deck.lastviewed = response.data.lastviewed;
-        },
-    });
-};
 </script>
 
 <template>
@@ -33,19 +19,19 @@ const editLastViewed = () => {
                 >{{ props.deck.cards.length }} Cards</span
             >
         </div>
-        <form @submit.prevent="editLastViewed" class="m-auto">
-            <button
-                type="submit"
-                name="submit"
-                :disabled="form.processing"
-                class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-            >
-                {{ props.deck.title }}
-            </button>
-        </form>
-        <span
-            class="text-right dark:text-white"
-            v-if="`${props.deck.lastviewed}`"
+
+        <Link
+            :href="route('deck.show', { deck: props.deck.id })"
+            method="patch"
+            :data="{ lastviewed: new Date() }"
+            as="button"
+            class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+            >{{ props.deck.id }}</Link
+        >
+        <span class="text-right dark:text-white"
+            >Last Viewed: {{ dayjs(props.deck.lastviewed).fromNow() }}</span
+        >
+        <span class="text-right dark:text-white"
             >Last Viewed: {{ props.deck.lastviewed }}</span
         >
     </div>

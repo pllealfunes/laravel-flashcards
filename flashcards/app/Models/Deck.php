@@ -11,9 +11,7 @@ class Deck extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title',
-        'cards',
-        'lastviewed'
+    "lastviewed"
     ];
 
 

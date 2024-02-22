@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Deck;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Date;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Carbon;
 
 class DeckController extends Controller
 {
@@ -17,7 +19,7 @@ class DeckController extends Controller
     {
         return Inertia::render('Decks/Index', [
 
-            'decks' => Deck::all()->latest()->get(),
+            'decks' => Deck::latest()->get(),
 
         ]);
     }
@@ -58,9 +60,23 @@ class DeckController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Deck $deck)
+    public function show(Request $request, Deck $deck)
     {
-        //
+        $validated = $request->validate([
+
+            'lastviewed' => 'required|date',
+
+        ]);
+
+         // Parse the datetime string into Carbon instance
+    $lastViewed = Carbon::parse($validated['lastviewed']);
+
+    // Format Carbon instance to Laravel's default datetime format
+    $formattedLastViewed = $lastViewed->toIso8601String();
+    $deck->lastviewed = $formattedLastViewed;
+    $deck->save();
+
+        return Inertia::render('Decks/DeckView', ['deck' => $deck, 'isUpdating' => true]);
     }
 
     /**
@@ -72,35 +88,22 @@ class DeckController extends Controller
     }
 
 
-    public function getLastViewed()
-    {
-        
-    $lastViewed = Deck::orderByDesc('lastviewed')->value('lastviewed');
-
-    return response()->json(['lastviewed' => $lastViewed]);
-    }
-
 
         /**
      * Show the form for editing the specified resource.
      */
-    public function editLastViewed(Request $request, Deck $deck)
+    public function lastviewed(Request $request, Deck $deck)
     {
-        $this->authorize('update', $deck);
-
- 
-
-        $validated = $request->validate([
+        $ $validated = $request->validate([
 
             'lastviewed' => 'required|date',
 
         ]);
 
- 
-
         $deck->update($validated);
 
-        return response()->json(['lastviewed'=> $deck->lastviewed]);
+    
+        return response()->json(['message' => 'Last viewed updated successfully', 'lastViewed' => $deck->lastViewed]);
     }
 
     /**

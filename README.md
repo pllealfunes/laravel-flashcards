@@ -11,15 +11,14 @@ A project that will be created Using Laravel, Breeze, Vue, Inertia.js, Piñia, &
 - [ ] Each card will have different point values based on difficulty
 - [ ] Add hint to cards
 - [ ] Show and hide hint
+- [ ] Timed session or non-timed session option
 - [ ] After a certain amount of guesses show correct answer
 - [ ] Time limit to answer question
-- [ ] Add time taken to complete deck
 - [ ] Shuffle deck
 - [ ] Automatically create a deck filled with questions incorrectly answered or ran out of time
 - [ ] Memory game
 - [ ] Matching
 - [ ] Quiz
-- [ ] Create user account to save decks
 
 ## Learning Tools
 
