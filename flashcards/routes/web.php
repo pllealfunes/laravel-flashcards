@@ -39,8 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/index', [DeckController::class, 'index'])->name('deck.index');
     Route::get('/createdeck', [DeckController::class, 'create'])->name('deck.create');
     Route::post('/createdeck', [DeckController::class, 'store'])->name('deck.store');
-    Route::patch('/deck/{deck}', [DeckController::class, 'show'])->name('deck.show');
-    Route::put('/editLastViewed/{deck}', [DeckController::class, 'update'])->name('deck.lastviewed');
+    Route::get('/deck/{deck}', [DeckController::class, 'show'])->name('deck.show');
 });
 
 Route::middleware('auth')->group(function () {

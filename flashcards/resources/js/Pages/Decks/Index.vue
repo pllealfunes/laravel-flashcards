@@ -22,7 +22,6 @@ dayjs.extend(relativeTime);
 
         <Link
             :href="route('deck.show', { deck: props.deck.id })"
-            method="patch"
             :data="{ lastviewed: new Date() }"
             as="button"
             class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
