@@ -30,7 +30,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     $user = Auth::user(); 
-    $decks = Deck::where('user_id', $user->id)->latest()->get();
+    $decks = Deck::where('user_id', $user->id)->orderByDesc('lastviewed')->get();
     return Inertia::render('Dashboard')->with('decks', $decks);
 })->middleware(['auth', 'verified'])->name('dashboard');
 

@@ -4,7 +4,7 @@ A project that will be created Using Laravel, Breeze, Vue, Inertia.js, Piñia, &
 
 ## Project Features to Implement
 
-- [ ] Homepage that shows a list of decks or groups that contain decks
+- [ ] Homepage that shows a list of ~~decks~~ or groups that contain decks
 - [ ] Search by deck name or category
 - [ ] Give feedback
 - [ ] Give points for each correct answer
@@ -22,9 +22,10 @@ A project that will be created Using Laravel, Breeze, Vue, Inertia.js, Piñia, &
 
 ## Learning Tools
 
-- Laracasts
+- Laracasts Forum for Help
 - Codeaholic PHP 6+ HR Tutorial
-- Freecodecamp and Codeaholic - Code a Google Drive Clone using Laravel and Vue.js
+- Susan Codes YT Channel
 - Unsplash - Matt Ragland School Essentials
-- Storyset
-- Flowbite
+- Storyset for Home character photos
+- Flowbite for UI
+- ChatGPT For Problem Solving

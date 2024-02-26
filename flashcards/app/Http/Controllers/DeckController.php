@@ -19,7 +19,7 @@ class DeckController extends Controller
     {
         return Inertia::render('Decks/Index', [
 
-            'decks' => Deck::latest()->get(),
+            'decks' => Deck::get(),
 
         ]);
     }
