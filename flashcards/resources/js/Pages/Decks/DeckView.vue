@@ -1,35 +1,57 @@
 <script setup>
-import { Head } from "@inertiajs/vue3";
-const props = defineProps(["deck"]);
+import { ref } from "vue";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+const { deck } = defineProps(["deck"]);
+
+// Create an array to store the flipped state for each card
+const flippedStates = ref(new Array(deck.cards.length).fill(false));
+
+const toggleFlip = (index) => {
+    // Update the flipped state of the clicked card
+    flippedStates.value[index] = !flippedStates.value[index];
+};
 </script>
 
 <template>
-    <div
-        class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between"
-    >
-        {{ props.deck.id }}
-    </div>
-    <div
-        class="relative preserve-3d group-hover:my-rotate-y-180 w-full h-full duration-1000"
-    >
-        <div class="absolute backface-hidden border-2 w-full h-full">
-            <span>{{ props.deck.cards[0].question }}</span>
-        </div>
+    <AuthenticatedLayout>
+        <template #header>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ deck.title }}
+            </h2>
+        </template>
         <div
-            class="absolute my-rotate-y-180 backface-hidden w-full h-full bg-gray-100 overflow-hidden"
+            v-for="(card, index) in deck.cards"
+            :key="card.id"
+            class="font-semibold mt-6 flex flex-row flex-wrap justify-center items-center gap-4"
         >
             <div
-                class="text-center flex flex-col items-center justify-center h-full text-gray-800 px-2 pb-24"
+                class="w-[300px] h-[420px] bg-transparent cursor-pointer group perspective"
             >
-                <h1 class="text-3xl font-semibold">
-                    {{ props.deck.cards[0].answer }}
-                </h1>
-                <p class="my-2">{{ props.deck.cards[0].points }}</p>
-                <p class="my-2">{{ props.deck.cards[0].difficultylevel }}</p>
-                <p>
-                    {{ props.deck.cards[0].hint }}
-                </p>
+                <div
+                    class="relative preserve-3d w-full h-full duration-1000"
+                    :class="{ 'flip-card': flippedStates[index] }"
+                    @click="toggleFlip(index)"
+                >
+                    <div
+                        class="absolute backface-hidden border-2 w-full h-full"
+                    >
+                        <h3 class="text-3xl font-semibold">
+                            {{ card.answer }}
+                        </h3>
+                    </div>
+                    <div
+                        class="absolute flip-card backface-hidden w-full h-full bg-gray-100 overflow-hidden"
+                    >
+                        <div
+                            class="text-center flex flex-col items-center justify-center h-full text-gray-800 px-2 pb-24"
+                        >
+                            <p>
+                                {{ card.question }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </AuthenticatedLayout>
 </template>
