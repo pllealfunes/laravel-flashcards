@@ -19,36 +19,36 @@ const toggleFlip = (index) => {
                 {{ deck.title }}
             </h2>
         </template>
+        <button>Change Card</button>
         <div
             v-for="(card, index) in deck.cards"
             :key="card.id"
-            class="font-semibold mt-6 flex flex-row flex-wrap justify-center items-center gap-4"
+            class="font-semibold mt-6 flex flex-row flex-wrap justify-center items-center gap-4 justify-center"
         >
             <div
-                class="w-[300px] h-[420px] bg-transparent cursor-pointer group perspective"
+                class="mx-3 w-[700px] h-[450px] dark:text-slate-200 bg-white border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between cursor-pointer group perspective flex flex-row justify-between relative preserve-3d duration-1000"
+                :class="{ 'flip-card': flippedStates[index] }"
+                @click="toggleFlip(index)"
             >
+                <div class="backface-hidden w-full h-full p-4">
+                    <p>{{ card.hint }}</p>
+                    <h3
+                        class="text-center flex flex-col items-center justify-center h-full px-2 pb-24 text-3xl font-semibold text-center"
+                    >
+                        {{ card.question }}
+                    </h3>
+                </div>
+
+                <p>{{ deck.question }}</p>
                 <div
-                    class="relative preserve-3d w-full h-full duration-1000"
-                    :class="{ 'flip-card': flippedStates[index] }"
-                    @click="toggleFlip(index)"
+                    class="absolute flip-card backface-hidden w-full h-full dark:bg-sky-950 dark:border-sky-950 rounded-lg"
                 >
                     <div
-                        class="absolute backface-hidden border-2 w-full h-full"
+                        class="text-center flex flex-col items-center justify-center h-full px-2 pb-24"
                     >
-                        <h3 class="text-3xl font-semibold">
+                        <p>
                             {{ card.answer }}
-                        </h3>
-                    </div>
-                    <div
-                        class="absolute flip-card backface-hidden w-full h-full bg-gray-100 overflow-hidden"
-                    >
-                        <div
-                            class="text-center flex flex-col items-center justify-center h-full text-gray-800 px-2 pb-24"
-                        >
-                            <p>
-                                {{ card.question }}
-                            </p>
-                        </div>
+                        </p>
                     </div>
                 </div>
             </div>

@@ -22,10 +22,12 @@ dayjs.extend(relativeTime);
             :href="route('deck.show', { deck: deck.id })"
             :data="{ lastviewed: new Date() }"
             as="button"
-            class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+            class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-slate-200"
             >{{ deck.id }}</Link
         >
-        <span class="text-right dark:text-white" v-if="deck.lastviewed !== null"
+        <span
+            class="text-right text-gray-900 dark:text-slate-200"
+            v-if="deck.lastviewed !== null"
             >Last Viewed: {{ dayjs(deck.lastviewed).fromNow() }}</span
         >
         <span class="text-right dark:text-white" v-else>Not Viewed</span>
