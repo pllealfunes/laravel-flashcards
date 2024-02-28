@@ -29,3 +29,4 @@ A project that will be created Using Laravel, Breeze, Vue, Inertia.js, Piñia, &
 - Storyset for Home character photos
 - Flowbite for UI
 - ChatGPT For Problem Solving
+- Code A Program YT - Animated 3D Crad Design Using Tailwind CSS | tailwind css advanced tutorial
