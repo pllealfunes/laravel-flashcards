@@ -4,13 +4,20 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 const { deck } = defineProps(["deck"]);
 
 // Create an array to store the flipped state for each card
-const newDeck = deck.cards.reverse();
-
-const flippedStates = ref(new Array(newDeck.length).fill(false));
+const flippedStates = ref(new Array(deck.cards.length).fill(false));
+const activeCardIndex = ref(0); // Keep track of the index of the currently active card
 
 const toggleFlip = (index) => {
     // Update the flipped state of the clicked card
     flippedStates.value[index] = !flippedStates.value[index];
+    isActive.value = !isActive.value;
+};
+
+const showNextCard = () => {
+    // Hide the currently active card
+    flippedStates.value[activeCardIndex.value] = false;
+    // Update activeCardIndex to point to the next card
+    activeCardIndex.value = (activeCardIndex.value + 1) % deck.cards.length;
 };
 </script>
 
@@ -25,6 +32,7 @@ const toggleFlip = (index) => {
             <div
                 v-for="(card, index) in deck.cards"
                 :key="card.id"
+                v-show="index === activeCardIndex"
                 class="m-5 font-semibold absolute inset-x-0 flex flex-wrap justify-center items-center transition-transform duration-500 ease-in-out"
             >
                 <div
@@ -59,4 +67,5 @@ const toggleFlip = (index) => {
             </div>
         </div>
     </AuthenticatedLayout>
+    <button @click="showNextCard">Next Card</button>
 </template>
