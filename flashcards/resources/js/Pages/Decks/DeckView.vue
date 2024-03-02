@@ -1,16 +1,16 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 const { deck } = defineProps(["deck"]);
 
 // Create an array to store the flipped state for each card
 const flippedStates = ref(new Array(deck.cards.length).fill(false));
 const activeCardIndex = ref(0); // Keep track of the index of the currently active card
+const isActive = ref(false);
 
 const toggleFlip = (index) => {
     // Update the flipped state of the clicked card
     flippedStates.value[index] = !flippedStates.value[index];
-    isActive.value = !isActive.value;
 };
 
 const showNextCard = () => {
@@ -18,7 +18,19 @@ const showNextCard = () => {
     flippedStates.value[activeCardIndex.value] = false;
     // Update activeCardIndex to point to the next card
     activeCardIndex.value = (activeCardIndex.value + 1) % deck.cards.length;
+    isActive.value = activeCardIndex.value !== 0;
 };
+
+const showPrevCard = () => {
+    // Hide the currently active card
+    flippedStates.value[activeCardIndex.value] = false;
+    // Update activeCardIndex to point to the next card
+    activeCardIndex.value = (activeCardIndex.value - 1) % deck.cards.length;
+    isActive.value = activeCardIndex.value !== 0;
+};
+
+// Computed property to determine if the Prev button should be disabled
+const isPrevButtonDisabled = computed(() => activeCardIndex.value === 0);
 </script>
 
 <template>
@@ -67,5 +79,20 @@ const showNextCard = () => {
             </div>
         </div>
     </AuthenticatedLayout>
-    <button @click="showNextCard">Next Card</button>
+    <div class="inline-flex">
+        <button
+            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
+            @click="showPrevCard"
+            :disabled="isPrevButtonDisabled"
+            :class="{ visible: isActive, hidden: !isActive }"
+        >
+            Prev
+        </button>
+        <button
+            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r"
+            @click="showNextCard"
+        >
+            Next
+        </button>
+    </div>
 </template>
