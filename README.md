@@ -6,11 +6,11 @@ A project that will be created Using Laravel, Breeze, Vue, Inertia.js, Piñia, &
 
 - [ ] Homepage that shows a list of ~~decks~~ or groups that contain decks
 - [ ] Search by deck name or category
-- [ ] Give feedback
+- [ ] Give feedback?
 - [ ] Give points for each correct answer
 - [ ] Each card will have different point values based on difficulty
 - [ ] Add hint to cards
-- [ ] Show and hide hint
+- [ X ] Show and hide hint
 - [ ] Timed session or non-timed session option
 - [ ] After a certain amount of guesses show correct answer
 - [ ] Time limit to answer question
@@ -30,3 +30,4 @@ A project that will be created Using Laravel, Breeze, Vue, Inertia.js, Piñia, &
 - Flowbite for UI
 - ChatGPT For Problem Solving
 - Code A Program YT - Animated 3D Crad Design Using Tailwind CSS | tailwind css advanced tutorial
+- Heroicons - for logo and icons

@@ -23,7 +23,7 @@ dayjs.extend(relativeTime);
             :data="{ lastviewed: new Date() }"
             as="button"
             class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-slate-200"
-            >{{ deck.id }}</Link
+            >{{ deck.title }}</Link
         >
         <span
             class="text-right text-gray-900 dark:text-slate-200"
