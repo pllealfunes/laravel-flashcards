@@ -167,7 +167,7 @@ const hintToggle = () => {
             </svg>
         </div>
 
-        <!-- Your flashcardsList section -->
+        <!-- flashcardsList section -->
         <section id="flashcardsList" class="mt-[300px]">
             <ul
                 v-for="card in deck.cards"
@@ -175,11 +175,21 @@ const hintToggle = () => {
                 class="flex flex-wrap justify-center items-center"
             >
                 <li
-                    class="w-[50%] h-[70px] m-5 dark:text-slate-200 border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950"
+                    class="w-[50%] flex m-5 dark:text-slate-200 border border-gray-200 rounded-lg shadow"
                 >
-                    <div class="flex flex-row justify-between p-5">
-                        <p>{{ card.question }}</p>
-                        <p>{{ card.answer }}</p>
+                    <div
+                        class="w-1/2 p-4 dark:bg-sky-900 dark:border-sky-900 flex justify-center items-center overflow-hidden"
+                    >
+                        <p>
+                            {{ card.question }}
+                        </p>
+                    </div>
+                    <div
+                        class="w-1/2 p-4 dark:bg-sky-950 dark:border-sky-950 flex justify-center items-center flex-wrap"
+                    >
+                        <p>
+                            {{ card.answer }}
+                        </p>
                     </div>
                 </li>
             </ul>
