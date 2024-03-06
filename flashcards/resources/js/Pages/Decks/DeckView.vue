@@ -47,7 +47,7 @@ const hintToggle = () => {
                 {{ deck.title }}
             </h2>
         </template>
-        <div class="relative">
+        <section class="relative" id="flashcardsDeck">
             <div
                 v-for="(card, index) in deck.cards"
                 :key="card.id"
@@ -131,22 +131,68 @@ const hintToggle = () => {
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="absolute flex justify-center w-full">
-            <button
-                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
+        </section>
+        <!-- Buttons container -->
+        <div class="flex justify-evenly w-full mt-5">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="w-12 h-12"
                 @click="showPrevCard"
                 :disabled="isPrevButtonDisabled"
-                :class="{ visible: isActive, hidden: !isActive }"
+                :class="{ notActive: !isActive }"
             >
-                Prev
-            </button>
-            <button
-                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r"
+                <path
+                    fill-rule="evenodd"
+                    d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-4.28 9.22a.75.75 0 0 0 0 1.06l3 3a.75.75 0 1 0 1.06-1.06l-1.72-1.72h5.69a.75.75 0 0 0 0-1.5h-5.69l1.72-1.72a.75.75 0 0 0-1.06-1.06l-3 3Z"
+                    clip-rule="evenodd"
+                />
+            </svg>
+            <span class="text-gray-800 font-bold mt-3 text-xl">
+                {{ activeCardIndex + 1 }} / {{ deck.cards.length }}
+            </span>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="w-12 h-12"
                 @click="showNextCard"
             >
-                Next
-            </button>
+                <path
+                    fill-rule="evenodd"
+                    d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm4.28 10.28a.75.75 0 0 0 0-1.06l-3-3a.75.75 0 1 0-1.06 1.06l1.72 1.72H8.25a.75.75 0 0 0 0 1.5h5.69l-1.72 1.72a.75.75 0 1 0 1.06 1.06l3-3Z"
+                    clip-rule="evenodd"
+                />
+            </svg>
         </div>
+
+        <!-- Your flashcardsList section -->
+        <section id="flashcardsList" class="mt-[300px]">
+            <ul
+                v-for="card in deck.cards"
+                :key="card.id"
+                class="flex flex-wrap justify-center items-center"
+            >
+                <li
+                    class="w-[50%] h-[70px] m-5 dark:text-slate-200 border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950"
+                >
+                    <div class="flex flex-row justify-between p-5">
+                        <p>{{ card.question }}</p>
+                        <p>{{ card.answer }}</p>
+                    </div>
+                </li>
+            </ul>
+        </section>
     </AuthenticatedLayout>
 </template>
+
+<style>
+.notActive {
+    fill: gray;
+}
+
+.notActive:hover {
+    fill: gray !important;
+}
+</style>
