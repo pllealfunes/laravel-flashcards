@@ -9,6 +9,9 @@ const activeCardIndex = ref(0); // Keep track of the index of the currently acti
 const isActive = ref(false);
 const showHint = ref(false);
 
+const pageSize = 10;
+const currentPage = ref(1);
+
 const toggleFlip = (index) => {
     // Update the flipped state of the clicked card
     flippedStates.value[index] = !flippedStates.value[index];
@@ -38,6 +41,53 @@ const hintToggle = () => {
     showHint.value = !showHint.value;
     console.log(showHint.value);
 };
+
+const shuffleCards = () => {
+    const originalDeck = [...deck.cards]; // Create a copy of the original deck
+    let shuffledDeck = shuffleDeck([...originalDeck]); // Initialize shuffled deck
+
+    // Shuffle the deck until it's different from the original
+    while (isSameDeck(originalDeck, shuffledDeck)) {
+        shuffledDeck = shuffleDeck([...originalDeck]);
+    }
+
+    deck.cards = shuffledDeck; // Update the deck with the shuffled cards
+};
+
+// Function to check if two decks are the same
+const isSameDeck = (deck1, deck2) => {
+    if (deck1.length !== deck2.length) return false;
+    for (let i = 0; i < deck1.length; i++) {
+        if (deck1[i] !== deck2[i]) return false;
+    }
+    return true;
+};
+
+// Function to shuffle a deck
+const shuffleDeck = (deck) => {
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    return deck;
+};
+
+// Function to paginate the deck
+const paginateDeck = () => {
+    const startIndex = (currentPage.value - 1) * pageSize;
+    return deck.cards.slice(startIndex, startIndex + pageSize);
+};
+
+// Computed property to get the current page's cards
+const paginatedCards = computed(() => paginateDeck());
+
+// Function to handle page change
+const onPageChange = (page) => {
+    currentPage.value = page;
+};
+
+// Computed property to get total number of pages
+const totalPages = computed(() => Math.ceil(deck.cards.length / pageSize));
 </script>
 
 <template>
@@ -61,7 +111,7 @@ const hintToggle = () => {
                     }"
                     @click.stop="toggleFlip(index)"
                 >
-                    <div class="backface-hidden w-full h-full p-4">
+                    <div class="w-full h-full p-4">
                         <button
                             @click.stop="hintToggle"
                             class="rounded-lg dark:bg-yellow-500 p-1 text-sky-950 flex flex-wrap flex-row w-20"
@@ -117,6 +167,21 @@ const hintToggle = () => {
                             {{ card.question }}
                         </h3>
                     </div>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-7 h-7 m-2"
+                        @click.stop="shuffleCards"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3"
+                        />
+                    </svg>
 
                     <div
                         class="absolute flip-card backface-hidden w-full h-full dark:bg-sky-950 dark:border-sky-950 rounded-lg"
@@ -141,7 +206,7 @@ const hintToggle = () => {
                 class="w-12 h-12"
                 @click="showPrevCard"
                 :disabled="isPrevButtonDisabled"
-                :class="{ notActive: !isActive }"
+                :class="{ 'fill-gray-400 cursor-not-allowed': !isActive }"
             >
                 <path
                     fill-rule="evenodd"
@@ -169,40 +234,68 @@ const hintToggle = () => {
 
         <!-- flashcardsList section -->
         <section id="flashcardsList" class="mt-[300px]">
-            <ul
-                v-for="card in deck.cards"
-                :key="card.id"
-                class="flex flex-wrap justify-center items-center"
-            >
+            <ul class="flex flex-wrap justify-center items-center">
                 <li
+                    v-for="card in paginatedCards"
+                    :key="card.id"
                     class="w-[50%] flex m-5 dark:text-slate-200 border border-gray-200 rounded-lg shadow"
                 >
                     <div
                         class="w-1/2 p-4 dark:bg-sky-900 dark:border-sky-900 flex justify-center items-center overflow-hidden"
                     >
-                        <p>
-                            {{ card.question }}
-                        </p>
+                        <p>{{ card.question }}</p>
                     </div>
                     <div
                         class="w-1/2 p-4 dark:bg-sky-950 dark:border-sky-950 flex justify-center items-center flex-wrap"
                     >
-                        <p>
-                            {{ card.answer }}
-                        </p>
+                        <p>{{ card.answer }}</p>
                     </div>
                 </li>
             </ul>
+
+            <!-- Pagination -->
+            <div class="flex justify-evenly w-full mt-5">
+                <!-- Previous page button -->
+                <button
+                    @click="onPageChange(currentPage - 1)"
+                    :disabled="currentPage === 1"
+                    class="bg-gray-800 font-bold mt-3 mr-2 py-2 px-4 rounded-lg"
+                    :class="{
+                        'bg-gray-800 text-white': currentPage !== 1,
+                        'bg-gray-400 cursor-not-allowed text-gray-800':
+                            currentPage === 1,
+                    }"
+                >
+                    Previous
+                </button>
+
+                <!-- Page buttons -->
+                <div class="flex">
+                    <button
+                        v-for="page in Math.min(totalPages, 10)"
+                        :key="page"
+                        @click="onPageChange(page)"
+                        class="text-white bg-gray-800 font-bold mt-3 mr-2 py-2 px-4 rounded-lg"
+                        :class="{ 'bg-yellow-800': currentPage === page }"
+                    >
+                        {{ page }}
+                    </button>
+                </div>
+
+                <!-- Next page button -->
+                <button
+                    @click="onPageChange(currentPage + 1)"
+                    :disabled="currentPage === totalPages"
+                    class="text-white bg-gray-800 font-bold mt-3 mr-2 py-2 px-4 rounded-lg"
+                    :class="{
+                        'bg-gray-800': currentPage !== totalPages,
+                        'bg-gray-400 cursor-not-allowed':
+                            currentPage === totalPages,
+                    }"
+                >
+                    Next
+                </button>
+            </div>
         </section>
     </AuthenticatedLayout>
 </template>
-
-<style>
-.notActive {
-    fill: gray;
-}
-
-.notActive:hover {
-    fill: gray !important;
-}
-</style>
