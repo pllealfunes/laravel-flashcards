@@ -4,7 +4,7 @@ A project that will be created Using Laravel, Breeze, Vue, Inertia.js, Piñia, &
 
 ## Project Tasks:
 
-![Project Tasks](tasks.png)
+![Project Tasks](/flashcards/public/images/tasks.png)
 
 ## Learning Tools
 
