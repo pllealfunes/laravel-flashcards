@@ -1,24 +1,10 @@
 # Flash
 
-A project that will be created Using Laravel, Breeze, Vue, Inertia.js, Piñia, &amp; Tailwind. An application where a user can create decks of flashcards. Follow along in the GitHUb repo.
+A project that will be created Using Laravel, Breeze, Vue, Inertia.js, Piñia, &amp; Tailwind. An application where a user can create decks of flashcards and study them on their own or with a quiz, memory game, or matching game. Follow along in the GitHub repo.
 
-## Project Features to Implement
+## Project Tasks:
 
-- [ ] Homepage that shows a list of ~~decks~~ or groups that contain decks
-- [ ] Search by deck name or category
-- [ ] Give feedback?
-- [ ] Give points for each correct answer
-- [ ] Each card will have different point values based on difficulty
-- [ ] Add hint to cards
-- [ X ] Show and hide hint
-- [ ] Timed session or non-timed session option
-- [ ] After a certain amount of guesses show correct answer
-- [ ] Time limit to answer question
-- [ ] Shuffle deck
-- [ ] Automatically create a deck filled with questions incorrectly answered or ran out of time
-- [ ] Memory game
-- [ ] Matching
-- [ ] Quiz
+![Project Tasks](tasks.png)
 
 ## Learning Tools
 
