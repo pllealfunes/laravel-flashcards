@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { router } from "@inertiajs/vue3";
 const { deck } = defineProps(["deck"]);
 
 // Create an array to store the flipped state for each card
@@ -88,14 +89,33 @@ const onPageChange = (page) => {
 
 // Computed property to get total number of pages
 const totalPages = computed(() => Math.ceil(deck.cards.length / pageSize));
+
+const deleteDeck = async () => {
+    try {
+        await router.delete(route("deck.destroy", { deck: deck.id }));
+        // Handle success, e.g., show a success message
+        console.log("Deck deleted successfully");
+    } catch (error) {
+        // Handle error, e.g., show an error message
+        console.error("Error deleting deck:", error);
+    }
+};
 </script>
 
 <template>
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ deck.title }}
-            </h2>
+            <div class="flex flex-row flex-wrap justify-between">
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    {{ deck.title }}
+                </h2>
+                <button
+                    class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+                    @click="deleteDeck(deck.id)"
+                >
+                    Delete Deck
+                </button>
+            </div>
         </template>
         <section class="relative" id="flashcardsDeck">
             <div
@@ -262,7 +282,7 @@ const totalPages = computed(() => Math.ceil(deck.cards.length / pageSize));
                     class="bg-gray-800 font-bold mt-3 mr-2 py-2 px-4 rounded-lg"
                     :class="{
                         'bg-gray-800 text-white': currentPage !== 1,
-                        'bg-gray-400 cursor-not-allowed text-gray-800':
+                        'bg-gray-200 text-black cursor-not-allowed text-gray-800':
                             currentPage === 1,
                     }"
                 >
@@ -289,7 +309,7 @@ const totalPages = computed(() => Math.ceil(deck.cards.length / pageSize));
                     class="text-white bg-gray-800 font-bold mt-3 mr-2 py-2 px-4 rounded-lg"
                     :class="{
                         'bg-gray-800': currentPage !== totalPages,
-                        'bg-gray-400 cursor-not-allowed':
+                        'bg-gray-300 text-black cursor-not-allowed':
                             currentPage === totalPages,
                     }"
                 >

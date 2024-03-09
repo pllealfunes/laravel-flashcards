@@ -117,8 +117,17 @@ class DeckController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Deck $deck)
+    public function destroy(Request $request, Deck $deck): RedirectResponse
     {
-        //
+         // Ensure that the deck belongs to the authenticated user
+    if ($deck->user_id === $request->user()->id) {
+        // Delete the deck
+        $deck->delete();
+    } else {
+        // Handle unauthorized deletion attempts (e.g., return an error response)
+        abort(403, 'Unauthorized');
+    }
+
+        return redirect(route('dashboard'));
     }
 }

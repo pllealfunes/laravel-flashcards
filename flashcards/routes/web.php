@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/createdeck', [DeckController::class, 'create'])->name('deck.create');
     Route::post('/createdeck', [DeckController::class, 'store'])->name('deck.store');
     Route::get('/deck/{deck}', [DeckController::class, 'show'])->name('deck.show');
+    Route::delete('/deck/{deck}', [DeckController::class, 'destroy'])->name('deck.destroy');
 });
 
 Route::middleware('auth')->group(function () {
