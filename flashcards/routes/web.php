@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/createdeck', [DeckController::class, 'store'])->name('deck.store');
     Route::get('/deck/{deck}', [DeckController::class, 'show'])->name('deck.show');
     Route::delete('/deck/{deck}', [DeckController::class, 'destroy'])->name('deck.destroy');
+    Route::patch('/deck/editTitle/{deck}', [DeckController::class, 'updateTitle'])->name('deck.updateTitle');
 });
 
 Route::middleware('auth')->group(function () {

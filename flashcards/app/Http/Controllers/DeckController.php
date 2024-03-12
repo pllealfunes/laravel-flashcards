@@ -90,7 +90,7 @@ class DeckController extends Controller
 
 
         /**
-     * Show the form for editing the specified resource.
+     * Update LastViewed of card.
      */
     public function lastviewed(Request $request, Deck $deck)
     {
@@ -105,6 +105,26 @@ class DeckController extends Controller
     
         return response()->json(['message' => 'Last viewed updated successfully', 'lastViewed' => $deck->lastViewed]);
     }
+
+      /**
+     * Update Deck Title
+     */
+    public function updateTitle(Request $request, Deck $deck)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+        ]);
+    
+        try {
+            $deck->title = $validated['title']; // Access 'title' from the validated array
+            $deck->save();
+         
+            return back()->with('success', 'Deck title updated successfully.');
+        } catch (\Exception $e) {
+            return back()->withInput()->withErrors(['error' => 'An error occurred while updating the deck title.']);
+        }
+    }
+
 
     /**
      * Update the specified resource in storage.

@@ -48,6 +48,10 @@ const hintToggle = () => {
 
 const showEditTitleModal = () => {
     showEditTitle.value = !showEditTitle.value;
+    if (form.errors() > 0) {
+        form.reset();
+        form.clearErrors();
+    }
 };
 
 const shuffleCards = () => {
@@ -98,8 +102,8 @@ const onPageChange = (page) => {
 const totalPages = computed(() => Math.ceil(deck.cards.length / pageSize));
 
 const editTitle = async () => {
-    form.post(route("deck.editDeckTitle"), {
-        onSuccess: () => form.reset(),
+    form.patch(route("deck.updateTitle", { deck: deck.id }), {
+        onSuccess: () => form.clearErrors(),
     });
 };
 
@@ -158,7 +162,7 @@ const deleteDeck = async () => {
                                     <h3
                                         class="text-lg font-semibold text-gray-900 dark:text-white"
                                     >
-                                        Edit Deck Title
+                                        Edit Deck Title :
                                     </h3>
                                     <button
                                         @click.stop="showEditTitleModal"
@@ -193,13 +197,16 @@ const deleteDeck = async () => {
                                             <label
                                                 for="title"
                                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                                >{{ deck.ttile }}</label
+                                                >{{ deck.title }}</label
                                             >
                                             <input
                                                 type="text"
                                                 v-model="form.title"
                                             />
-                                            <div v-if="form.errors.title">
+                                            <div
+                                                v-if="form.errors.title"
+                                                class="text-red-300 font-bold mt-1"
+                                            >
                                                 {{ form.errors.title }}
                                             </div>
                                         </div>
