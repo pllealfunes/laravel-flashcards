@@ -76,15 +76,15 @@ class DeckController extends Controller
     $deck->lastviewed = $formattedLastViewed;
     $deck->save();
 
-        return Inertia::render('Decks/DeckView', ['deck' => $deck, 'isUpdating' => true]);
+        return Inertia::render('Decks/ViewDeck', ['deck' => $deck, 'isUpdating' => true]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Deck $deck)
+    public function showUpdatePage(Deck $deck)
     {
-        return redirect(route('dashboard'));
+        return Inertia::render('Decks/UpdateDeck',['deck' => $deck]);
     }
 
 
@@ -127,11 +127,21 @@ class DeckController extends Controller
 
 
     /**
-     * Update the specified resource in storage.
+     * Update deck by deleting a card
      */
-    public function update(Request $request, Deck $deck)
+    public function updateDeleteCard(Request $request, Deck $deck)
     {
-        //
+        $validated = $request->validate([
+            'cards' => 'required|array|min:2',
+        ]);
+    
+        try {
+            $deck->cards = $validated['cards']; // Access 'title' from the validated array
+            $deck->save();
+            return back()->with('success', 'Deleted successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'An error occurred while deleting card.']);
+        }
     }
 
     /**
