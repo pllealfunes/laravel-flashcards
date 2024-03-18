@@ -144,8 +144,50 @@ class DeckController extends Controller
         }
     }
 
+     /**
+     * Update a card in the deck
+     */
+    public function updateCard(Request $request, Deck $deck)
+    {
+        $validatedData = $request->validate([
+            'question' => 'required|string',
+            'answer' => 'required|string',
+            'hint' => 'string|nullable',
+            'difficultylevel' => 'string',
+            'points' => 'integer',
+        ]);
+    
+        $cardId = $validatedData['card_id'];
+        $updatedCardData = [
+            'question' => $validatedData['question'],
+            'answer' => $validatedData['answer'],
+            'hint' => $validatedData['hint'],
+            'difficultylevel' => $validatedData['difficultylevel'],
+            'points' => $validatedData['points'],
+        ];
+    
+        // Find the card in the deck's cards array by its ID
+        $cardIndex = null;
+        foreach ($deck->cards as $index => $card) {
+            if ($card['id'] == $cardId) {
+                $cardIndex = $index;
+                break;
+            }
+        }
+    
+        if ($cardIndex !== null) {
+            // Update the card in the cards array
+            $deck->cards[$cardIndex] = array_merge($deck->cards[$cardIndex], $updatedCardData);
+            $deck->save();
+    
+            return redirect()->back()->with('success', 'Card updated successfully.');
+        } else {
+            return redirect()->back()->with('error', 'Card not found.');
+        }
+    }
+
     /**
-     * Remove the specified resource from storage.
+     * Delete Deck from database
      */
     public function destroy(Request $request, Deck $deck): RedirectResponse
     {

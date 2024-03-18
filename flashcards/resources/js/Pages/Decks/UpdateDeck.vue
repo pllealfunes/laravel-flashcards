@@ -6,7 +6,9 @@ const { deck } = defineProps(["deck"]);
 
 const pageSize = 10;
 const currentPage = ref(1);
+const deleteDeckModal = ref(false);
 const deleteCardModal = ref(false);
+const updateCardModal = ref(false);
 
 // Function to paginate the deck
 const paginateDeck = () => {
@@ -41,8 +43,40 @@ const editTitle = async () => {
     });
 };
 
-const showDeleteCard = () => {
-    deleteCardModal.value = !deleteCardModal.value;
+const updateForm = {};
+
+const showUpdateCard = (card) => {
+    updateForm.question = card.question;
+    updateForm.answer = card.answer;
+    updateForm.hint = card.hint;
+    updateForm.difficultylevel = card.difficultylevel;
+    updateForm.points = card.points;
+    updateCardModal.value = !updateCardModal.value;
+};
+
+const updateCard = async () => {
+    try {
+        // Call the update API endpoint with the updated card data
+        await router.put(
+            route("deck.updateCard", { deck: deck.id }),
+            updateForm,
+            {
+                onSuccess: () => {
+                    console.log("Card updated successfully");
+                    updateCardModal.value = false; // Close the update card modal
+                },
+                onError: (errors) => {
+                    console.error("Error updating card:", errors);
+                },
+            }
+        );
+    } catch (error) {
+        console.error("Error updating card:", error);
+    }
+};
+
+const showDeleteDeck = () => {
+    deleteDeckModal.value = !deleteDeckModal.value;
 };
 
 const deleteDeck = async () => {
@@ -54,6 +88,10 @@ const deleteDeck = async () => {
         // Handle error, e.g., show an error message
         console.error("Error deleting deck:", error);
     }
+};
+
+const showDeleteCard = () => {
+    deleteCardModal.value = !deleteCardModal.value;
 };
 
 const deleteCard = async (card) => {
@@ -115,7 +153,7 @@ const deleteCard = async (card) => {
                         </div>
                     </div>
 
-                    <!-- Main modal -->
+                    <!-- Edit Title Modal -->
                     <div v-if="showEditTitle" class="absolute mt-5">
                         <div class="relative mt-2 z-10">
                             <!-- Modal content -->
@@ -193,7 +231,7 @@ const deleteCard = async (card) => {
 
                 <button
                     class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-                    @click.stop="deleteDeck"
+                    @click="showDeleteDeck"
                 >
                     Delete Deck
                     <svg
@@ -209,6 +247,74 @@ const deleteCard = async (card) => {
                         />
                     </svg>
                 </button>
+                <div
+                    v-if="deleteDeckModal"
+                    class="fixed inset-0 flex justify-center items-center"
+                >
+                    <div class="relative p-4 w-full max-w-md max-h-full">
+                        <div
+                            class="relative bg-white rounded-lg shadow dark:bg-gray-700"
+                        >
+                            <button
+                                type="button"
+                                class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                @click.stop="showDeleteDeck"
+                            >
+                                <svg
+                                    class="w-3 h-3"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 14 14"
+                                >
+                                    <path
+                                        stroke="currentColor"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                                    />
+                                </svg>
+                                <span class="sr-only">Close modal</span>
+                            </button>
+                            <div class="p-4 md:p-5 text-center">
+                                <svg
+                                    class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 20 20"
+                                >
+                                    <path
+                                        stroke="currentColor"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                    />
+                                </svg>
+                                <h3
+                                    class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
+                                >
+                                    Are you sure you want to delete this card?
+                                </h3>
+                                <button
+                                    @click.stop="deleteDeck"
+                                    class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center"
+                                >
+                                    Yes, I'm sure
+                                </button>
+                                <button
+                                    type="button"
+                                    @click.stop="showDeleteDeck"
+                                    class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                                >
+                                    No, cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </template>
 
@@ -221,18 +327,28 @@ const deleteCard = async (card) => {
                     class="w-[50%] flex m-5 dark:text-slate-200 rounded-lg"
                 >
                     <div
-                        class="w-1/3 p-4 dark:bg-sky-900 dark:border-sky-900 flex justify-center items-center overflow-hidden"
+                        class="w-1/4 p-4 dark:bg-sky-900 dark:border-sky-900 flex justify-center items-center overflow-hidden"
+                    >
+                        <p>Level: {{ card.difficultylevel }}</p>
+                    </div>
+                    <div
+                        class="w-1/4 p-4 dark:bg-sky-900 dark:border-sky-900 flex justify-center items-center overflow-hidden"
+                    >
+                        <p>Points: {{ card.points }}</p>
+                    </div>
+                    <div
+                        class="w-1/4 p-4 dark:bg-sky-900 dark:border-sky-900 flex justify-center items-center overflow-hidden"
                     >
                         <p>{{ card.question }}</p>
                     </div>
                     <div
-                        class="w-1/3 p-4 dark:bg-sky-950 dark:border-sky-950 flex justify-center items-center flex-wrap"
+                        class="w-1/4 p-4 dark:bg-sky-950 dark:border-sky-950 flex justify-center items-center flex-wrap"
                     >
                         <p>{{ card.answer }}</p>
                     </div>
                     <div class="w-1/3 ml-2 flex justify-center items-center">
                         <button
-                            class="flex p-4 flex-row justify-center items-center focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-3 py-1.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+                            class="flex p-4 flex-row justify-center items-center focus:outline-none text-white font-dark bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-3 py-1.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
                             @click.stop="showDeleteCard"
                         >
                             <span>Delete Card</span>
@@ -241,7 +357,7 @@ const deleteCard = async (card) => {
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 24 24"
                                     fill="currentColor"
-                                    class="w-3 h-3"
+                                    class="w-4 h-4"
                                 >
                                     <path
                                         fill-rule="evenodd"
@@ -251,7 +367,29 @@ const deleteCard = async (card) => {
                                 </svg>
                             </span>
                         </button>
+                        <button
+                            type="button"
+                            @click.stop="showUpdateCard(card)"
+                            class="flex p-4 flex-row justify-center items-center focus:outline-none text-black font-dark bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
+                        >
+                            Update Card
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="black"
+                                class="w-5 h-5 cursor-pointer"
+                            >
+                                <path
+                                    d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z"
+                                />
+                                <path
+                                    d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z"
+                                />
+                            </svg>
+                        </button>
                     </div>
+
+                    <!-- Delete Card Modal-->
                     <div
                         v-if="deleteCardModal"
                         class="fixed inset-0 flex justify-center items-center"
@@ -318,6 +456,132 @@ const deleteCard = async (card) => {
                                         No, cancel
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Update Card Modal-->
+                    <div
+                        v-if="updateCardModal"
+                        class="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50"
+                    >
+                        <div
+                            class="flex items-center justify-center min-h-screen"
+                        >
+                            <!-- Modal content -->
+                            <div
+                                class="relative bg-white rounded-lg shadow-lg w-full max-w-md"
+                            >
+                                <!-- Modal header -->
+                                <div
+                                    class="flex justify-between items-center p-4 border-b"
+                                >
+                                    <h3
+                                        class="text-lg font-semibold text-gray-900"
+                                    >
+                                        Edit Card :
+                                    </h3>
+                                    <button
+                                        @click="showUpdateCard(card)"
+                                        type="button"
+                                        class="text-gray-400 hover:text-gray-900"
+                                    >
+                                        <svg
+                                            class="w-5 h-5"
+                                            aria-hidden="true"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                fill-rule="evenodd"
+                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                clip-rule="evenodd"
+                                            ></path>
+                                        </svg>
+                                        <span class="sr-only">Close modal</span>
+                                    </button>
+                                </div>
+                                <!-- Modal body -->
+                                <form class="p-4" @submit.prevent="updateCard">
+                                    <div class="grid gap-4 mb-4 grid-cols-2">
+                                        <div class="col-span-2">
+                                            <label
+                                                for="question"
+                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                >Question:
+                                            </label>
+                                            <input
+                                                type="text"
+                                                class="mb-2 w-full text-black"
+                                                v-model="updateForm.question"
+                                            />
+                                            <label
+                                                for="points"
+                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                >Answer:
+                                            </label>
+                                            <input
+                                                type="text"
+                                                class="mb-2 w-full text-black"
+                                                v-model="updateForm.answer"
+                                            />
+                                            <label
+                                                for="hint"
+                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                >Hint:</label
+                                            >
+                                            <input
+                                                type="text"
+                                                class="mb-2 w-full text-black"
+                                                v-model="updateForm.hint"
+                                            />
+                                            <label
+                                                for="difficultylevel"
+                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                >Difficulty level :</label
+                                            >
+                                            <select
+                                                v-model="
+                                                    updateForm.difficultylevel
+                                                "
+                                                name="difficultylevel"
+                                                class="mb-2 text-black"
+                                            >
+                                                <option disabled value="">
+                                                    Please select one
+                                                </option>
+                                                <option>easy</option>
+                                                <option>intermediate</option>
+                                                <option>hard</option>
+                                            </select>
+                                            <label
+                                                for="points"
+                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                >Points :</label
+                                            >
+                                            <select
+                                                v-model="updateForm.points"
+                                                name="difficultylevel"
+                                                class="text-black"
+                                            >
+                                                <option disabled value="">
+                                                    Please select one
+                                                </option>
+                                                <option>1</option>
+                                                <option>3</option>
+                                                <option>5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        :disabled="form.processing"
+                                        class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                    >
+                                        Submit
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>

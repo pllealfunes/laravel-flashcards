@@ -129,7 +129,7 @@ const submit = () => {
                     />
                     <!-- difficulty level -->
                     <label
-                        for="points"
+                        for="difficultylevel"
                         class="block mb-2 uppercase font-bold text-xs m-1"
                         >difficulty level :</label
                     >
