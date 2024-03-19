@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { router, useForm, Link } from "@inertiajs/vue3";
-import InputError from "@/Components/InputError.vue";
+import { router, useForm } from "@inertiajs/vue3";
+import SuccessToast from "@/Components/SuccessToast.vue";
 const { deck } = defineProps(["deck"]);
 
 const pageSize = 10;
@@ -10,6 +10,8 @@ const currentPage = ref(1);
 const deleteDeckModal = ref(false);
 const deleteCardModal = ref(false);
 const updateCardModal = ref(false);
+const updateToast = ref(false);
+let updateErrors = ref(null);
 
 // Function to paginate the deck
 const paginateDeck = () => {
@@ -44,16 +46,21 @@ const editTitle = async () => {
     });
 };
 
-const updateForm = {};
+let updateForm = {};
 
 const showUpdateCard = (card) => {
-    updateForm.card_id = card.id;
-    updateForm.question = card.question;
-    updateForm.answer = card.answer;
-    updateForm.hint = card.hint;
-    updateForm.difficultylevel = card.difficultylevel;
-    updateForm.points = card.points;
+    updateForm = useForm({
+        card_id: card.id,
+        question: card.question,
+        answer: card.answer,
+        hint: card.hint,
+        difficultylevel: card.difficultylevel,
+        points: card.points,
+    });
     updateCardModal.value = !updateCardModal.value;
+    if (Object.keys(updateErrors).length > 0) {
+        updateErrors.value = null;
+    }
 };
 
 const updateCard = async () => {
@@ -64,7 +71,6 @@ const updateCard = async () => {
             updateForm,
             {
                 onSuccess: (response) => {
-                    console.log("Card updated successfully");
                     const updatedCard = response.data.updatedCard;
                     const index = cards.findIndex(
                         (card) => card.id === updatedCard.id
@@ -72,15 +78,20 @@ const updateCard = async () => {
                     if (index !== -1) {
                         cards.splice(index, 1, updatedCard);
                     }
+                    updateCardModal.value = false;
                 },
                 onError: (errors) => {
-                    console.error("Error updating card:", errors);
+                    updateErrors.value = errors;
+                    updateToast.value = false;
                 },
             }
         );
-        updateCardModal.value = false;
     } catch (error) {
-        console.error("Error updating card:", error);
+        updateErrors.value = errors;
+        updateToast.value = false;
+    }
+    if (Object.keys(updateErrors).length === 0) {
+        updateToast.value = true;
     }
 };
 
@@ -327,6 +338,7 @@ const deleteCard = async (card) => {
             </div>
         </template>
 
+        <SuccessToast v-if="updateToast" />
         <!-- flashcardsList section -->
         <section id="flashcardsList" class="mt-10">
             <div class="flex flex-wrap justify-center items-center">
@@ -515,6 +527,32 @@ const deleteCard = async (card) => {
                                 <form class="p-4" @submit.prevent="updateCard">
                                     <div class="grid gap-4 mb-4 grid-cols-2">
                                         <div class="col-span-2">
+                                            <div
+                                                v-if="updateErrors"
+                                                class="mb-3"
+                                            >
+                                                <div role="alert">
+                                                    <div
+                                                        class="bg-red-500 text-white font-bold rounded-t px-4 py-2"
+                                                    >
+                                                        Missing Fields :
+                                                    </div>
+                                                    <div
+                                                        class="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700"
+                                                    >
+                                                        <div
+                                                            v-for="(
+                                                                error, index
+                                                            ) in updateErrors"
+                                                            :key="index"
+                                                        >
+                                                            <span>{{
+                                                                error
+                                                            }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <label
                                                 for="question"
                                                 class="block mb-2 text-sm font-medium text-gray-900 text-black"
