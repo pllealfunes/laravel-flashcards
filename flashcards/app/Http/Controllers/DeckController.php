@@ -121,7 +121,7 @@ class DeckController extends Controller
          
             return back()->with('success', 'Deck title updated successfully.');
         } catch (\Exception $e) {
-            return back()->withInput()->withErrors(['error' => 'An error occurred while updating the deck title.']);
+            return back()->withErrors(['error' => 'An error occurred while updating the deck title.']);
         }
     }
 
@@ -150,6 +150,7 @@ class DeckController extends Controller
     public function updateCard(Request $request, Deck $deck)
     {
         $validatedData = $request->validate([
+            'card_id' => 'required',
             'question' => 'required|string',
             'answer' => 'required|string',
             'hint' => 'string|nullable',
@@ -166,25 +167,28 @@ class DeckController extends Controller
             'points' => $validatedData['points'],
         ];
     
-        // Find the card in the deck's cards array by its ID
-        $cardIndex = null;
-        foreach ($deck->cards as $index => $card) {
-            if ($card['id'] == $cardId) {
-                $cardIndex = $index;
-                break;
-            }
-        }
-    
-        if ($cardIndex !== null) {
-            // Update the card in the cards array
-            $deck->cards[$cardIndex] = array_merge($deck->cards[$cardIndex], $updatedCardData);
-            $deck->save();
-    
-            return redirect()->back()->with('success', 'Card updated successfully.');
-        } else {
-            return redirect()->back()->with('error', 'Card not found.');
-        }
-    }
+   // Find the index of the card in the deck's cards array by its ID
+   $cardIndex = null;
+   $cards = $deck->cards ?? [];
+   foreach ($cards as $index => $card) {
+       if ($card['id'] == $cardId) {
+           $cardIndex = $index;
+           break;
+       }
+   }
+
+   if ($cardIndex !== null) {
+       // Update the card in the cards array
+       $cards[$cardIndex] = array_merge($cards[$cardIndex], $updatedCardData);
+       $deck->cards = $cards; // Update the cards array in the deck
+       $deck->save();
+
+       return Inertia::location(route('deck.showUpdatePage', ['deck' => $deck->id]));
+} else {
+   // Redirect back with an error message if the card was not found
+   return back()->withErrors(['error' => 'An error occurred while updating the card.']);
+}
+}
 
     /**
      * Delete Deck from database

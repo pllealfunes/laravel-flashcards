@@ -2,6 +2,7 @@
 import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { router, useForm, Link } from "@inertiajs/vue3";
+import InputError from "@/Components/InputError.vue";
 const { deck } = defineProps(["deck"]);
 
 const pageSize = 10;
@@ -46,6 +47,7 @@ const editTitle = async () => {
 const updateForm = {};
 
 const showUpdateCard = (card) => {
+    updateForm.card_id = card.id;
     updateForm.question = card.question;
     updateForm.answer = card.answer;
     updateForm.hint = card.hint;
@@ -61,15 +63,22 @@ const updateCard = async () => {
             route("deck.updateCard", { deck: deck.id }),
             updateForm,
             {
-                onSuccess: () => {
+                onSuccess: (response) => {
                     console.log("Card updated successfully");
-                    updateCardModal.value = false; // Close the update card modal
+                    const updatedCard = response.data.updatedCard;
+                    const index = cards.findIndex(
+                        (card) => card.id === updatedCard.id
+                    );
+                    if (index !== -1) {
+                        cards.splice(index, 1, updatedCard);
+                    }
                 },
                 onError: (errors) => {
                     console.error("Error updating card:", errors);
                 },
             }
         );
+        updateCardModal.value = false;
     } catch (error) {
         console.error("Error updating card:", error);
     }
