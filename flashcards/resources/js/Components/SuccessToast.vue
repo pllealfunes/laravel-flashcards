@@ -1,5 +1,20 @@
+<script setup>
+import { ref, onMounted } from "vue";
+
+const { message } = defineProps(["message"]);
+const isVisible = ref(true);
+
+// Automatically hide the toast after 5 seconds
+onMounted(() => {
+    setTimeout(() => {
+        isVisible.value = false;
+    }, 3000);
+});
+</script>
+
 <template>
     <div
+        v-if="isVisible"
         class="bg-green-400 text-black font-bold p-3 border-green-600 border-2 border-solid flex flex-row gap-2 justify-center items-center"
     >
         <svg
@@ -14,6 +29,6 @@
                 clip-rule="evenodd"
             />
         </svg>
-        Successfully Updated Card
+        {{ message }}
     </div>
 </template>

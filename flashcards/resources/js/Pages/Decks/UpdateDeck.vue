@@ -1,17 +1,19 @@
 <script setup>
 import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { router, useForm } from "@inertiajs/vue3";
+import { router, useForm, usePage } from "@inertiajs/vue3";
 import SuccessToast from "@/Components/SuccessToast.vue";
+import ErrorToast from "@/Components/ErrorToast.vue";
+import CreateCard from "@/Components/CreateCard.vue";
 const { deck } = defineProps(["deck"]);
 
+const page = usePage();
 const pageSize = 10;
 const currentPage = ref(1);
 const deleteDeckModal = ref(false);
 const deleteCardModal = ref(false);
 const updateCardModal = ref(false);
-const updateToast = ref(false);
-let updateErrors = ref(null);
+const addCardModal = ref(false);
 
 // Function to paginate the deck
 const paginateDeck = () => {
@@ -30,6 +32,10 @@ const onPageChange = (page) => {
 // Computed property to get total number of pages
 const totalPages = computed(() => Math.ceil(deck.cards.length / pageSize));
 
+const showAddCard = () => {
+    addCardModal.value = !addCardModal.value;
+};
+
 const form = useForm({
     title: deck.title,
 });
@@ -38,12 +44,20 @@ const showEditTitle = ref(false);
 
 const showEditTitleModal = () => {
     showEditTitle.value = !showEditTitle.value;
+    form.clearErrors();
+    form.reset();
 };
 
 const editTitle = async () => {
-    form.patch(route("deck.updateTitle", { deck: deck.id }), {
-        onSuccess: () => form.clearErrors(),
-    });
+    try {
+        await form.patch(route("deck.updateTitle", { deck: deck.id }), {
+            onSuccess: () => {
+                showEditTitle.value = false;
+            },
+        });
+    } catch (error) {
+        page.props.flash.error = `Unable to update card. Error: ${error}`;
+    }
 };
 
 let updateForm = {};
@@ -58,40 +72,17 @@ const showUpdateCard = (card) => {
         points: card.points,
     });
     updateCardModal.value = !updateCardModal.value;
-    if (Object.keys(updateErrors).length > 0) {
-        updateErrors.value = null;
-    }
 };
 
 const updateCard = async () => {
     try {
-        // Call the update API endpoint with the updated card data
-        await router.put(
-            route("deck.updateCard", { deck: deck.id }),
-            updateForm,
-            {
-                onSuccess: (response) => {
-                    const updatedCard = response.data.updatedCard;
-                    const index = cards.findIndex(
-                        (card) => card.id === updatedCard.id
-                    );
-                    if (index !== -1) {
-                        cards.splice(index, 1, updatedCard);
-                    }
-                    updateCardModal.value = false;
-                },
-                onError: (errors) => {
-                    updateErrors.value = errors;
-                    updateToast.value = false;
-                },
-            }
-        );
+        await updateForm.put(route("deck.updateCard", { deck: deck.id }), {
+            onSuccess: () => {
+                updateCardModal.value = false;
+            },
+        });
     } catch (error) {
-        updateErrors.value = errors;
-        updateToast.value = false;
-    }
-    if (Object.keys(updateErrors).length === 0) {
-        updateToast.value = true;
+        page.props.flash.error = `Unable to update card. Error: ${error}`;
     }
 };
 
@@ -102,11 +93,9 @@ const showDeleteDeck = () => {
 const deleteDeck = async () => {
     try {
         await router.delete(route("deck.destroy", { deck: deck.id }));
-        // Handle success, e.g., show a success message
-        console.log("Deck deleted successfully");
     } catch (error) {
-        // Handle error, e.g., show an error message
-        console.error("Error deleting deck:", error);
+        page.props.flash.error = `Unable to delete deck. Error: ${error}`;
+        deleteToast.value = false;
     }
 };
 
@@ -120,26 +109,27 @@ const deleteCard = async (card) => {
         const cardIndex = deck.cards.findIndex(
             (deleteCard) => deleteCard.id === card
         );
-        if ((cardIndex !== -1) & (deck.cards.length > 2)) {
+        if (cardIndex !== -1 && deck.cards.length > 2) {
             // Remove the card from the array
             deck.cards.splice(card, 1);
             // Update the deck in the database with the updated cards array
             await router.patch(
-                route("deck.updateDeleteCard", { deck: deck.id }),
+                route("deck.deleteCard", { deck: deck.id }),
                 {
                     cards: deck.cards,
+                },
+                {
+                    onSuccess: () => {
+                        deleteCardModal.value = false;
+                    },
                 }
             );
-
-            // Handle success, e.g., show a success message
-            console.log("Card deleted successfully");
-            deleteCardModal.value = false;
         } else {
-            console.log("unable to delete card");
+            page.props.flash.error =
+                "Unable to delete card or deck does not contain 2 cards.";
         }
     } catch (error) {
-        // Handle error, e.g., show an error message
-        console.error("Error deleting card:", error);
+        page.props.flash.error = `Error Deleting Card: ${error}`;
     }
 };
 </script>
@@ -226,6 +216,7 @@ const deleteCard = async (card) => {
                                             >
                                             <input
                                                 type="text"
+                                                class="mb-2 w-full text-black"
                                                 v-model="form.title"
                                             />
                                             <div
@@ -249,24 +240,57 @@ const deleteCard = async (card) => {
                     </div>
                 </div>
 
-                <button
-                    class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-                    @click="showDeleteDeck"
-                >
-                    Delete Deck
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        class="w-4 h-4"
+                <div class="flex flex-row justify-evenly items-center">
+                    <button
+                        class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-green-700 hover:bg-red-800 focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-900"
+                        @click.stop="showAddCard"
                     >
-                        <path
-                            fill-rule="evenodd"
-                            d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z"
-                            clip-rule="evenodd"
-                        />
-                    </svg>
-                </button>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="w-6 h-6"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                            />
+                        </svg>
+
+                        Add Card
+                    </button>
+
+                    <button
+                        class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+                        @click.stop="showDeleteDeck"
+                    >
+                        Delete Deck
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            class="w-6 h-6"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
+                <CreateCard
+                    v-if="addCardModal"
+                    :deck="deck"
+                    :show-add-card="showAddCard"
+                    :add-card-modal="addCardModal"
+                    :page="page"
+                />
+
                 <div
                     v-if="deleteDeckModal"
                     class="fixed inset-0 flex justify-center items-center"
@@ -316,7 +340,7 @@ const deleteCard = async (card) => {
                                 <h3
                                     class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
                                 >
-                                    Are you sure you want to delete this card?
+                                    Are you sure you want to delete this deck?
                                 </h3>
                                 <button
                                     @click.stop="deleteDeck"
@@ -338,7 +362,14 @@ const deleteCard = async (card) => {
             </div>
         </template>
 
-        <SuccessToast v-if="updateToast" />
+        <SuccessToast
+            v-if="$page.props.flash.success"
+            :message="$page.props.flash.success"
+        />
+        <ErrorToast
+            v-if="$page.props.flash.error"
+            :message="$page.props.flash.error"
+        />
         <!-- flashcardsList section -->
         <section id="flashcardsList" class="mt-10">
             <div class="flex flex-wrap justify-center items-center">
@@ -484,7 +515,7 @@ const deleteCard = async (card) => {
                     <!-- Update Card Modal-->
                     <div
                         v-if="updateCardModal"
-                        class="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-50"
+                        class="fixed inset-0 z-50 overflow-y-auto"
                     >
                         <div
                             class="flex items-center justify-center min-h-screen"
@@ -503,7 +534,7 @@ const deleteCard = async (card) => {
                                         Edit Card :
                                     </h3>
                                     <button
-                                        @click="showUpdateCard(card)"
+                                        @click.stop="showUpdateCard(card)"
                                         type="button"
                                         class="text-gray-400 hover:text-gray-900"
                                     >
@@ -527,56 +558,44 @@ const deleteCard = async (card) => {
                                 <form class="p-4" @submit.prevent="updateCard">
                                     <div class="grid gap-4 mb-4 grid-cols-2">
                                         <div class="col-span-2">
-                                            <div
-                                                v-if="updateErrors"
-                                                class="mb-3"
-                                            >
-                                                <div role="alert">
-                                                    <div
-                                                        class="bg-red-500 text-white font-bold rounded-t px-4 py-2"
-                                                    >
-                                                        Missing Fields :
-                                                    </div>
-                                                    <div
-                                                        class="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700"
-                                                    >
-                                                        <div
-                                                            v-for="(
-                                                                error, index
-                                                            ) in updateErrors"
-                                                            :key="index"
-                                                        >
-                                                            <span>{{
-                                                                error
-                                                            }}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                             <label
                                                 for="question"
                                                 class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                                >Question:
+                                                >* Question :
                                             </label>
                                             <input
                                                 type="text"
                                                 class="mb-2 w-full text-black"
                                                 v-model="updateForm.question"
                                             />
+                                            <p
+                                                v-if="
+                                                    updateForm.errors.question
+                                                "
+                                                class="text-red-500 mb-2"
+                                            >
+                                                {{ updateForm.errors.question }}
+                                            </p>
                                             <label
                                                 for="points"
                                                 class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                                >Answer:
+                                                >* Answer :
                                             </label>
                                             <input
                                                 type="text"
                                                 class="mb-2 w-full text-black"
                                                 v-model="updateForm.answer"
                                             />
+                                            <p
+                                                v-if="updateForm.errors.answer"
+                                                class="text-red-500 mb-2"
+                                            >
+                                                {{ updateForm.errors.answer }}
+                                            </p>
                                             <label
                                                 for="hint"
                                                 class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                                >Hint:</label
+                                                >Hint :</label
                                             >
                                             <input
                                                 type="text"
@@ -623,7 +642,7 @@ const deleteCard = async (card) => {
                                     </div>
                                     <button
                                         type="submit"
-                                        :disabled="form.processing"
+                                        :disabled="updateForm.processing"
                                         class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                     >
                                         Submit
@@ -666,7 +685,7 @@ const deleteCard = async (card) => {
 
                 <!-- Next page button -->
                 <button
-                    @click="onPageChange(currentPage + 1)"
+                    @click.stop="onPageChange(currentPage + 1)"
                     :disabled="currentPage === totalPages"
                     class="text-white bg-gray-800 font-bold mt-3 mr-2 py-2 px-4 rounded-lg"
                     :class="{

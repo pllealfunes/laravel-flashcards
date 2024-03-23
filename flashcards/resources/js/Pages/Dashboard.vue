@@ -2,6 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import Deck from "@/Pages/Decks/Index.vue";
+import SuccessToast from "@/Components/SuccessToast.vue";
 
 defineProps(["decks"]);
 </script>
@@ -23,7 +24,10 @@ defineProps(["decks"]);
                 </div>
             </div>
         </div>
-
+        <SuccessToast
+            v-if="$page.props.flash.success"
+            :message="$page.props.flash.success"
+        />
         <div
             class="mt-6 flex flex-row flex-wrap justify-center items-center gap-4"
         >
