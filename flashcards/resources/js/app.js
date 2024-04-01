@@ -28,13 +28,35 @@ createInertiaApp({
 });
 
 let stale = false;
-window.addEventListener("popstate", () => (stale = true));
+
+// Listen for popstate event (back button)
+window.addEventListener("popstate", () => {
+    stale = true;
+    refreshDashboard();
+});
+
+// Listen for navigation events triggered by Inertia Links
 router.on("navigate", (event) => {
-    if (stale)
+    if (stale) {
         router.get(
             event.detail.page.url,
             {},
             { replace: true, preserveState: false }
         );
-    stale = false;
+        stale = false;
+    }
+});
+
+// Function to refresh the dashboard and reorder decks
+function refreshDashboard() {
+    // Perform an Inertia visit to reload the dashboard page
+    Inertia.visit(route("dashboard.index"), {
+        replace: true,
+        preserveScroll: true,
+    });
+}
+
+// Call refreshDashboard function when the page initially loads
+window.addEventListener("load", () => {
+    refreshDashboard();
 });

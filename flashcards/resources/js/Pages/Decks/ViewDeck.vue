@@ -2,10 +2,10 @@
 import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { router, Link } from "@inertiajs/vue3";
-const { deck } = defineProps(["deck"]);
+const { deck, flashcards } = defineProps(["deck", "flashcards"]);
 
 // Create an array to store the flipped state for each card
-const flippedStates = ref(new Array(deck.cards.length).fill(false));
+const flippedStates = ref(new Array(flashcards.length).fill(false));
 const activeCardIndex = ref(0); // Keep track of the index of the currently active card
 const isActive = ref(false);
 const showHint = ref(false);
@@ -22,7 +22,7 @@ const showNextCard = () => {
     // Hide the currently active card
     flippedStates.value[activeCardIndex.value] = false;
     // Update activeCardIndex to point to the next card
-    activeCardIndex.value = (activeCardIndex.value + 1) % deck.cards.length;
+    activeCardIndex.value = (activeCardIndex.value + 1) % flashcards.length;
     isActive.value = activeCardIndex.value !== 0;
 };
 
@@ -30,7 +30,7 @@ const showPrevCard = () => {
     // Hide the currently active card
     flippedStates.value[activeCardIndex.value] = false;
     // Update activeCardIndex to point to the next card
-    activeCardIndex.value = (activeCardIndex.value - 1) % deck.cards.length;
+    activeCardIndex.value = (activeCardIndex.value - 1) % flashcards.length;
     isActive.value = activeCardIndex.value !== 0;
 };
 
@@ -42,7 +42,7 @@ const hintToggle = () => {
 };
 
 const shuffleCards = () => {
-    const originalDeck = [...deck.cards]; // Create a copy of the original deck
+    const originalDeck = [...flashcards]; // Create a copy of the original deck
     let shuffledDeck = shuffleDeck([...originalDeck]); // Initialize shuffled deck
 
     // Shuffle the deck until it's different from the original
@@ -50,7 +50,7 @@ const shuffleCards = () => {
         shuffledDeck = shuffleDeck([...originalDeck]);
     }
 
-    deck.cards = shuffledDeck; // Update the deck with the shuffled cards
+    flashcards = shuffledDeck; // Update the deck with the shuffled cards
 };
 
 // Function to check if two decks are the same
@@ -74,7 +74,7 @@ const shuffleDeck = (deck) => {
 // Function to paginate the deck
 const paginateDeck = () => {
     const startIndex = (currentPage.value - 1) * pageSize;
-    return deck.cards.slice(startIndex, startIndex + pageSize);
+    return flashcards.slice(startIndex, startIndex + pageSize);
 };
 
 // Computed property to get the current page's cards
@@ -86,7 +86,7 @@ const onPageChange = (page) => {
 };
 
 // Computed property to get total number of pages
-const totalPages = computed(() => Math.ceil(deck.cards.length / pageSize));
+const totalPages = computed(() => Math.ceil(flashcards.length / pageSize));
 </script>
 
 <template>
@@ -121,7 +121,7 @@ const totalPages = computed(() => Math.ceil(deck.cards.length / pageSize));
         </template>
         <section class="relative" id="flashcardsDeck">
             <div
-                v-for="(card, index) in deck.cards"
+                v-for="(card, index) in flashcards"
                 :key="card.id"
                 v-show="index === activeCardIndex"
                 class="m-5 font-semibold inset-x-0 flex flex-wrap justify-center items-center transition-transform duration-500 ease-in-out"
@@ -238,7 +238,7 @@ const totalPages = computed(() => Math.ceil(deck.cards.length / pageSize));
                 />
             </svg>
             <span class="text-gray-800 font-bold mt-3 text-xl">
-                {{ activeCardIndex + 1 }} / {{ deck.cards.length }}
+                {{ activeCardIndex + 1 }} / {{ flashcards.length }}
             </span>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -285,7 +285,7 @@ const totalPages = computed(() => Math.ceil(deck.cards.length / pageSize));
                     class="bg-gray-800 font-bold mt-3 mr-2 py-2 px-4 rounded-lg"
                     :class="{
                         'bg-gray-800 text-white': currentPage !== 1,
-                        'bg-gray-200 text-black cursor-not-allowed text-gray-800':
+                        'bg-gray-200 text-white cursor-not-allowed text-gray-800':
                             currentPage === 1,
                     }"
                 >
@@ -309,7 +309,7 @@ const totalPages = computed(() => Math.ceil(deck.cards.length / pageSize));
                 <button
                     @click="onPageChange(currentPage + 1)"
                     :disabled="currentPage === totalPages"
-                    class="text-white bg-gray-800 font-bold mt-3 mr-2 py-2 px-4 rounded-lg"
+                    class="text-white bg-gray-800 font-bold mt-3 mr-2 py-2 px-7 rounded-lg"
                     :class="{
                         'bg-gray-800': currentPage !== totalPages,
                         'bg-gray-300 text-black cursor-not-allowed':

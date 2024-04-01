@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Deck;
+use App\Models\Flashcard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -18,11 +19,10 @@ class DeckController extends Controller
      */
     public function index(): Response
     {
-        return Inertia::render('Decks/Index', [
-
-            'decks' => Deck::get(),
-
-        ]);
+        $decks = Deck::orderByDesc('created_at')->get();
+        // Debugging output
+        dd($decks); // Check the order and timestamps of fetched decks
+        return Inertia::render('Decks/Index', ['decks' => $decks]);
     }
 
     /**
@@ -38,113 +38,75 @@ class DeckController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        try {
+        
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
-                'cards' => 'required|array|min:2',
-                'cards.*.question' => 'required|string|max:255',
-                'cards.*.answer' => 'required|string|max:255',
-                'cards.*.hint' => 'required|string|max:255',
-                'cards.*.difficultylevel' => 'required|string',
-                'cards.*.points' => 'required|integer',
+                'flashcards' => 'required|array|size:2',
+                'flashcards.*.question' => 'required|string|max:255',
+                'flashcards.*.answer' => 'required|string|max:255',
+                'flashcards.*.hint' => 'required|string|max:255',
+                'flashcards.*.difficulty' => 'required|in:easy,medium,hard',
+                'flashcards.*.points' => 'required|in:1,3,5',
+            ], [
+                'title.required' => 'A title is required to create a deck.',
+                'flashcards.size' => 'A deck must contain a minimum of 2 flashcards',
+                'flashcards.required' => 'A deck must contain a minimum of 2 flashcards',
+                'flashcards.*.question.required' => 'The question field is required for all flashcards.',
+                'flashcards.*.answer.required' => 'The answer field is required for all flashcards.',
+                'flashcards.*.difficulty.required' => 'The difficulty level field is required for all flashcards.',
+                'flashcards.*.points.required' => 'The points field is required for all flashcards.',
             ]);
     
-            $request->user()->decks()->create($validated);
+              // Create the deck
+    $deck = Deck::create([
+        'title' => $validated['title'],
+        'user_id' => $request->user()->id
+    ]);
+
+    // Create flashcards associated with the deck
+    foreach ($validated['flashcards'] as $flashcardData) {
+       Flashcard::create([
+            'question' => $flashcardData['question'],
+            'answer' => $flashcardData['answer'],
+            'hint' => $flashcardData['hint'],
+            'difficulty' => $flashcardData['difficulty'],
+            'points' => $flashcardData['points'],
+            'deck_id' => $deck->id,
+            'user_id' => $deck->user_id ?? $request->user()->id
+        ]);
+    }
+ 
     
             return redirect(route('dashboard'))->with('success', 'Successfully Created Deck.');
-        } catch (ValidationException $e) {
-            return back()->withErrors($e->errors())->withInput();
-        } catch (\Exception $e) {
-            return back()->with('error', 'An error occurred while saving the deck.');
-        }
+        
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Request $request, Deck $deck)
+    public function show(Deck $deck)
     {
-        $validated = $request->validate([
-
-            'lastviewed' => 'required|date',
-
-        ]);
-
-         // Parse the datetime string into Carbon instance
-    $lastViewed = Carbon::parse($validated['lastviewed']);
 
     // Format Carbon instance to Laravel's default datetime format
-    $formattedLastViewed = $lastViewed->toIso8601String();
-    $deck->lastviewed = $formattedLastViewed;
+    $lastViewed = Carbon::now() -> toIso8601String();
+    $deck->lastviewed = $lastViewed;
     $deck->save();
 
-        return Inertia::render('Decks/ViewDeck', ['deck' => $deck, 'isUpdating' => true]);
+    $flashcards = Flashcard::where('deck_id', $deck->id)->get();
+
+        return Inertia::render('Decks/ViewDeck', ['deck' => $deck, 'flashcards' => $flashcards, 'isUpdating' => true]);
     }
+
+
 
     /**
      * Show the form for editing the specified resource.
      */
     public function showUpdatePage(Deck $deck)
     {
-        return Inertia::render('Decks/UpdateDeck',['deck' => $deck]);
+        $flashcards = Flashcard::where('deck_id', $deck->id)->get();
+        return Inertia::render('Decks/UpdateDeck',['deck' => $deck, 'flashcards' => $flashcards]);
     }
-
-
-
-        /**
-     * Update LastViewed of card.
-     */
-    public function lastviewed(Request $request, Deck $deck)
-    {
-        $ $validated = $request->validate([
-
-            'lastviewed' => 'required|date',
-
-        ]);
-
-        $deck->update($validated);
-
-    
-        return response()->json(['message' => 'Last viewed updated successfully', 'lastViewed' => $deck->lastViewed]);
-    }
-
-
-
-
-     /**
-     * Store a newly created resource in storage.
-     */
-    public function addCard(Request $request, Deck $deck)
-    {
-
-        try {
-            if ($deck->user_id === $request->user()->id) {
-              
-                $validated = $request->validate([
-                    'question' => 'required|string',
-                    'answer' => 'required|string',
-                    'hint' => 'string|nullable',
-                    'difficultylevel' => 'string',
-                    'points' => 'integer',
-                ]);
-            
-                $deck->cards()->create($validated);
-
-                return back()->with('success', 'Added card successfully.');
-            } 
-            else {
-                // Handle unauthorized deletion attempts with a 403 status code
-                abort(403, 'Unauthorized');
-            }
-        }  
-        catch (ModelNotFoundException $e) {
-            // Handle the case where the deck is not found with a 404 status code
-            abort(404, 'Deck not found');
-        }catch (\Exception $e) {
-            return back()->with('error', $e);
-        }
-    }
-
 
 
 
@@ -159,99 +121,23 @@ class DeckController extends Controller
         ]);
     
         try {
-            $deck->title = $validated['title']; // Access 'title' from the validated array
-            $deck->save();
+            if ($deck->user_id === $request->user()->id) {
+                $deck->title = $validated['title']; // Access 'title' from the validated array
+                $deck->save();
+            } else {
+                // Handle unauthorized deletion attempts with a 403 status code
+                abort(403, 'Unauthorized');
+            }
          
             return back()->with('success', 'Deck title updated successfully.');
+        } catch (ModelNotFoundException $e) {
+            // Handle the case where the deck is not found with a 404 status code
+            abort(404, 'Deck not found');
         } catch (\Exception $e) {
-            return back()->with('error','An error occurred while updating the deck title.');
+            // Handle other potential exceptions with a generic error message
+            return back()->with('error', 'An error occurred while  updating the titl.');
         }
     }
-
-
-     /**
-     * Update a card in the deck
-     */
-    public function updateCard(Request $request, Deck $deck)
-    {
-        $validatedData = $request->validate([
-            'card_id' => 'required',
-            'question' => 'required|string',
-            'answer' => 'required|string',
-            'hint' => 'string|nullable',
-            'difficultylevel' => 'string',
-            'points' => 'integer',
-        ]);
-    
-        $cardId = $validatedData['card_id'];
-        $updatedCardData = [
-            'question' => $validatedData['question'],
-            'answer' => $validatedData['answer'],
-            'hint' => $validatedData['hint'],
-            'difficultylevel' => $validatedData['difficultylevel'],
-            'points' => $validatedData['points'],
-        ];
-    
-   // Find the index of the card in the deck's cards array by its ID
-   $cardIndex = null;
-   $cards = $deck->cards ?? [];
-   foreach ($cards as $index => $card) {
-       if ($card['id'] == $cardId) {
-           $cardIndex = $index;
-           break;
-       }
-   }
-
-   if ($cardIndex !== null) {
-    try{
-         // Update the card in the cards array
-       $cards[$cardIndex] = array_merge($cards[$cardIndex], $updatedCardData);
-       $deck->cards = $cards; // Update the cards array in the deck
-       $deck->save();
-
-       return back()->with('success', 'Successfully Updated Card.');
-    } catch (\Exception $e) {
-        return back()->with('error','An error occurred while updating the card.');
-    }
-} else {
-   // Redirect back with an error message if the card was not found
-   return back()->with('error','An error occurred while updating the card.');
-}
-}
-
-
-
-
-   /**
-     * Delete a card
-     */
-    public function deleteCard(Request $request, Deck $deck)
-    {
-        $validated = $request->validate([
-            'cards' => 'required|array|min:2',
-        ]);
-    try {
-        if ($deck->user_id === $request->user()->id) {
-          
-            $deck->cards = $validated['cards'];
-            $deck->save();
-            
-            return back()->with('success', 'Deleted successfully.');
-        } 
-        else {
-            // Handle unauthorized deletion attempts with a 403 status code
-            abort(403, 'Unauthorized');
-        }
-    }  
-    catch (ModelNotFoundException $e) {
-        // Handle the case where the deck is not found with a 404 status code
-        abort(404, 'Card not found');
-    }catch (\Exception $e) {
-        return back()->with('error', 'An error occurred while deleting the card.');
-    }
-    
-}
-
 
 
 
@@ -265,9 +151,9 @@ class DeckController extends Controller
             if ($deck->user_id === $request->user()->id) {
                 // Delete the deck
                 $deck->delete();
-    
+                $deck->user()->dissociate();
                 // If the deletion was successful and authorized, redirect to dashboard
-                return redirect(route('dashboard'))->with('success', 'Successfully Deleted Card.');
+                return redirect(route('dashboard'))->with('success', 'Successfully Deleted Deck.');
             } else {
                 // Handle unauthorized deletion attempts with a 403 status code
                 abort(403, 'Unauthorized');

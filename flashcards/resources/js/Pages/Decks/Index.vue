@@ -15,14 +15,12 @@ dayjs.extend(relativeTime);
             <span class="dark:text-white"
                 >Created: {{ dayjs(deck.created_at).fromNow() }}</span
             >
-            <span class="dark:text-white">{{ deck.cards.length }} Cards</span>
         </div>
 
         <Link
             :href="route('deck.show', { deck: deck.id })"
-            :data="{ lastviewed: new Date() }"
             as="button"
-            class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-slate-200"
+            class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
             >{{ deck.title }}</Link
         >
         <span

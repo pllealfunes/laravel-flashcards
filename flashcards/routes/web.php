@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DeckController;
+use App\Http\Controllers\FlashcardsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -42,10 +43,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/deck/{deck}', [DeckController::class, 'show'])->name('deck.show');
     Route::delete('/deck/{deck}', [DeckController::class, 'destroy'])->name('deck.destroy');
     Route::get('/deck/updateDeck/{deck}', [DeckController::class, 'showUpdatePage'])->name('deck.showUpdatePage');
-    Route::put('/deck/updateCard/{deck}', [DeckController::class, 'updateCard'])->name('deck.updateCard');
-    Route::put('/deck/addCard/{deck}', [DeckController::class, 'addCard'])->name('deck.addCard');
-    Route::patch('/deck/editTitle/{deck}', [DeckController::class, 'updateTitle'])->name('deck.updateTitle');
-    Route::patch('/deck/deleteCard/{deck}', [DeckController::class, 'updateDeleteCard'])->name('deck.deleteCard');
+    Route::patch('/deck/updateTitle/{deck}', [DeckController::class, 'updateTitle'])->name('deck.updateTitle');
+    
+    Route::post('/deck/createFlashcard', [FlashcardsController::class, 'store'])->name('flashcard.store');
+    Route::put('/deck/updateFlashcard/{flashcard}', [FlashcardsController::class, 'update'])->name('flashcard.update');
+    Route::delete('/deck/deleteFlashcard/{flashcard}', [FlashcardsController::class, 'destroy'])->name('flashcard.destroy');
 });
 
 Route::middleware('auth')->group(function () {

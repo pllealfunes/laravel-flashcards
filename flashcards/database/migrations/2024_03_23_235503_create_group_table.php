@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('decks', function (Blueprint $table) {
-            $table->timestamp('lastviewed')->nullable();
+        Schema::create('group', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->timestamps();
+           
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('decks', function (Blueprint $table) {
-            $table->dropColumn('lastviewed');
-        });
+        Schema::dropIfExists('group');
     }
 };
