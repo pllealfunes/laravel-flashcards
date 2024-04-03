@@ -177,7 +177,11 @@ const totalPages = computed(() => Math.ceil(flashcards.length / pageSize));
                                         <p
                                             class="text-base leading-relaxed text-gray-500 dark:text-white"
                                         >
-                                            {{ card.hint }}
+                                            {{
+                                                card.hint
+                                                    ? card.hint
+                                                    : `No Hint Here! Good Luck!`
+                                            }}
                                         </p>
                                     </div>
                                 </div>
@@ -208,7 +212,7 @@ const totalPages = computed(() => Math.ceil(flashcards.length / pageSize));
                         class="absolute flip-card backface-hidden w-full h-full dark:bg-sky-950 dark:border-sky-950 rounded-lg"
                     >
                         <div
-                            class="text-center flex flex-col items-center justify-center h-full px-2 pb-24"
+                            class="text-center text-xl flex flex-col items-center justify-center h-full p-10"
                         >
                             <p>
                                 {{ card.answer }}
@@ -256,25 +260,77 @@ const totalPages = computed(() => Math.ceil(flashcards.length / pageSize));
         </div>
 
         <!-- flashcardsList section -->
-        <section id="flashcardsList" class="mt-[300px]">
-            <ul class="flex flex-wrap justify-center items-center">
-                <li
-                    v-for="card in paginatedCards"
-                    :key="card.id"
-                    class="w-[50%] flex m-5 dark:text-slate-200 border border-gray-200 rounded-lg shadow"
-                >
-                    <div
-                        class="w-1/2 p-4 dark:bg-sky-900 dark:border-sky-900 flex justify-center items-center overflow-hidden"
+        <section id="flashcardsList" class="mt-[20px] p-[10%]">
+            <h3 class="text-3xl font-bold text-slate-600 text-center mb-11">
+                Flashcards in this Deck
+            </h3>
+            <div class="flex flex-wrap justify-center items-center">
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                    <table
+                        class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-black"
                     >
-                        <p>{{ card.question }}</p>
-                    </div>
-                    <div
-                        class="w-1/2 p-4 dark:bg-sky-950 dark:border-sky-950 flex justify-center items-center flex-wrap"
-                    >
-                        <p>{{ card.answer }}</p>
-                    </div>
-                </li>
-            </ul>
+                        <thead
+                            class="text-xs text-gray-700 uppercase dark:text-gray-400"
+                        >
+                            <tr>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                >
+                                    Question
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                >
+                                    Answer
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                >
+                                    Hint
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                >
+                                    Level
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 bg-gray-800 text-slate-50"
+                                >
+                                    Points
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="flashcard in paginatedCards"
+                                :key="flashcard.id"
+                                class="border-b border-gray-200 dark:border-gray-700"
+                            >
+                                <td class="px-6 py-4">
+                                    {{ flashcard.question }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ flashcard.answer }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ flashcard.hint }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ flashcard.difficulty }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ flashcard.points }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             <!-- Pagination -->
             <div class="flex justify-evenly w-full mt-5">
