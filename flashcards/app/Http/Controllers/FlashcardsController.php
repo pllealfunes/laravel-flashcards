@@ -34,7 +34,7 @@ class FlashcardsController extends Controller
      */
     public function store(Request $request)
     {
-        $deckUser = $request->input('deck_user');
+        
                 $validated = $request->validate([
                     'deck_id'=> 'required',
                     'question' => 'required|string|max:255',

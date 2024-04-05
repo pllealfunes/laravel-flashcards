@@ -27,36 +27,36 @@ createInertiaApp({
     },
 });
 
-let stale = false;
+// let stale = false;
 
-// Listen for popstate event (back button)
-window.addEventListener("popstate", () => {
-    stale = true;
-    refreshDashboard();
-});
+// // Listen for popstate event (back button)
+// window.addEventListener("popstate", () => {
+//     stale = true;
+//     refreshDashboard();
+// });
 
-// Listen for navigation events triggered by Inertia Links
-router.on("navigate", (event) => {
-    if (stale) {
-        router.get(
-            event.detail.page.url,
-            {},
-            { replace: true, preserveState: false }
-        );
-        stale = false;
-    }
-});
+// // Listen for navigation events triggered by Inertia Links
+// router.on("navigate", (event) => {
+//     if (stale) {
+//         router.get(
+//             event.detail.page.url,
+//             {},
+//             { replace: true, preserveState: false }
+//         );
+//         stale = false;
+//     }
+// });
 
-// Function to refresh the dashboard and reorder decks
-function refreshDashboard() {
-    // Perform an Inertia visit to reload the dashboard page
-    Inertia.visit(route("dashboard.index"), {
-        replace: true,
-        preserveScroll: true,
-    });
-}
+// // Function to refresh the dashboard and reorder decks
+// function refreshDashboard() {
+//     // Perform an Inertia visit to reload the dashboard page
+//     router.visit(route("dashboard"), {
+//         replace: true,
+//         preserveScroll: true,
+//     });
+// }
 
-// Call refreshDashboard function when the page initially loads
-window.addEventListener("load", () => {
-    refreshDashboard();
-});
+// // Call refreshDashboard function when the page initially loads
+// window.addEventListener("load", () => {
+//     refreshDashboard();
+// });

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->timestamp('lastviewed')->nullable();
             $table->timestamps();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('group_id')->nullable()->constrained()->cascadeOnDelete();
         });
     }
 

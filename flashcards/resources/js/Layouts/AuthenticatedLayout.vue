@@ -43,6 +43,12 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Create Deck
                                 </NavLink>
+                                <NavLink
+                                    :href="route('group.create')"
+                                    :active="route().current('group.create')"
+                                >
+                                    Create Group
+                                </NavLink>
                             </div>
                         </div>
 
@@ -158,6 +164,15 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('deck.create')"
                         >
                             Create Deck
+                        </ResponsiveNavLink>
+                    </div>
+
+                    <div class="pt-2 pb-3 space-y-1">
+                        <ResponsiveNavLink
+                            :href="route('group.create')"
+                            :active="route().current('group.create')"
+                        >
+                            Create Group
                         </ResponsiveNavLink>
                     </div>
                     <!-- Responsive Settings Options -->

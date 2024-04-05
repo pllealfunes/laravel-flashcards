@@ -3,10 +3,12 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DeckController;
 use App\Http\Controllers\FlashcardsController;
+use App\Http\Controllers\GroupsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\Deck;
+use App\Models\Group;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -32,7 +34,8 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     $user = Auth::user(); 
     $decks = Deck::where('user_id', $user->id)->orderByDesc('lastviewed')->get();
-    return Inertia::render('Dashboard')->with('decks', $decks);
+    $groups = Group::where('user_id', $user->id)->orderByDesc('lastviewed')->get();
+    return Inertia::render('Dashboard', ['decks' => $decks, 'groups' => $groups]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 
@@ -48,6 +51,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/deck/createFlashcard', [FlashcardsController::class, 'store'])->name('flashcard.store');
     Route::put('/deck/updateFlashcard/{flashcard}', [FlashcardsController::class, 'update'])->name('flashcard.update');
     Route::delete('/deck/deleteFlashcard/{flashcard}', [FlashcardsController::class, 'destroy'])->name('flashcard.destroy');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/group/{group}', [GroupsController::class, 'show'])->name('group.show');
+    Route::get('/createGroup', [GroupsController::class, 'create'])->name('group.create');
+    Route::post('/createGroup', [GroupsController::class, 'store'])->name('group.store');
 });
 
 Route::middleware('auth')->group(function () {

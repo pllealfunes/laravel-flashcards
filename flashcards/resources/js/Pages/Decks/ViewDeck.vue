@@ -49,26 +49,25 @@ const shuffleCards = () => {
     while (isSameDeck(originalDeck, shuffledDeck)) {
         shuffledDeck = shuffleDeck([...originalDeck]);
     }
-
-    flashcards = shuffledDeck; // Update the deck with the shuffled cards
+    return shuffledDeck;
 };
 
 // Function to check if two decks are the same
-const isSameDeck = (deck1, deck2) => {
-    if (deck1.length !== deck2.length) return false;
-    for (let i = 0; i < deck1.length; i++) {
-        if (deck1[i] !== deck2[i]) return false;
+const isSameDeck = (card1, card2) => {
+    if (card1.length !== card2.length) return false;
+    for (let i = 0; i < card1.length; i++) {
+        if (card1[i] !== card2[i]) return false;
     }
     return true;
 };
 
 // Function to shuffle a deck
-const shuffleDeck = (deck) => {
-    for (let i = deck.length - 1; i > 0; i--) {
+const shuffleDeck = (card) => {
+    for (let i = card.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [deck[i], deck[j]] = [deck[j], deck[i]];
+        [card[i], card[j]] = [card[j], card[i]];
     }
-    return deck;
+    return card;
 };
 
 // Function to paginate the deck
@@ -212,7 +211,7 @@ const totalPages = computed(() => Math.ceil(flashcards.length / pageSize));
                         class="absolute flip-card backface-hidden w-full h-full dark:bg-sky-950 dark:border-sky-950 rounded-lg"
                     >
                         <div
-                            class="text-center text-xl flex flex-col items-center justify-center h-full p-10"
+                            class="text-center text-xl flex flex-col items-center justify-center h-full"
                         >
                             <p>
                                 {{ card.answer }}

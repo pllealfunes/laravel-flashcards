@@ -95,9 +95,7 @@ const submit = async () => {
             >
                 <!-- deck title -->
                 <div class="rounded-lg border-sky-950 p-5 bg-sky-950 mb-5">
-                    <label
-                        for="title"
-                        class="block mb-2 uppercase font-bold text-xs text-slate-50"
+                    <label for="title" class="block mb-2 bold text-slate-50"
                         >Deck Title :</label
                     >
                     <input

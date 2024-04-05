@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Deck extends Model
@@ -31,8 +30,8 @@ class Deck extends Model
         return $this->hasMany(Flashcard::class);
     }
 
-    public function groups(): HasMany
+    public function groups(): BelongsTo
     {
-        return $this->hasMany(Deck::class, 'deck_id', 'deck_id');
+        return $this->belongsTo(Group::class);
     }
 }

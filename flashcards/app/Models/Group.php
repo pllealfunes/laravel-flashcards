@@ -4,18 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Group extends Model
 {
     use HasFactory;
-    protected $primaryKey = 'group_id';
-    protected $fillable = ['title'];
+ 
+    protected $fillable = ['title','user_id'];
 
-    public function decks(): BelongsToMany
+    public function decks(): HasMany
     {
-        return $this->belongsToMany(Deck::class, 'group_decks', 'group_id', 'deck_id')
-                    ->withTimestamps();
+        return $this->hasMany(Deck::class);
     }
 
 }

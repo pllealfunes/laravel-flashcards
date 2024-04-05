@@ -2,8 +2,19 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Link } from "@inertiajs/vue3";
+import { computed } from "vue";
 
-const { deck } = defineProps(["deck"]);
+const { item } = defineProps(["item"]);
+const itemRoute = computed(() => {
+    if (item.type === "deck") {
+        return route("deck.show", { deck: item.id });
+    } else if (item.type === "group") {
+        return route("group.show", { group: item.id });
+    } else {
+        return "#"; // Default to a hash if the item type is unknown
+    }
+});
+
 dayjs.extend(relativeTime);
 </script>
 
@@ -13,20 +24,20 @@ dayjs.extend(relativeTime);
     >
         <div class="flex flex-row justify-between">
             <span class="dark:text-white"
-                >Created: {{ dayjs(deck.created_at).fromNow() }}</span
+                >Created: {{ dayjs(item.created_at).fromNow() }}</span
             >
         </div>
 
         <Link
-            :href="route('deck.show', { deck: deck.id })"
+            :href="itemRoute"
             as="button"
             class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-            >{{ deck.title }}</Link
+            >{{ item.title }}</Link
         >
         <span
             class="text-right text-gray-900 dark:text-slate-200"
-            v-if="deck.lastviewed !== null"
-            >Last Viewed: {{ dayjs(deck.lastviewed).fromNow() }}</span
+            v-if="item.lastviewed !== null"
+            >Last Viewed: {{ dayjs(item.lastviewed).fromNow() }}</span
         >
         <span class="text-right dark:text-white" v-else>Not Viewed</span>
     </div>

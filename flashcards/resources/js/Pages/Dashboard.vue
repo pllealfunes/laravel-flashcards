@@ -1,10 +1,19 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head } from "@inertiajs/vue3";
-import Deck from "@/Pages/Decks/Index.vue";
+import { Head, router } from "@inertiajs/vue3";
+import { ref, onMounted } from "vue";
+import Index from "@/Pages/Decks/Index.vue";
 import SuccessToast from "@/Components/SuccessToast.vue";
 
-defineProps(["decks"]);
+const { decks, groups } = defineProps(["decks", "groups"]);
+const items = ref([]);
+
+onMounted(async () => {
+    items.value = [
+        ...decks.map((deck) => ({ ...deck, type: "deck" })),
+        ...groups.map((group) => ({ ...group, type: "group" })),
+    ];
+});
 </script>
 
 <template>
@@ -31,7 +40,7 @@ defineProps(["decks"]);
         <div
             class="mt-6 flex flex-row flex-wrap justify-center items-center gap-4"
         >
-            <Deck v-for="deck in decks" :key="deck.id" :deck="deck" />
+            <Index v-for="item in items" :key="item.id" :item="item" />
         </div>
     </AuthenticatedLayout>
 </template>

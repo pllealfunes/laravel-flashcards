@@ -17,12 +17,11 @@ class DeckController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index()
     {
-        $decks = Deck::orderByDesc('created_at')->get();
-        // Debugging output
-        dd($decks); // Check the order and timestamps of fetched decks
-        return Inertia::render('Decks/Index', ['decks' => $decks]);
+        // $decks = Deck::orderBy('created_at', 'DESC')->get();
+        
+        // return Inertia::render('Dashboard', ['decks' => $decks]);
     }
 
     /**
@@ -30,7 +29,7 @@ class DeckController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Decks/CreateDeck', []);
+        return Inertia::render('Decks/CreateDeck');
     }
 
     /**
@@ -41,10 +40,10 @@ class DeckController extends Controller
         
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
-                'flashcards' => 'required|array|size:2',
+                'flashcards' => 'required|array|min:2',
                 'flashcards.*.question' => 'required|string|max:255',
                 'flashcards.*.answer' => 'required|string|max:255',
-                'flashcards.*.hint' => 'required|string|max:255',
+                'flashcards.*.hint' => 'nullable|string|max:255',
                 'flashcards.*.difficulty' => 'required|in:easy,medium,hard',
                 'flashcards.*.points' => 'required|in:1,3,5',
             ], [
