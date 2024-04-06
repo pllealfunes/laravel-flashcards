@@ -97,6 +97,7 @@ const totalPages = computed(() =>
 </script>
 
 <template>
+    <Head :title="deck.title" />
     <AuthenticatedLayout>
         <template #header>
             <div class="flex flex-row justify-between items-center">

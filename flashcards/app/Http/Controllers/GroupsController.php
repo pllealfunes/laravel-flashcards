@@ -92,6 +92,35 @@ class GroupsController extends Controller
         //
     }
 
+         /**
+     * Update Deck Title
+     */
+    public function updateTitle(Request $request, Group $group)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+        ]);
+    
+        try {
+            if ($group->user_id === $request->user()->id) {
+                $group->title = $validated['title']; // Access 'title' from the validated array
+                $group->save();
+            } else {
+                // Handle unauthorized deletion attempts with a 403 status code
+                abort(403, 'Unauthorized');
+            }
+         
+            return back()->with('success', 'Deck title updated successfully.');
+        } catch (ModelNotFoundException $e) {
+            // Handle the case where the deck is not found with a 404 status code
+            abort(404, 'Deck not found');
+        } catch (\Exception $e) {
+            // Handle other potential exceptions with a generic error message
+            return back()->with('error', 'An error occurred while  updating the title.');
+        }
+    }
+
+
     /**
      * Update the specified resource in storage.
      */

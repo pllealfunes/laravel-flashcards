@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { router, useForm, usePage } from "@inertiajs/vue3";
+import { router, useForm, usePage, Head } from "@inertiajs/vue3";
 import SuccessToast from "@/Components/SuccessToast.vue";
 import ErrorToast from "@/Components/ErrorToast.vue";
 import CreateCardModal from "@/Components/CreateCardModal.vue";
@@ -148,6 +148,9 @@ const deleteCard = async () => {
 };
 </script>
 <template>
+    <Head>
+        <title>Update {{ deck.title }}</title>
+    </Head>
     <AuthenticatedLayout>
         <template #header>
             <div class="flex flex-row flex-wrap justify-between">

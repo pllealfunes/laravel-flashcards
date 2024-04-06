@@ -134,7 +134,7 @@ class DeckController extends Controller
             abort(404, 'Deck not found');
         } catch (\Exception $e) {
             // Handle other potential exceptions with a generic error message
-            return back()->with('error', 'An error occurred while  updating the titl.');
+            return back()->with('error', 'An error occurred while  updating the title.');
         }
     }
 

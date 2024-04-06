@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/group/{group}', [GroupsController::class, 'show'])->name('group.show');
     Route::get('/createGroup', [GroupsController::class, 'create'])->name('group.create');
     Route::post('/createGroup', [GroupsController::class, 'store'])->name('group.store');
+    Route::patch('/group/updateTitle/{group}', [GroupsController::class, 'updateTitle'])->name('group.updateTitle');
 });
 
 Route::middleware('auth')->group(function () {
