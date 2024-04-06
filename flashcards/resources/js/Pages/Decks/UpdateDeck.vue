@@ -106,7 +106,6 @@ const deleteDeck = async () => {
         await router.delete(route("deck.destroy", { deck: deck.id }));
     } catch (error) {
         page.props.flash.error = `Unable to delete deck. Error: ${error}`;
-        deleteToast.value = false;
     }
 };
 
@@ -308,6 +307,7 @@ const deleteCard = async () => {
             </div>
         </template>
 
+        <!--Delete Deck Modal-->
         <DeleteModal
             :show="deleteDeckModal"
             @close="showDeleteDeck"

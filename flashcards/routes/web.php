@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/createGroup', [GroupsController::class, 'create'])->name('group.create');
     Route::post('/createGroup', [GroupsController::class, 'store'])->name('group.store');
     Route::patch('/group/updateTitle/{group}', [GroupsController::class, 'updateTitle'])->name('group.updateTitle');
+    Route::patch('/group/removeDeck/{group}', [GroupsController::class, 'removeDeck'])->name('group.removeDeck');
 });
 
 Route::middleware('auth')->group(function () {

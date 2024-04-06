@@ -120,6 +120,37 @@ class GroupsController extends Controller
         }
     }
 
+     /**
+     * Show the form for editing the specified resource.
+     */
+    
+     public function removeDeck(Request $request, Group $group)
+{
+    try {
+        // Ensure that the deck belongs to the authenticated user
+        if ($group->user_id === $request->user()->id) {
+            // Get all decks belonging to the group
+            $decks = Deck::where('group_id', $group->id)->get();
+
+            // Update the group_id to NULL for each deck
+            foreach ($decks as $deck) {
+                $deck->group_id = null;
+                $deck->save();
+            }
+
+            return back()->with('success', 'Successfully Removed Card.');
+        } else {
+            // Handle unauthorized deletion attempts with a 403 status code
+            abort(403, 'Unauthorized');
+        }
+    } catch (ModelNotFoundException $e) {
+        // Handle the case where the deck is not found with a 404 status code
+        abort(404, 'Deck not found');
+    } catch (\Exception $e) {
+        // Handle other potential exceptions with a generic error message
+        return back()->with('error', 'An error occurred while removing the deck.');
+    }
+}
 
     /**
      * Update the specified resource in storage.
