@@ -9,8 +9,12 @@ const { decks, groups } = defineProps(["decks", "groups"]);
 const items = ref([]);
 
 onMounted(async () => {
+    let currentDecks = decks.filter(
+        (deck) => !groups.some((group) => group.id === deck.group_id)
+    );
+
     items.value = [
-        ...decks.map((deck) => ({ ...deck, type: "deck" })),
+        ...currentDecks.map((deck) => ({ ...deck, type: "deck" })),
         ...groups.map((group) => ({ ...group, type: "group" })),
     ];
 });
