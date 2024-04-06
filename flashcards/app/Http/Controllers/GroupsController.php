@@ -31,13 +31,15 @@ class GroupsController extends Controller
     public function create()
     {
        
-// Get the currently logged-in user
-$user = Auth::user();
+        // Get the currently logged-in user
+           $user = Auth::user();
 
-// Fetch all decks belonging to the current user
-$decks = Deck::where('user_id', $user->id)->get();
+        // Fetch all decks belonging to the current user with NULL group_id
+            $decks = Deck::where('user_id', $user->id)
+            ->whereNull('group_id')
+            ->get();
 
-        return Inertia::render('Groups/CreateGroup', ['decks' => $decks]);
+            return Inertia::render('Groups/CreateGroup', ['decks' => $decks]);
     }
 
     /**
