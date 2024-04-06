@@ -118,40 +118,46 @@ const submit = async () => {
                 </div>
 
                 <!-- add decks -->
-                <div class="flex flex-wrap justify-center items-center">
+
+                <div class="w-full">
                     <div
-                        class="relative overflow-x-auto shadow-md sm:rounded-lg"
+                        class="relative overflow-x-auto shadow-md rounded-lg mb-10"
                     >
                         <table
-                            class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-black"
+                            class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 p-10"
                         >
                             <thead
-                                class="text-xs text-gray-700 uppercase dark:text-gray-400"
+                                class="text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 p-10"
                             >
                                 <tr>
                                     <th
                                         scope="col"
-                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                        class="px-6 py-3 bg-gray-800 text-slate-50"
                                     >
                                         Deck Title
                                     </th>
                                     <th
                                         scope="col"
-                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
-                                    ></th>
+                                        class="px-6 py-3 bg-gray-800 text-slate-50 text-right"
+                                    >
+                                        Available Decks
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr
                                     v-for="deck in decks"
                                     :key="deck.id"
-                                    class="border-b border-gray-200 dark:border-gray-700"
+                                    class="border-b border-gray-200 dark:border-gray-700 text-black"
                                 >
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 text-black">
                                         {{ deck.title }}
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <label for="checkbox" class="ml-6">
+                                    <td class="px-6 py-4 text-black text-right">
+                                        <label
+                                            for="checkbox"
+                                            class="text-black"
+                                        >
                                             <input
                                                 type="checkbox"
                                                 :id="'checkbox-' + deck.id"
@@ -164,59 +170,90 @@ const submit = async () => {
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
-                </div>
 
-                <!-- Pagination -->
-                <div class="flex justify-evenly w-full mt-5">
-                    <!-- Previous page button -->
-                    <button
-                        @click="onPageChange(currentPage - 1)"
-                        :disabled="currentPage === 1"
-                        class="bg-gray-800 font-bold mt-3 mr-2 py-2 px-4 rounded-lg"
-                        :class="{
-                            'bg-gray-800 text-white': currentPage !== 1,
-                            'bg-gray-200 text-white cursor-not-allowed text-gray-800':
-                                currentPage === 1,
-                        }"
-                    >
-                        Previous
-                    </button>
-
-                    <!-- Page buttons -->
-                    <div class="flex">
-                        <button
-                            v-for="page in Math.min(totalPages, 10)"
-                            :key="page"
-                            @click="onPageChange(page)"
-                            class="text-white bg-gray-800 font-bold mt-3 mr-2 py-2 px-4 rounded-lg"
-                            :class="{ 'bg-yellow-800': currentPage === page }"
+                        <nav
+                            class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4"
+                            aria-label="Table navigation"
                         >
-                            {{ page }}
-                        </button>
-                    </div>
+                            <span
+                                class="text-sm font-normal mb-4 md:mb-0 block w-full md:inline md:w-auto"
+                            >
+                                Showing
+                                <span class="font-semibold">{{
+                                    (currentPage - 1) * pageSize + 1
+                                }}</span>
+                                -
+                                <span class="font-semibold">{{
+                                    Math.min(
+                                        currentPage * pageSize,
+                                        decks.length
+                                    )
+                                }}</span>
+                                of
+                                <span class="font-semibold">{{
+                                    decks.length
+                                }}</span>
+                            </span>
+                            <!-- Previous page button -->
+                            <button
+                                @click="onPageChange(currentPage - 1)"
+                                :disabled="currentPage === 1"
+                                :class="{
+                                    'text-black cursor-pointer':
+                                        currentPage !== 1,
+                                    'cursor-not-allowed text-black':
+                                        currentPage === 1,
+                                }"
+                            >
+                                &laquo; Previous
+                            </button>
 
-                    <!-- Next page button -->
-                    <button
-                        @click="onPageChange(currentPage + 1)"
-                        :disabled="currentPage === totalPages"
-                        class="text-white bg-gray-800 font-bold mt-3 mr-2 py-2 px-7 rounded-lg"
-                        :class="{
-                            'bg-gray-800': currentPage !== totalPages,
-                            'bg-gray-300 text-black cursor-not-allowed':
-                                currentPage === totalPages,
-                        }"
-                    >
-                        Next
-                    </button>
+                            <!-- Page buttons -->
+                            <ul
+                                class="inline-flex -space-x-px rtl:space-x-reverse"
+                            >
+                                <li
+                                    v-for="page in Math.min(
+                                        totalPages,
+                                        pageSize
+                                    )"
+                                    :key="page"
+                                >
+                                    <a
+                                        @click="onPageChange(page)"
+                                        class="text-white bg-gray-800 font-bold mt-3 mr-2 py-1 px-2 rounded-lg"
+                                        :class="{
+                                            'bg-yellow-800':
+                                                currentPage === page,
+                                        }"
+                                        >{{ page }}</a
+                                    >
+                                </li>
+                            </ul>
+
+                            <!-- Next page button -->
+                            <button
+                                @click="onPageChange(currentPage + 1)"
+                                :disabled="currentPage === totalPages"
+                                :class="{
+                                    'text-black cursor-pointer':
+                                        currentPage !== totalPages,
+                                    'text-black cursor-not-allowed':
+                                        currentPage === totalPages,
+                                }"
+                            >
+                                Next &raquo;
+                            </button>
+                        </nav>
+                    </div>
                 </div>
 
                 <!-- submit -->
-                <div>
+                <div class="flex justify-center items-center">
                     <button
                         type="submit"
                         :disabled="form.processing"
-                        class="block mt-5 font-bold uppercase focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                        class="w-full block mt-5 font-bold uppercase focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                     >
                         Submit
                     </button>
