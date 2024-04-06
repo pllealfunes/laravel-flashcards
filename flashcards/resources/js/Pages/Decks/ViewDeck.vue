@@ -267,143 +267,142 @@ const totalPages = computed(() =>
         </div>
 
         <!-- flashcardsList section -->
-        <section id="flashcardsList" class="mt-[20px] p-[10%]">
+        <section id="flashcardsList" class="mt-[160px] p-5">
             <h3 class="text-3xl font-bold text-slate-600 text-center mb-11">
                 Flashcards in this Deck
             </h3>
             <div class="flex flex-wrap justify-center items-center">
-                <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                    <div
-                        class="relative overflow-x-auto shadow-md sm:rounded-lg"
+                <div
+                    class="relative overflow-x-auto shadow-md rounded-lg mb-10"
+                >
+                    <table
+                        class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 p-10"
                     >
-                        <table
-                            class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 p-10"
+                        <thead
+                            class="text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 p-10"
                         >
-                            <thead
-                                class="text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 p-10"
-                            >
-                                <tr>
-                                    <th
-                                        scope="col"
-                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
-                                    >
-                                        Question
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
-                                    >
-                                        Answer
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
-                                    >
-                                        Hint
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
-                                    >
-                                        Level
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        class="px-6 py-3 bg-gray-800 text-slate-50"
-                                    >
-                                        Points
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr
-                                    v-for="flashcard in paginatedCards"
-                                    :key="flashcard.id"
-                                    class="border-b border-gray-200 dark:border-gray-700 text-black"
+                            <tr>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
                                 >
-                                    <td class="px-6 py-4">
-                                        {{ flashcard.question }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{ flashcard.answer }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{ flashcard.hint }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{ flashcard.difficulty }}
-                                    </td>
-                                    <td class="px-11">
-                                        {{ flashcard.points }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    Question
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                >
+                                    Answer
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                >
+                                    Hint
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                >
+                                    Level
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 bg-gray-800 text-slate-50"
+                                >
+                                    Points
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="flashcard in paginatedCards"
+                                :key="flashcard.id"
+                                class="border-b border-gray-200 dark:border-gray-700 text-black"
+                            >
+                                <td class="px-6 py-4">
+                                    {{ flashcard.question }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ flashcard.answer }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ flashcard.hint }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ flashcard.difficulty }}
+                                </td>
+                                <td class="px-11">
+                                    {{ flashcard.points }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                        <nav
-                            class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4"
-                            aria-label="Table navigation"
+                    <nav
+                        class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4"
+                        aria-label="Table navigation"
+                    >
+                        <span
+                            class="text-sm font-normal mb-4 md:mb-0 block w-full md:inline md:w-auto"
                         >
-                            <span
-                                class="text-sm font-normal mb-4 md:mb-0 block w-full md:inline md:w-auto"
-                            >
-                                Showing
-                                <span class="font-semibold">{{
-                                    (currentPage - 1) * pageSize + 1
-                                }}</span>
-                                -
-                                <span class="font-semibold">{{
-                                    Math.min(currentPage * pageSize, totalPages)
-                                }}</span>
-                                of
-                                <span class="font-semibold">{{
-                                    currentCards.length
-                                }}</span>
-                            </span>
-                            <!-- Previous page button -->
-                            <button
-                                @click="onPageChange(currentPage - 1)"
-                                :class="{ disabled: currentPage === 1 }"
-                                class="cursor-pointer"
-                            >
-                                &laquo; Previous
-                            </button>
+                            Showing
+                            <span class="font-semibold">{{
+                                (currentPage - 1) * pageSize + 1
+                            }}</span>
+                            -
+                            <span class="font-semibold">{{
+                                Math.min(currentPage * pageSize, totalPages)
+                            }}</span>
+                            of
+                            <span class="font-semibold">{{
+                                currentCards.length
+                            }}</span>
+                        </span>
+                        <!-- Previous page button -->
+                        <button
+                            @click="onPageChange(currentPage - 1)"
+                            :disabled="currentPage === 1"
+                            :class="{
+                                'text-black cursor-pointer': currentPage !== 1,
+                                'cursor-not-allowed text-black':
+                                    currentPage === 1,
+                            }"
+                        >
+                            &laquo; Previous
+                        </button>
 
-                            <!-- Page buttons -->
-                            <ul
-                                class="inline-flex -space-x-px rtl:space-x-reverse"
+                        <!-- Page buttons -->
+                        <ul class="inline-flex -space-x-px rtl:space-x-reverse">
+                            <li
+                                v-for="page in Math.min(totalPages, pageSize)"
+                                :key="page"
                             >
-                                <li
-                                    v-for="page in Math.min(
-                                        totalPages,
-                                        pageSize
-                                    )"
-                                    :key="page"
+                                <a
+                                    @click="onPageChange(page)"
+                                    class="text-white bg-gray-800 font-bold mt-3 mr-2 py-1 px-2 rounded-lg"
+                                    :class="{
+                                        'bg-yellow-800': currentPage === page,
+                                    }"
+                                    >{{ page }}</a
                                 >
-                                    <a
-                                        @click="onPageChange(page)"
-                                        class="text-white bg-gray-800 font-bold mt-3 mr-2 py-1 px-2 rounded-lg"
-                                        :class="{
-                                            'bg-yellow-800':
-                                                currentPage === page,
-                                        }"
-                                        >{{ page }}</a
-                                    >
-                                </li>
-                            </ul>
+                            </li>
+                        </ul>
 
-                            <!-- Next page button -->
-                            <button
-                                @click="onPageChange(currentPage + 1)"
-                                :class="{
-                                    disabled: currentPage === totalPages,
-                                }"
-                                class="cursor-pointer"
-                            >
-                                Next &raquo;
-                            </button>
-                        </nav>
-                    </div>
+                        <!-- Next page button -->
+                        <button
+                            @click="onPageChange(currentPage + 1)"
+                            :disabled="currentPage === totalPages"
+                            :class="{
+                                'text-black cursor-pointer':
+                                    currentPage !== totalPages,
+                                'text-black cursor-not-allowed':
+                                    currentPage === totalPages,
+                            }"
+                        >
+                            Next &raquo;
+                        </button>
+                    </nav>
                 </div>
             </div>
         </section>

@@ -328,15 +328,18 @@ const deleteCard = async () => {
             v-if="$page.props.flash.error"
             :message="$page.props.flash.error"
         />
+
         <!-- flashcardsList section -->
-        <section id="flashcardsList" class="mt-10">
+        <section id="flashcardsList" class="mt-10 p-5 md:p-10">
             <div class="flex flex-wrap justify-center items-center">
-                <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                <div
+                    class="relative overflow-x-auto shadow-md rounded-lg mb-10"
+                >
                     <table
-                        class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-black"
+                        class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 p-10"
                     >
                         <thead
-                            class="text-xs text-gray-700 uppercase dark:text-gray-400"
+                            class="text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 p-10"
                         >
                             <tr>
                                 <th
@@ -381,7 +384,7 @@ const deleteCard = async () => {
                             <tr
                                 v-for="flashcard in paginatedCards"
                                 :key="flashcard.id"
-                                class="border-b border-gray-200 dark:border-gray-700"
+                                class="border-b border-gray-200 dark:border-gray-700 text-black"
                             >
                                 <td class="px-6 py-4">
                                     {{ flashcard.question }}
@@ -395,7 +398,7 @@ const deleteCard = async () => {
                                 <td class="px-6 py-4">
                                     {{ flashcard.difficulty }}
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-11">
                                     {{ flashcard.points }}
                                 </td>
                                 <td class="px-6 py-4">
@@ -448,208 +451,310 @@ const deleteCard = async () => {
                                         </button>
                                     </div>
                                 </td>
+                                <!-- Update Card Modal-->
+                                <div
+                                    v-if="updateCardModal"
+                                    class="fixed inset-0 z-50 overflow-y-auto"
+                                >
+                                    <div
+                                        class="flex items-center justify-center min-h-screen"
+                                    >
+                                        <!-- Modal content -->
+                                        <div
+                                            class="relative bg-white rounded-lg shadow-lg w-full max-w-md"
+                                        >
+                                            <!-- Modal header -->
+                                            <div
+                                                class="flex justify-between items-center p-4 border-b"
+                                            >
+                                                <h3
+                                                    class="text-lg font-semibold text-gray-900"
+                                                >
+                                                    Edit Card :
+                                                </h3>
+                                                <button
+                                                    @click.stop="
+                                                        showUpdateCard(
+                                                            flashcard
+                                                        )
+                                                    "
+                                                    type="button"
+                                                    class="text-gray-400 hover:text-gray-900"
+                                                >
+                                                    <svg
+                                                        class="w-5 h-5"
+                                                        aria-hidden="true"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 20 20"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                            fill-rule="evenodd"
+                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                            clip-rule="evenodd"
+                                                        ></path>
+                                                    </svg>
+                                                    <span class="sr-only"
+                                                        >Close modal</span
+                                                    >
+                                                </button>
+                                            </div>
+                                            <!-- Modal body -->
+                                            <form
+                                                class="p-4"
+                                                @submit.prevent="
+                                                    updateCard(currentCard)
+                                                "
+                                            >
+                                                <div
+                                                    class="grid gap-4 mb-4 grid-cols-2"
+                                                >
+                                                    <div class="col-span-2">
+                                                        <label
+                                                            for="question"
+                                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                            >* Question :
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            class="mb-2 w-full text-black"
+                                                            v-model="
+                                                                updateForm.question
+                                                            "
+                                                        />
+                                                        <p
+                                                            v-if="
+                                                                updateForm
+                                                                    .errors
+                                                                    .question
+                                                            "
+                                                            class="text-red-500 mb-2"
+                                                        >
+                                                            {{
+                                                                updateForm
+                                                                    .errors
+                                                                    .question
+                                                            }}
+                                                        </p>
+                                                        <label
+                                                            for="points"
+                                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                            >* Answer :
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            class="mb-2 w-full text-black"
+                                                            v-model="
+                                                                updateForm.answer
+                                                            "
+                                                        />
+                                                        <p
+                                                            v-if="
+                                                                updateForm
+                                                                    .errors
+                                                                    .answer
+                                                            "
+                                                            class="text-red-500 mb-2"
+                                                        >
+                                                            {{
+                                                                updateForm
+                                                                    .errors
+                                                                    .answer
+                                                            }}
+                                                        </p>
+                                                        <label
+                                                            for="hint"
+                                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                            >Hint :</label
+                                                        >
+                                                        <input
+                                                            type="text"
+                                                            class="mb-2 w-full text-black"
+                                                            v-model="
+                                                                updateForm.hint
+                                                            "
+                                                        />
+                                                        <p
+                                                            v-if="
+                                                                updateForm
+                                                                    .errors.hint
+                                                            "
+                                                            class="text-red-500 mb-2"
+                                                        >
+                                                            {{
+                                                                updateForm
+                                                                    .errors.hint
+                                                            }}
+                                                        </p>
+                                                        <label
+                                                            for="difficulty"
+                                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                            >Difficulty level
+                                                            :</label
+                                                        >
+                                                        <select
+                                                            v-model="
+                                                                updateForm.difficulty
+                                                            "
+                                                            name="difficulty"
+                                                            class="mb-2 text-black"
+                                                        >
+                                                            <option
+                                                                disabled
+                                                                value=""
+                                                            >
+                                                                Please select
+                                                                one
+                                                            </option>
+                                                            <option>
+                                                                easy
+                                                            </option>
+                                                            <option>
+                                                                medium
+                                                            </option>
+                                                            <option>
+                                                                hard
+                                                            </option>
+                                                        </select>
+                                                        <p
+                                                            v-if="
+                                                                updateForm
+                                                                    .errors
+                                                                    .difficulty
+                                                            "
+                                                            class="text-red-500 mb-2"
+                                                        >
+                                                            {{
+                                                                updateForm
+                                                                    .errors
+                                                                    .difficulty
+                                                            }}
+                                                        </p>
+                                                        <label
+                                                            for="points"
+                                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                            >Points :</label
+                                                        >
+                                                        <select
+                                                            v-model="
+                                                                updateForm.points
+                                                            "
+                                                            name="difficultylevel"
+                                                            class="text-black"
+                                                        >
+                                                            <option
+                                                                disabled
+                                                                value=""
+                                                            >
+                                                                Please select
+                                                                one
+                                                            </option>
+                                                            <option>1</option>
+                                                            <option>3</option>
+                                                            <option>5</option>
+                                                        </select>
+                                                        <p
+                                                            v-if="
+                                                                updateForm
+                                                                    .errors
+                                                                    .points
+                                                            "
+                                                            class="text-red-500 mb-2"
+                                                        >
+                                                            {{
+                                                                updateForm
+                                                                    .errors
+                                                                    .points
+                                                            }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="submit"
+                                                    :disabled="
+                                                        updateForm.processing
+                                                    "
+                                                    class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                                >
+                                                    Submit
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </tr>
                         </tbody>
                     </table>
-                </div>
 
-                <!-- Update Card Modal-->
-                <div
-                    v-if="updateCardModal"
-                    class="fixed inset-0 z-50 overflow-y-auto"
-                >
-                    <div class="flex items-center justify-center min-h-screen">
-                        <!-- Modal content -->
-                        <div
-                            class="relative bg-white rounded-lg shadow-lg w-full max-w-md"
+                    <nav
+                        class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4"
+                        aria-label="Table navigation"
+                    >
+                        <span
+                            class="text-sm font-normal mb-4 md:mb-0 block w-full md:inline md:w-auto"
                         >
-                            <!-- Modal header -->
-                            <div
-                                class="flex justify-between items-center p-4 border-b"
+                            Showing
+                            <span class="font-semibold">{{
+                                (currentPage - 1) * pageSize + 1
+                            }}</span>
+                            -
+                            <span class="font-semibold">{{
+                                Math.min(
+                                    currentPage * pageSize,
+                                    flashcards.length
+                                )
+                            }}</span>
+                            of
+                            <span class="font-semibold">{{
+                                flashcards.length
+                            }}</span>
+                        </span>
+                        <!-- Previous page button -->
+                        <button
+                            @click="onPageChange(currentPage - 1)"
+                            :disabled="currentPage === 1"
+                            :class="{
+                                'text-black cursor-pointer': currentPage !== 1,
+                                'cursor-not-allowed text-black':
+                                    currentPage === 1,
+                            }"
+                        >
+                            &laquo; Previous
+                        </button>
+
+                        <!-- Page buttons -->
+                        <ul class="inline-flex -space-x-px rtl:space-x-reverse">
+                            <li
+                                v-for="page in Math.min(totalPages, pageSize)"
+                                :key="page"
                             >
-                                <h3 class="text-lg font-semibold text-gray-900">
-                                    Edit Card :
-                                </h3>
-                                <button
-                                    @click="showUpdateCard(flashcard)"
-                                    type="button"
-                                    class="text-gray-400 hover:text-gray-900"
+                                <a
+                                    @click="onPageChange(page)"
+                                    class="text-white bg-gray-800 font-bold mt-3 mr-2 py-1 px-2 rounded-lg"
+                                    :class="{
+                                        'bg-yellow-800': currentPage === page,
+                                    }"
+                                    >{{ page }}</a
                                 >
-                                    <svg
-                                        class="w-5 h-5"
-                                        aria-hidden="true"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            fill-rule="evenodd"
-                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                            clip-rule="evenodd"
-                                        ></path>
-                                    </svg>
-                                    <span class="sr-only">Close modal</span>
-                                </button>
-                            </div>
-                            <!-- Modal body -->
-                            <form
-                                class="p-4"
-                                @submit.prevent="updateCard(currentCard)"
-                            >
-                                <div class="grid gap-4 mb-4 grid-cols-2">
-                                    <div class="col-span-2">
-                                        <label
-                                            for="question"
-                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                            >* Question :
-                                        </label>
-                                        <input
-                                            type="text"
-                                            class="mb-2 w-full text-black"
-                                            v-model="updateForm.question"
-                                        />
-                                        <p
-                                            v-if="updateForm.errors.question"
-                                            class="text-red-500 mb-2"
-                                        >
-                                            {{ updateForm.errors.question }}
-                                        </p>
-                                        <label
-                                            for="points"
-                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                            >* Answer :
-                                        </label>
-                                        <input
-                                            type="text"
-                                            class="mb-2 w-full text-black"
-                                            v-model="updateForm.answer"
-                                        />
-                                        <p
-                                            v-if="updateForm.errors.answer"
-                                            class="text-red-500 mb-2"
-                                        >
-                                            {{ updateForm.errors.answer }}
-                                        </p>
-                                        <label
-                                            for="hint"
-                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                            >Hint :</label
-                                        >
-                                        <input
-                                            type="text"
-                                            class="mb-2 w-full text-black"
-                                            v-model="updateForm.hint"
-                                        />
-                                        <p
-                                            v-if="updateForm.errors.hint"
-                                            class="text-red-500 mb-2"
-                                        >
-                                            {{ updateForm.errors.hint }}
-                                        </p>
-                                        <label
-                                            for="difficulty"
-                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                            >Difficulty level :</label
-                                        >
-                                        <select
-                                            v-model="updateForm.difficulty"
-                                            name="difficulty"
-                                            class="mb-2 text-black"
-                                        >
-                                            <option disabled value="">
-                                                Please select one
-                                            </option>
-                                            <option>easy</option>
-                                            <option>medium</option>
-                                            <option>hard</option>
-                                        </select>
-                                        <p
-                                            v-if="updateForm.errors.difficulty"
-                                            class="text-red-500 mb-2"
-                                        >
-                                            {{ updateForm.errors.difficulty }}
-                                        </p>
-                                        <label
-                                            for="points"
-                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                            >Points :</label
-                                        >
-                                        <select
-                                            v-model="updateForm.points"
-                                            name="difficultylevel"
-                                            class="text-black"
-                                        >
-                                            <option disabled value="">
-                                                Please select one
-                                            </option>
-                                            <option>1</option>
-                                            <option>3</option>
-                                            <option>5</option>
-                                        </select>
-                                        <p
-                                            v-if="updateForm.errors.points"
-                                            class="text-red-500 mb-2"
-                                        >
-                                            {{ updateForm.errors.points }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <button
-                                    type="submit"
-                                    :disabled="updateForm.processing"
-                                    class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                                >
-                                    Submit
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+                            </li>
+                        </ul>
+
+                        <!-- Next page button -->
+                        <button
+                            @click="onPageChange(currentPage + 1)"
+                            :disabled="currentPage === totalPages"
+                            :class="{
+                                'text-black cursor-pointer':
+                                    currentPage !== totalPages,
+                                'text-black cursor-not-allowed':
+                                    currentPage === totalPages,
+                            }"
+                        >
+                            Next &raquo;
+                        </button>
+                    </nav>
                 </div>
             </div>
         </section>
-
-        <!-- Pagination -->
-        <div class="flex justify-evenly w-full mt-10">
-            <!-- Previous page button -->
-            <button
-                @click="onPageChange(currentPage - 1)"
-                :disabled="currentPage === 1"
-                class="bg-gray-800 font-bold mt-3 mr-2 py-2 px-4 rounded-lg"
-                :class="{
-                    'bg-gray-800 text-white': currentPage !== 1,
-                    'bg-gray-200 text-white cursor-not-allowed text-gray-800':
-                        currentPage === 1,
-                }"
-            >
-                Previous
-            </button>
-
-            <!-- Page buttons -->
-            <div class="flex">
-                <button
-                    v-for="page in Math.min(totalPages, 10)"
-                    :key="page"
-                    @click="onPageChange(page)"
-                    class="text-white bg-gray-800 font-bold mt-3 mr-2 py-2 px-4 rounded-lg"
-                    :class="{ 'bg-yellow-800': currentPage === page }"
-                >
-                    {{ page }}
-                </button>
-            </div>
-
-            <!-- Next page button -->
-            <button
-                @click.stop="onPageChange(currentPage + 1)"
-                :disabled="currentPage === totalPages"
-                class="text-white bg-gray-800 font-bold mt-3 mr-2 py-2 px-7 rounded-lg"
-                :class="{
-                    'bg-gray-800': currentPage !== totalPages,
-                    'bg-gray-300 text-black cursor-not-allowed':
-                        currentPage === totalPages,
-                }"
-            >
-                Next
-            </button>
-        </div>
     </AuthenticatedLayout>
 </template>
