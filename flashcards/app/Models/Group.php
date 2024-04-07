@@ -17,4 +17,9 @@ class Group extends Model
         return $this->hasMany(Deck::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
 }

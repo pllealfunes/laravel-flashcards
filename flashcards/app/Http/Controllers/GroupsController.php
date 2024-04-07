@@ -76,9 +76,14 @@ class GroupsController extends Controller
      */
     public function show(Group $group)
     {
+         // Format Carbon instance to Laravel's default datetime format
+    $lastViewed = Carbon::now() -> toIso8601String();
+    $group->lastviewed = $lastViewed;
+    $group->save();
+
         $decks = Deck::where('group_id', $group->id)->get();
 
-        return inertia('Groups/ViewGroup', [
+        return Inertia('Groups/ViewGroup', [
             'group' => $group,
             'decks' => $decks,
         ]);
@@ -121,7 +126,7 @@ class GroupsController extends Controller
     }
 
      /**
-     * Show the form for editing the specified resource.
+     * Remove Deck from Group
      */
     
      public function removeDeck(Request $request, Group $group)
@@ -151,6 +156,72 @@ class GroupsController extends Controller
         return back()->with('error', 'An error occurred while removing the deck.');
     }
 }
+
+     /**
+     * Delete Group but Keep the Decks.
+     */
+    
+     public function keepDecks(Request $request, Group $group)
+{
+    try {
+        // Ensure that the deck belongs to the authenticated user
+        if ($group->user_id === $request->user()->id) {
+             // Ensure that the deck belongs             
+        // Get all decks belonging to the group
+        $decks = Deck::where('group_id', $group->id)->get();
+
+        // Update the group_id to NULL for each deck
+        foreach ($decks as $deck) {
+            $deck->group_id = null;
+            $deck->save();
+        }
+
+            // Delete the group
+            $group->delete();
+            $group->user()->dissociate();
+            // If the deletion was successful and authorized, redirect to dashboard
+            return redirect(route('dashboard'))->with('success', 'Successfully Deleted Group.');
+        } else {
+            // Handle unauthorized deletion attempts with a 403 status code
+            abort(403, 'Unauthorized');
+        }
+    } catch (ModelNotFoundException $e) {
+        // Handle the case where the deck is not found with a 404 status code
+        abort(404, 'Group not found');
+    } catch (\Exception $e) {
+        // Handle other potential exceptions with a generic error message
+        return back()->with('error', 'An error occurred while deleting the group.');
+    }
+}
+
+
+/**
+     * Delete Group and all Decks inside.
+     */
+    
+     public function destroy(Request $request, Group $group)
+{
+    try {
+        // Ensure that the deck belongs to the authenticated user
+        if ($group->user_id === $request->user()->id) {
+            // Delete the group
+            $group->delete();
+            $group->user()->dissociate();
+            // If the deletion was successful and authorized, redirect to dashboard
+            return redirect(route('dashboard'))->with('success', 'Successfully Deleted Group.');
+        } else {
+            // Handle unauthorized deletion attempts with a 403 status code
+            abort(403, 'Unauthorized');
+        }
+    } catch (ModelNotFoundException $e) {
+        // Handle the case where the deck is not found with a 404 status code
+        abort(404, 'Group not found');
+    } catch (\Exception $e) {
+        // Handle other potential exceptions with a generic error message
+        return back()->with('error', 'An error occurred while deleting the group.');
+    }
+}
+
 
     /**
      * Update the specified resource in storage.
