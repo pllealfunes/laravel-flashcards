@@ -15,18 +15,9 @@ use Illuminate\Support\Carbon;
 
 class GroupsController extends Controller
 {
+   
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        // $groups = Group::orderBy('created_at', 'DESC')->get();
-        
-        // return Inertia::render('Dashboard', ['groups' => $groups]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new group.
      */
     public function create()
     {
@@ -43,7 +34,7 @@ class GroupsController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created group in storage.
      */
     public function store(Request $request)
     {
@@ -72,7 +63,7 @@ class GroupsController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified group.
      */
     public function show(Group $group)
     {
@@ -81,24 +72,19 @@ class GroupsController extends Controller
     $group->lastviewed = $lastViewed;
     $group->save();
 
-        $decks = Deck::where('group_id', $group->id)->get();
+        $userDecks = Deck::where('group_id', $group->id)->get();
+        $availableDecks = Deck::where('group_id', null)->get();
 
         return Inertia('Groups/ViewGroup', [
             'group' => $group,
-            'decks' => $decks,
+            'userDecks' => $userDecks,
+            'availableDecks'=>$availableDecks,
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
          /**
-     * Update Deck Title
+     * Update Group Title
      */
     public function updateTitle(Request $request, Group $group)
     {
@@ -124,6 +110,41 @@ class GroupsController extends Controller
             return back()->with('error', 'An error occurred while  updating the title.');
         }
     }
+
+
+
+           /**
+     * Add new Decks to the Group
+     */
+    public function addDeck(Request $request, Group $group)
+    {
+        $validated = $request->validate([
+             'decks' => 'required|array', // Assuming 'decks' is an array of deck IDs
+        ]);
+    
+        try {
+            if ($group->user_id === $request->user()->id) {
+                
+                 foreach ($validated['decks'] as $deckId) {
+                
+                Deck::where('id', $deckId)->update(['group_id' => $group->id]);
+        }
+            } else {
+                // Handle unauthorized deletion attempts with a 403 status code
+                abort(403, 'Unauthorized');
+            }
+         
+            return back()->with('success', 'Deck added to group successfully.');
+        } catch (ModelNotFoundException $e) {
+            // Handle the case where the deck is not found with a 404 status code
+            abort(404, 'Deck not found');
+        } catch (\Exception $e) {
+            // Handle other potential exceptions with a generic error message
+            return back()->with('error', 'An error occurred while adding a new deck to the group.');
+        }
+    }
+
+
 
      /**
      * Remove Deck from Group
@@ -222,73 +243,4 @@ class GroupsController extends Controller
     }
 }
 
-
-    /**
-     * Update the specified resource in storage.
-     */
-    // public function update(Request $request, Flashcard $flashcard)
-    // {
-    //     $validated = $request->validate([
-    //         'question' => 'required|string|max:255',
-    //         'answer' => 'required|string|max:255',
-    //         'hint' => 'string|nullable|max:255',
-    //         'difficulty' => 'required|in:easy,medium,hard',
-    //         'points' => 'required|in:1,3,5',
-    //     ]);
-
-    //     try {
-            
-    //         // Ensure that the deck belongs to the authenticated user
-    //         if ($flashcard->user_id === $request->user()->id) {
-                
-    //             // update flashcard
-              
-    //             $flashcard->question = $validated['question'];
-    //             $flashcard->answer = $validated['answer'];
-    //             $flashcard->hint = $validated['hint'];
-    //             $flashcard->difficulty = $validated['difficulty'];
-    //             $flashcard->points = $validated['points'];
-                
-               
-    //           $flashcard->save();
-    
-    //             // If the deletion was successful and authorized, redirect to dashboard
-    //              return back()->with('success', 'Successfully Updated Card.');
-    //         } else {
-    //             // Handle unauthorized deletion attempts with a 403 status code
-    //             abort(403, 'Unauthorized');
-    //         }
-    //     } catch (ModelNotFoundException $e) {
-    //         // Handle the case where the deck is not found with a 404 status code
-    //         abort(404, 'Flashcard not found');
-    //     } catch (\Exception $e) {
-    //         // Handle other potential exceptions with a generic error message
-    //         return back()->with('error', 'An error occurred while updating flashcard.');
-    //     }
-    // }
-
-    /**
-     * Remove the specified resource from storage.
-      */
-    // public function destroy(Request $request, Flashcard $flashcard)
-    // {
-    //     try {
-    //         // Ensure that the deck belongs to the authenticated user
-    //         if ($flashcard->user_id === $request->user()->id) {
-    //             // Delete the deck
-    //             $flashcard->delete();
-    //             $flashcard->user()->dissociate();
-    //             // If the deletion was successful and authorized, redirect to dashboard
-    //             return back()->with('success', 'Successfully Deleted Card.');
-    //         } else {
-    //             // Handle unauthorized deletion attempts with a 403 status code
-    //             abort(403, 'Unauthorized');
-    //         }
-    //     } catch (ModelNotFoundException $e) {
-    //         // Handle the case where the deck is not found with a 404 status code
-    //         abort(404, 'Deck not found');
-    //     } catch (\Exception $e) {
-    //         // Handle other potential exceptions with a generic error message
-    //         return back()->with('error', 'An error occurred while deleting the deck.');
-    //     }}
 }
