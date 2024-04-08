@@ -95,7 +95,7 @@ const searchResults = computed(() => {
             v-if="$page.props.flash.success"
             :message="$page.props.flash.success"
         />
-        <div v-if="searchInput.length > 0">
+        <div v-if="searchInput.value !== ''">
             <div
                 class="mt-6 flex flex-row flex-wrap justify-center items-center gap-4"
             >
