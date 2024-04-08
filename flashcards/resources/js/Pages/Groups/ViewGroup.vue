@@ -19,6 +19,7 @@ const { group, userDecks, availableDecks } = defineProps([
 dayjs.extend(relativeTime);
 
 const page = usePage();
+const currentDeck = ref("");
 const addDeckModal = ref(false);
 const deleteKeepDecksModal = ref(false);
 const deleteGroupModal = ref(false);
@@ -76,13 +77,16 @@ const deleteAll = async () => {
     }
 };
 
-const showDeleteDeck = () => {
+const showDeleteDeck = (deck) => {
     deleteDeckModal.value = !deleteDeckModal.value;
+    currentDeck.value = deck;
 };
 
 const deleteDeck = async () => {
     try {
-        await router.patch(route("group.removeDeck", { group: group.id }));
+        await router.put(
+            route("group.removeDeck", { deck: currentDeck.value })
+        );
     } catch (error) {
         page.props.flash.error = `Unable to delete deck. Error: ${error}`;
     }

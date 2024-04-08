@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Link } from "@inertiajs/vue3";
+import { Link, Head } from "@inertiajs/vue3";
 const { deck, flashcards } = defineProps(["deck", "flashcards"]);
 
 // Create an array to store the flipped state for each card
@@ -97,7 +97,7 @@ const totalPages = computed(() =>
 </script>
 
 <template>
-    <Head :title="deck.title" />
+    <Head title="deck.title" />
     <AuthenticatedLayout>
         <template #header>
             <div class="flex flex-row justify-between items-center">
