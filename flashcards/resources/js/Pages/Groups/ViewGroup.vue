@@ -3,13 +3,14 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, usePage, useForm, router } from "@inertiajs/vue3";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { ref, onMounted } from "vue";
+import { ref, computed } from "vue";
 import SuccessToast from "@/Components/SuccessToast.vue";
 import ErrorToast from "@/Components/ErrorToast.vue";
 import AddDeckModal from "@/Components/AddDeckModal.vue";
 import DeleteModal from "@/Components/DeleteModal.vue";
 import DeleteGroupModal from "@/Components/DeleteModal.vue";
-import DeleteDeckModal from "@/Components/DeleteModal.vue";
+import RemoveDeckModal from "@/Components/DeleteModal.vue";
+import SearchBar from "@/Components/SearchBar.vue";
 
 const { group, userDecks, availableDecks } = defineProps([
     "group",
@@ -19,11 +20,25 @@ const { group, userDecks, availableDecks } = defineProps([
 dayjs.extend(relativeTime);
 
 const page = usePage();
-const currentDeck = ref("");
+const currentDeck = ref();
+const searchInput = ref("");
 const addDeckModal = ref(false);
 const deleteKeepDecksModal = ref(false);
 const deleteGroupModal = ref(false);
-const deleteDeckModal = ref(false);
+const removeDeckModal = ref(false);
+const handleSearch = (input) => {
+    console.log(input);
+    searchInput.value = input;
+};
+
+const searchResults = computed(() => {
+    console.log(searchInput.value);
+    return userDecks.filter((item) => {
+        return item.title
+            .toLowerCase()
+            .includes(searchInput.value.toLowerCase());
+    });
+});
 
 const form = useForm({
     title: group.title,
@@ -77,15 +92,17 @@ const deleteAll = async () => {
     }
 };
 
-const showDeleteDeck = (deck) => {
-    deleteDeckModal.value = !deleteDeckModal.value;
+const showRemoveDeck = (deck) => {
+    removeDeckModal.value = !removeDeckModal.value;
     currentDeck.value = deck;
 };
 
-const deleteDeck = async () => {
+const removeDeck = async () => {
     try {
         await router.put(
-            route("group.removeDeck", { deck: currentDeck.value })
+            route("group.removeDeck", {
+                deck: currentDeck.value,
+            })
         );
     } catch (error) {
         page.props.flash.error = `Unable to delete deck. Error: ${error}`;
@@ -97,7 +114,7 @@ const deleteDeck = async () => {
     <Head :title="group.title" />
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex flex-row flex-wrap justify-between">
+            <div class="flex flex-row flex-wrap justify-between items-center">
                 <div class="flex flex-col">
                     <div
                         class="flex flex-row justify-center items-center gap-2"
@@ -200,6 +217,11 @@ const deleteDeck = async () => {
                         </div>
                     </div>
                 </div>
+
+                <div class="md:w-80">
+                    <SearchBar @search="handleSearch" />
+                </div>
+
                 <div class="flex flex-row justify-evenly items-center">
                     <button
                         class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-green-700 hover:bg-red-800 focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-2 py-1 md:mt-0 md:px-5 md:py-2.5 me-2 mt-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-900"
@@ -290,10 +312,10 @@ const deleteDeck = async () => {
         />
 
         <!-- Delete Card Modal-->
-        <DeleteDeckModal
-            :show="deleteDeckModal"
-            @close="showDeleteDeck"
-            :deleteFunction="deleteDeck"
+        <RemoveDeckModal
+            :show="removeDeckModal"
+            @close="showRemoveDeck"
+            :deleteFunction="removeDeck"
             :message="`Are you sure you want to remove this deck?`"
         />
 
@@ -306,48 +328,100 @@ const deleteDeck = async () => {
             :message="$page.props.flash.error"
         />
 
-        <div
-            class="mt-6 flex flex-row flex-wrap justify-center items-center gap-4"
-        >
+        <div class="mt-6 flex flex-row flex-wrap justify-center items-center">
             <div
-                v-for="deck in userDecks"
-                :key="deck.id"
-                class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between"
+                v-if="searchInput"
+                class="flex flex-row flex-wrap justify-center items-center gap-4"
             >
-                <div class="flex flex-row justify-between">
-                    <span class="dark:text-white"
-                        >Created: {{ dayjs(deck.created_at).fromNow() }}</span
-                    >
-                    <button @click.stop="showDeleteDeck(deck.id)">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="red"
-                            class="w-6 h-6"
+                <div
+                    v-for="deck in searchResults"
+                    :key="deck.id"
+                    class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between"
+                >
+                    <div class="flex flex-row justify-between">
+                        <span class="dark:text-white"
+                            >Created:
+                            {{ dayjs(deck.created_at).fromNow() }}</span
                         >
-                            <path
-                                fill-rule="evenodd"
-                                d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z"
-                                clip-rule="evenodd"
-                            />
-                        </svg>
-                    </button>
-                </div>
+                        <button @click.stop="showRemoveDeck(deck.id)">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="red"
+                                class="w-6 h-6"
+                            >
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z"
+                                    clip-rule="evenodd"
+                                />
+                            </svg>
+                        </button>
+                    </div>
 
-                <Link
-                    :href="route('deck.show', { deck: deck.id })"
-                    as="button"
-                    class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-                    >{{ deck.title }}</Link
+                    <Link
+                        :href="route('deck.show', { deck: deck.id })"
+                        as="button"
+                        class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+                        >{{ deck.title }}</Link
+                    >
+                    <span
+                        class="text-right text-gray-900 dark:text-slate-200"
+                        v-if="deck.lastviewed !== null"
+                        >Last Viewed:
+                        {{ dayjs(deck.lastviewed).fromNow() }}</span
+                    >
+                    <span class="text-right dark:text-white" v-else
+                        >Not Viewed</span
+                    >
+                </div>
+            </div>
+            <div
+                v-else
+                class="flex flex-row flex-wrap justify-center items-center gap-4"
+            >
+                <div
+                    v-for="deck in userDecks"
+                    :key="deck.id"
+                    class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between"
                 >
-                <span
-                    class="text-right text-gray-900 dark:text-slate-200"
-                    v-if="deck.lastviewed !== null"
-                    >Last Viewed: {{ dayjs(deck.lastviewed).fromNow() }}</span
-                >
-                <span class="text-right dark:text-white" v-else
-                    >Not Viewed</span
-                >
+                    <div class="flex flex-row justify-between">
+                        <span class="dark:text-white"
+                            >Created:
+                            {{ dayjs(deck.created_at).fromNow() }}</span
+                        >
+                        <button @click.stop="showRemoveDeck(deck.id)">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="red"
+                                class="w-6 h-6"
+                            >
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z"
+                                    clip-rule="evenodd"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <Link
+                        :href="route('deck.show', { deck: deck.id })"
+                        as="button"
+                        class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+                        >{{ deck.title }}</Link
+                    >
+                    <span
+                        class="text-right text-gray-900 dark:text-slate-200"
+                        v-if="deck.lastviewed !== null"
+                        >Last Viewed:
+                        {{ dayjs(deck.lastviewed).fromNow() }}</span
+                    >
+                    <span class="text-right dark:text-white" v-else
+                        >Not Viewed</span
+                    >
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>

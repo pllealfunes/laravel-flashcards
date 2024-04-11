@@ -1,9 +1,16 @@
 <script setup>
-const { items } = defineProps(["items"]);
+import { ref } from "vue";
+
+const searchInput = ref("");
+const emit = defineEmits(["search"]);
+
+const submitForm = () => {
+    emit("search", searchInput.value);
+};
 </script>
 
 <template>
-    <form class="max-w-lg mx-auto">
+    <form @submit.prevent="submitForm" class="max-w-lg mx-auto">
         <label
             for="default-search"
             class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
@@ -32,6 +39,8 @@ const { items } = defineProps(["items"]);
             <input
                 type="search"
                 id="default-search"
+                v-model="searchInput"
+                @input="submitForm"
                 class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 required
             />

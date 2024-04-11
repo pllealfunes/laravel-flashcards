@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class GroupsController extends Controller
 {
@@ -94,8 +95,7 @@ class GroupsController extends Controller
     
         try {
             if ($group->user_id === $request->user()->id) {
-                $group->title = $validated['title']; // Access 'title' from the validated array
-                $group->save();
+               $group->update(['title' => $validated['title']]); 
             } else {
                 // Handle unauthorized deletion attempts with a 403 status code
                 abort(403, 'Unauthorized');
@@ -146,30 +146,22 @@ class GroupsController extends Controller
 
 
 
-     /**
-     * Remove Deck from Group
-     */
-    
-     public function removeDeck(Deck $deck)
+/**
+ * Remove Deck from Group
+ */
+public function removeDeck($deckId)
 {
     try {
-       
-                $deck->group_id = null;
-                $deck->save();
-            
+         Deck::where('id', $deckId)->update(['group_id' => null]);
 
-            return back()->with('success', 'Successfully Removed Card.');
-            // Handle unauthorized deletion attempts with a 403 status code
-            abort(403, 'Unauthorized');
-        
+        return back()->with('success', 'Deck removed from group successfully.');
     } catch (ModelNotFoundException $e) {
-        // Handle the case where the deck is not found with a 404 status code
         abort(404, 'Deck not found');
     } catch (\Exception $e) {
-        // Handle other potential exceptions with a generic error message
         return back()->with('error', 'An error occurred while removing the deck.');
     }
 }
+
 
      /**
      * Delete Group but Keep the Decks.
