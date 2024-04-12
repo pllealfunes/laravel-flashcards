@@ -35,7 +35,12 @@ Route::get('/dashboard', function () {
     $user = Auth::user(); 
     $decks = Deck::where('user_id', $user->id)->orderByDesc('lastviewed')->get();
     $groups = Group::where('user_id', $user->id)->orderByDesc('lastviewed')->get();
-    return Inertia::render('Dashboard', ['decks' => $decks, 'groups' => $groups]);
+     $data = [
+        'decks' => $decks,
+        'groups' => $groups,
+        'successMessage' => "You're logged in!",
+    ];
+    return Inertia::render('Dashboard', $data);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 

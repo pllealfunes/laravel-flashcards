@@ -4,9 +4,16 @@ import { Head } from "@inertiajs/vue3";
 import { ref, onMounted, computed } from "vue";
 import Index from "@/Pages/Decks/Index.vue";
 import SuccessToast from "@/Components/SuccessToast.vue";
+import SuccessLogin from "@/Components/SuccessToast.vue";
 import SearchBar from "@/Components/SearchBar.vue";
+import SearchPagination from "@/Components/Pagination.vue";
+import UsersPagination from "@/Components/Pagination.vue";
 
-const { decks, groups } = defineProps(["decks", "groups"]);
+const { decks, groups, successMessage } = defineProps([
+    "decks",
+    "groups",
+    "successMessage",
+]);
 const items = ref([]);
 const searchInput = ref("");
 
@@ -49,28 +56,26 @@ const searchResults = computed(() => {
             </div>
         </template>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">You're logged in!</div>
-                </div>
-            </div>
-        </div>
+        <SuccessLogin v-if="successMessage" :message="successMessage" />
         <SuccessToast
             v-if="$page.props.flash.success"
             :message="$page.props.flash.success"
         />
+
         <div
             v-if="searchInput"
-            class="flex flex-row flex-wrap justify-center items-center gap-4"
+            class="mt-6 flex flex-col flex-wrap justify-center items-center gap-4"
         >
             <Index v-for="item in searchResults" :key="item.id" :item="item" />
+            <UsersPagination :results="searchResults" class="mt-5" />
         </div>
+
         <div v-else>
             <div
-                class="mt-6 flex flex-row flex-wrap justify-center items-center gap-4"
+                class="mt-6 flex flex-col flex-wrap justify-center items-center gap-4"
             >
                 <Index v-for="item in items" :key="item.id" :item="item" />
+                <SearchPagination results="items" class="mt-5" />
             </div>
         </div>
     </AuthenticatedLayout>
