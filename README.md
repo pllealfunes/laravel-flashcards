@@ -1,6 +1,8 @@
 # Flash
 
-An application where a user can create decks of flashcards and study them on their own or with a quiz, memory game, or matching game. A project being built with Laravel, Breeze, Vue, Inertia.js, &amp; Tailwind. Follow along in the GitHub repo.
+An application where a user can create decks of flashcards and study them on their own or with a quiz, memory game, or matching game. A project being built with Laravel, Breeze, Vue, Inertia, &amp; Tailwind. Follow along in the GitHub repo.
+
+[![Watch the video](https://img.youtube.com/vi/1VNtswo5Kf8/maxresdefault.jpg)](https://www.youtube.com/1VNtswo5Kf8)
 
 ## Current Functionalities :
 
@@ -16,8 +18,16 @@ An application where a user can create decks of flashcards and study them on the
 - Can Delete Individual Flashcards in the Deck
 - Can Create New Flashcards in the Deck
 - Can Delete Deck
+- Can create a Group and add Decks to the Group
+- Can Update Group Title
+- Can Add Deck to Group
+- Can Remove Deck from Group
+- Can Delete Group and Keep Decks
+- Can Delete Group along with all Decks inside
 
 ## Project Tasks :
+
+Next Task: Quiz
 
 ![Project Tasks](/flashcards/public/images/tasks.png)
 
