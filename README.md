@@ -2,7 +2,7 @@
 
 An application where a user can create decks of flashcards and study them on their own or with a quiz, memory game, or matching game. A project being built with Laravel, Breeze, Vue, Inertia, &amp; Tailwind. Follow along in the GitHub repo.
 
-[![Watch the video](https://img.youtube.com/vi/1VNtswo5Kf8/maxresdefault.jpg)](https://www.youtube.com/1VNtswo5Kf8)
+[![Watch the video](https://img.youtube.com/vi/1VNtswo5Kf8/maxresdefault.jpg)](https://www.youtu.be/1VNtswo5Kf8)
 
 ## Current Functionalities :
 
