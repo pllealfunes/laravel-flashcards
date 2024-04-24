@@ -52,7 +52,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/deck/{deck}', [DeckController::class, 'destroy'])->name('deck.destroy');
     Route::get('/deck/updateDeck/{deck}', [DeckController::class, 'showUpdatePage'])->name('deck.showUpdatePage');
     Route::patch('/deck/updateTitle/{deck}', [DeckController::class, 'updateTitle'])->name('deck.updateTitle');
-    
+    Route::get('/deck/quiz/{deck}', [DeckController::class, 'quiz'])->name('deck.quiz'); 
+});
+
+
+Route::middleware('auth')->group(function () {
     Route::post('/deck/createFlashcard', [FlashcardsController::class, 'store'])->name('flashcard.store');
     Route::put('/deck/updateFlashcard/{flashcard}', [FlashcardsController::class, 'update'])->name('flashcard.update');
     Route::delete('/deck/deleteFlashcard/{flashcard}', [FlashcardsController::class, 'destroy'])->name('flashcard.destroy');

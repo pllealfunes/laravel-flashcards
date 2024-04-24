@@ -164,4 +164,15 @@ class DeckController extends Controller
             // Handle other potential exceptions with a generic error message
             return back()->with('error', 'An error occurred while deleting the deck.');
         }}
+
+
+
+         /**
+     * GET the Quiz Page
+     */
+
+        public function quiz(Deck $deck){
+             $flashcards = Flashcard::where('deck_id', $deck->id)->get();
+             return Inertia::render('Quiz/Quiz', ['deck' => $deck, 'flashcards' => $flashcards]);
+        }
 }
