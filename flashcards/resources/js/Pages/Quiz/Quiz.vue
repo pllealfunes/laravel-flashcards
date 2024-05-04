@@ -1,56 +1,94 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Link, Head } from "@inertiajs/vue3";
 
-const { deck, flashcards } = defineProps(["deck", "flashcards"]);
-//const currentCards = ref([]);
+const { deck, flashcards } = defineProps({ deck: Object, flashcards: Object });
+const currentCards = ref([]);
 const currentAnswers = ref([]);
+const score = ref(0);
+const possibleScore = ref(0);
+const highScore = ref(false);
+const lowScore = ref(false);
+const isCorrect = ref(false);
+const isWrong = ref(false);
+const numRandomAnswers = 2;
+const showScore = ref(false);
 
-const numRandomAnswers = 3;
-const currentCards = computed(() => {
-    return shuffleDeck([...flashcards]).map((card) => ({
+//shuffles the flashcards array using shuffleDeck, maps each card to a new object with shuffled answers using getRandomAnswers, & assigns the result to currentCards.value
+onMounted(() => {
+    currentCards.value = shuffleDeck([...flashcards]).map((card) => ({
         ...card,
-        answers: getRandomAnswers(card),
+        answers: getRandomAnswers(card.answer, card),
     }));
 });
 
-// Function to check if two cards are the same
-const isSameDeck = (card1, card2) => {
-    if (card1.length !== card2.length) return false;
-    for (let i = 0; i < card1.length; i++) {
-        if (card1[i] !== card2[i]) return false;
+//shuffles an array in place using the Fisher-Yates algorithm
+const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+        const random = Math.floor(Math.random() * (i + 1));
+        [array[i], array[random]] = [array[random], array[i]];
     }
-    return true;
+    return array;
 };
 
-// Function to shuffle a deck
-
-const shuffleArray = (deck) => {
-    for (let i = deck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-    return deck;
-};
-
+// shuffles a deck of flashcards by shuffling each card's answers and then shuffling the entire deck
 const shuffleDeck = (deck) => {
     for (const card of deck) {
-        card.answers = [
-            card.answer,
-            ...deck.map((c) => c.answer).filter((a) => a !== card.answer),
-        ];
+        const otherAnswers = deck
+            .filter((c) => c !== card) // Exclude the current card
+            .map((c) => c.answer); // Get answers from other cards
+        card.answers = [...otherAnswers];
         card.answers = shuffleArray(card.answers.map((a) => a.toLowerCase())); // Shuffle lowercase answers
     }
     shuffleArray(deck);
     return deck;
 };
 
-const getRandomAnswers = (card) => {
-    return shuffleArray([...card.answers.map((a) => a.toLowerCase())]).slice(
-        0,
-        numRandomAnswers
-    ); // Lowercase random answers
+// returns a shuffled array of random answers for a given flashcard
+const getRandomAnswers = (answer, card) => {
+    let choices = shuffleArray([
+        ...card.answers.map((a) => a.toLowerCase()),
+    ]).slice(0, numRandomAnswers); // Lowercase random answers
+    choices.push(answer);
+    choices = shuffleArray(choices);
+    return choices;
+};
+
+const checkAnswers = () => {
+    currentCards.value.forEach((card, index) => {
+        possibleScore.value += parseInt(card.points);
+        if (card.answer === currentAnswers.value[index]) {
+            score.value += parseInt(card.points);
+            isCorrect.value = true;
+            isWrong.value = false;
+        } else {
+            isWrong.value = true;
+            isCorrect.value = false;
+        }
+    });
+    checkScore();
+    scrollToTop();
+};
+
+const checkScore = () => {
+    const percentage = (score.value / possibleScore.value) * 100;
+    if (percentage >= 70) {
+        lowScore.value = false;
+        highScore.value = true;
+        showScore.value = true;
+    } else {
+        highScore.value = false;
+        lowScore.value = true;
+        showScore.value = true;
+    }
+};
+
+const scrollToTop = () => {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+    });
 };
 </script>
 
@@ -59,13 +97,29 @@ const getRandomAnswers = (card) => {
         <title>Quiz: {{ deck.title }}</title>
     </Head>
     <AuthenticatedLayout>
-        <h1
-            class="mt-6 mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-800 flex justify-center items-center"
-        >
-            Quiz: {{ deck.title }}
-        </h1>
-
-        <div class="quiz-container">
+        <div class="flex justify-center items-center">
+            <h1
+                class="mt-6 mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-800 flex justify-center items-center"
+            >
+                Quiz: {{ deck.title }}
+            </h1>
+            <div v-if="showScore" class="flex justify-center items-center m-2">
+                <div
+                    class="w-16 h-16 p-11 rounded-full flex items-center justify-center text-white"
+                    :class="{
+                        'bg-green-500': highScore,
+                        'bg-red-500': lowScore,
+                    }"
+                >
+                    <span class="text-2xl font-bold m-2">{{ score }}</span>
+                    <span class="text-2xl font-bold">/</span>
+                    <span class="text-2xl font-bold m-2">{{
+                        possibleScore
+                    }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="quiz-container flex flex-col justify-center items-center">
             <div
                 v-for="(flashcard, index) in currentCards"
                 :key="flashcard.id"
@@ -91,26 +145,39 @@ const getRandomAnswers = (card) => {
                             class="flex flex-col justify-between items-center gap-3 mt-5"
                         >
                             <li
-                                v-for="(answer, aIndex) in flashcard.answers"
-                                :key="aIndex"
+                                v-for="(answer, cardIndex) in flashcard.answers"
+                                :key="cardIndex"
+                                class="w-[500px] p-11 text-gray-800 border border-gray-200 rounded-lg shadow dark:bg-slate-400 dark:border-slate-400 mb-2 hover:bg-slate-500 hover:text-gray-200 hover:cursorpointer"
+                                :class="{
+                                    'bg-green-500': isCorrect,
+                                    'bg-red-500': isWrong,
+                                }"
                             >
-                                <label
-                                    :for="`answer-${index}-${aIndex}`"
-                                    class="text-gray-800"
-                                >
+                                <label :for="`answer-${index}-${cardIndex}`">
                                     <input
-                                        type="text"
-                                        :id="`answer-${index}-${aIndex}`"
+                                        type="radio"
+                                        :id="`answer-${index}-${cardIndex}`"
                                         :value="answer"
                                         v-model="currentAnswers[index]"
-                                        class="w-[500px] p-11 text-left border border-gray-200 rounded-lg shadow text-gray-800 dark:bg-slate-400 dark:border-slate-400 mb-2 hover:bg-slate-500 hover:text-gray-200 hover:cursorpointer"
                                     />
+                                    {{ answer }}
                                 </label>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
+            <button
+                type="button"
+                class="mt-11 w-1/4 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                :disabled="showScore"
+                :class="{
+                    'cursor-not-allowed': showScore,
+                }"
+                @click="checkAnswers"
+            >
+                Submit
+            </button>
         </div>
     </AuthenticatedLayout>
 </template>
