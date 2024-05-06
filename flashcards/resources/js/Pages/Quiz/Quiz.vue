@@ -1,26 +1,25 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Link, Head } from "@inertiajs/vue3";
+import { Head } from "@inertiajs/vue3";
 
 const { deck, flashcards } = defineProps({ deck: Object, flashcards: Object });
+const startQuiz = ref(false);
 const currentCards = ref([]);
 const currentAnswers = ref([]);
 const score = ref(0);
 const possibleScore = ref(0);
 const highScore = ref(false);
 const lowScore = ref(false);
-const isCorrect = ref(false);
-const isWrong = ref(false);
+const correctCards = ref([]);
+const incorrectCards = ref([]);
 const numRandomAnswers = 2;
 const showScore = ref(false);
-
+const showCorrectAnswers = ref(false);
+const showIncorrectAnswers = ref(false);
 //shuffles the flashcards array using shuffleDeck, maps each card to a new object with shuffled answers using getRandomAnswers, & assigns the result to currentCards.value
 onMounted(() => {
-    currentCards.value = shuffleDeck([...flashcards]).map((card) => ({
-        ...card,
-        answers: getRandomAnswers(card.answer, card),
-    }));
+    newQuiz();
 });
 
 //shuffles an array in place using the Fisher-Yates algorithm
@@ -57,17 +56,17 @@ const getRandomAnswers = (answer, card) => {
 
 const checkAnswers = () => {
     currentCards.value.forEach((card, index) => {
+        const userAnswer = currentAnswers.value[index];
         possibleScore.value += parseInt(card.points);
-        if (card.answer === currentAnswers.value[index]) {
+        if (card.answer === userAnswer) {
             score.value += parseInt(card.points);
-            isCorrect.value = true;
-            isWrong.value = false;
+            correctCards.value.push(card);
         } else {
-            isWrong.value = true;
-            isCorrect.value = false;
+            incorrectCards.value.push({ card, userAnswer });
         }
     });
     checkScore();
+    startQuiz.value = false;
     scrollToTop();
 };
 
@@ -89,6 +88,35 @@ const scrollToTop = () => {
         top: 0,
         behavior: "smooth",
     });
+};
+
+const newQuiz = () => {
+    currentCards.value = shuffleDeck([...flashcards]).map((card) => ({
+        ...card,
+        answers: getRandomAnswers(card.answer, card),
+    }));
+    startQuiz.value = true;
+};
+
+const restartQuiz = () => {
+    newQuiz();
+    currentAnswers.value = [];
+    score.value = 0;
+    possibleScore.value = 0;
+    highScore.value = false;
+    lowScore.value = false;
+    correctCards.value = [];
+    incorrectCards.value = [];
+    showScore.value = false;
+    showCorrectAnswers.value = false;
+    showIncorrectAnswers.value = false;
+};
+
+const toggleCorrectAnswers = () => {
+    showCorrectAnswers.value = !showCorrectAnswers.value;
+};
+const toggleIncorrectAnswers = () => {
+    showIncorrectAnswers.value = !showIncorrectAnswers.value;
 };
 </script>
 
@@ -119,7 +147,10 @@ const scrollToTop = () => {
                 </div>
             </div>
         </div>
-        <div class="quiz-container flex flex-col justify-center items-center">
+        <div
+            v-if="startQuiz"
+            class="quiz-container flex flex-col justify-center items-center"
+        >
             <div
                 v-for="(flashcard, index) in currentCards"
                 :key="flashcard.id"
@@ -148,10 +179,6 @@ const scrollToTop = () => {
                                 v-for="(answer, cardIndex) in flashcard.answers"
                                 :key="cardIndex"
                                 class="w-[500px] p-11 text-gray-800 border border-gray-200 rounded-lg shadow dark:bg-slate-400 dark:border-slate-400 mb-2 hover:bg-slate-500 hover:text-gray-200 hover:cursorpointer"
-                                :class="{
-                                    'bg-green-500': isCorrect,
-                                    'bg-red-500': isWrong,
-                                }"
                             >
                                 <label :for="`answer-${index}-${cardIndex}`">
                                     <input
@@ -178,6 +205,164 @@ const scrollToTop = () => {
             >
                 Submit
             </button>
+        </div>
+        <div v-else class="flex flex-col justify-center items-center">
+            <button
+                type="button"
+                class="m-8 w-1/4 focus:outline-none font-black hover:bg-yellow-800 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-yellow-400 dark:hover:bg-yellow-700 dark:focus:ring-yellow-800"
+                @click="restartQuiz"
+            >
+                Try Again
+            </button>
+
+            <div
+                class="results-container mt-8 flex flex-col justify-center items-center"
+            >
+                <div v-if="correctCards.length > 0" class="m-4">
+                    <div>
+                        <button
+                            type="button"
+                            class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                            id="menu-button"
+                            aria-expanded="true"
+                            aria-haspopup="true"
+                            @click="toggleCorrectAnswers"
+                        >
+                            Correct Answers
+                            <svg
+                                class="-mr-1 h-5 w-5 text-gray-400"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                    clip-rule="evenodd"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!--Toggle Correct Answers-->
+                    <div
+                        role="menu"
+                        aria-orientation="vertical"
+                        aria-labelledby="menu-button"
+                        v-show="showCorrectAnswers"
+                    >
+                        <div
+                            v-for="(flashcard, index) in correctCards"
+                            :key="flashcard.id"
+                            class="m-5 flex flex-col flex-wrap justify-center items-center"
+                        >
+                            <div
+                                class="w-[700px] h-[300px] border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between"
+                            >
+                                <p
+                                    class="text-slate-200 flex justify-end mt-3 mr-3"
+                                >
+                                    POINTS: {{ flashcard.points }}
+                                </p>
+                                <div class="w-full h-full p-4">
+                                    <h3
+                                        class="flex flex-col items-center justify-center h-full pb-10 text-3xl font-semibold text-center text-slate-200"
+                                    >
+                                        {{ flashcard.question }}
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="answers-container">
+                                <div>
+                                    <ul
+                                        class="flex flex-col justify-between items-center gap-3 mt-5"
+                                    >
+                                        <li
+                                            class="w-[500px] p-11 text-gray-800 border border-green-200 rounded-lg shadow dark:bg-green-400 dark:border-green-400 mb-2"
+                                        >
+                                            {{ flashcard.answer }}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!---Toggle Incorrect Answers-->
+                <div v-if="incorrectCards.length > 0" class="m-4">
+                    <div>
+                        <button
+                            type="button"
+                            class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                            id="menu-button"
+                            aria-expanded="true"
+                            aria-haspopup="true"
+                            @click="toggleIncorrectAnswers"
+                        >
+                            Incorrect Answers
+                            <svg
+                                class="-mr-1 h-5 w-5 text-gray-400"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                    clip-rule="evenodd"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                    <div
+                        role="menu"
+                        aria-orientation="vertical"
+                        aria-labelledby="menu-button"
+                        v-show="showIncorrectAnswers"
+                    >
+                        <div
+                            v-for="(flashcard, index) in incorrectCards"
+                            :key="flashcard.id"
+                            class="m-5 flex flex-col flex-wrap justify-center items-center"
+                        >
+                            <div
+                                class="w-[700px] h-[300px] border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between"
+                            >
+                                <p
+                                    class="text-slate-200 flex justify-end mt-3 mr-3"
+                                >
+                                    POINTS: {{ flashcard.card.points }}
+                                </p>
+                                <div class="w-full h-full p-4">
+                                    <h3
+                                        class="flex flex-col items-center justify-center h-full pb-10 text-3xl font-semibold text-center text-slate-200"
+                                    >
+                                        {{ flashcard.card.question }}
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="answers-container">
+                                <div>
+                                    <ul
+                                        class="flex flex-col justify-between items-center gap-3 mt-5"
+                                    >
+                                        <li
+                                            class="w-[500px] p-11 text-gray-800 border border-red-200 rounded-lg shadow dark:bg-red-400 dark:border-red-400 mb-2"
+                                        >
+                                            {{ flashcard.userAnswer }}
+                                        </li>
+                                        <li
+                                            class="w-[500px] p-11 text-gray-800 border border-green-200 rounded-lg shadow dark:bg-green-400 dark:border-green-400 mb-2"
+                                        >
+                                            {{ flashcard.card.answer }}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </AuthenticatedLayout>
 </template>
