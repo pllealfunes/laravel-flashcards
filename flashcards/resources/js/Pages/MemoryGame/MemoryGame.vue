@@ -1,9 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Link, Head } from "@inertiajs/vue3";
-import Dropdown from "@/Components/Dropdown.vue";
-import DropdownLink from "@/Components/DropdownLink.vue";
+import { Head } from "@inertiajs/vue3";
 const { deck, flashcards } = defineProps(["deck", "flashcards"]);
 
 const answersArray = ref([]);
@@ -21,11 +19,16 @@ questionsArray.value = flashcards.map(function (flashcard) {
 
 const currentCards = ref([...answersArray.value, ...questionsArray.value]);
 
-const flippedStates = ref(new Array(currentCards.length).fill(false));
+const flippedStates = ref(
+    currentCards.value.map(() => ({
+        flipped: false,
+        color: "dark:bg-sky-950",
+    }))
+);
 
 const toggleFlip = (index, type) => {
     // Update the flipped state of the clicked card
-    flippedStates.value[index] = !flippedStates.value[index];
+    flippedStates.value[index].flipped = !flippedStates.value[index].flipped;
     pickedCard(index, type);
 };
 
@@ -48,40 +51,52 @@ function compareCards() {
         // Clear selected cards for next round
         pickedCards.value = [];
 
-        cardColor.value = "bg-red-500";
+        flippedStates.value[firstCard.index].color = "bg-red-500";
+        flippedStates.value[secondCard.index].color = "bg-red-500";
         setTimeout(function () {
-            flippedStates.value[firstCard.index] =
-                !flippedStates.value[firstCard.index];
-            flippedStates.value[secondCard.index] =
-                !flippedStates.value[secondCard.index];
+            flippedStates.value[firstCard.index].flipped =
+                !flippedStates.value[firstCard.index].flipped;
+            flippedStates.value[secondCard.index].flipped =
+                !flippedStates.value[secondCard.index].flipped;
+            flippedStates.value[firstCard.index].color = "bg-sky-950";
+            flippedStates.value[secondCard.index].color = "bg-sky-950";
         }, 3000);
-        cardColor.value = null;
+
         return;
     }
 
-    const questionCard =
-        firstCard.value["type"] === "question" ? firstCard : secondCard;
-    const answerCard =
-        firstCard.value["type"] === "answer" ? firstCard : secondCard;
+    const questionCard = firstCard.type === "question" ? firstCard : secondCard;
+    const answerCard = firstCard.type === "answer" ? firstCard : secondCard;
 
-    const question = currentCards.value[questionCard[index]];
-    const answer = answersArray.value[answerCard[index]];
+    const question = flashcards.find(
+        (card) => card.question === currentCards.value[questionCard.index].value
+    );
+    const answer = answersArray.value[answerCard.index];
+    console.log(questionCard);
+    console.log(questionCard.index);
+    console.log(question);
+    console.log(answer);
 
-    if (question.answer === answer) {
+    if (question.answer === answer.value) {
         console.log("this answer is correct");
+        flippedStates.value[firstCard.index].color = "bg-green-500";
+        flippedStates.value[secondCard.index].color = "bg-green-500";
     } else {
         console.log("no match");
+
+        flippedStates.value[firstCard.index].color = "bg-red-500";
+        flippedStates.value[secondCard.index].color = "bg-red-500";
     }
     // Clear selected cards for next round
     pickedCards.value = [];
 
-    cardColor.value = "bg-green-500";
-
     setTimeout(function () {
-        flippedStates.value[firstCard.index] =
-            !flippedStates.value[firstCard.index];
-        flippedStates.value[secondCard.index] =
-            !flippedStates.value[secondCard.index];
+        flippedStates.value[firstCard.index].flipped =
+            !flippedStates.value[firstCard.index].flipped;
+        flippedStates.value[secondCard.index].flipped =
+            !flippedStates.value[secondCard.index].flipped;
+        flippedStates.value[firstCard.index].color = "bg-sky-950";
+        flippedStates.value[secondCard.index].color = "bg-sky-950";
     }, 3000);
 }
 </script>
@@ -118,11 +133,11 @@ function compareCards() {
                 class="m-5 font-semibold flex flex-row justify-center items-center transition-transform duration-500 ease-in-out"
             >
                 <div
-                    class="w-[350px] h-[250px] dark:text-slate-200 border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 flex flex-row justify-between cursor-pointer group perspective relative preserve-3d duration-1000"
-                    :class="{
-                        'flip-card': flippedStates[index],
-                        cardColor: cardColor,
-                    }"
+                    class="w-[350px] h-[250px] dark:text-slate-200 border border-gray-200 rounded-lg shadow dark:border-sky-950 mb-2 flex flex-row justify-between cursor-pointer group perspective relative preserve-3d duration-1000"
+                    :class="[
+                        { 'flip-card': flippedStates[index].flipped },
+                        flippedStates[index].color,
+                    ]"
                     @click.stop="toggleFlip(index, card.type)"
                 >
                     <div
