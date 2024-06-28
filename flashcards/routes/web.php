@@ -53,6 +53,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/deck/updateDeck/{deck}', [DeckController::class, 'showUpdatePage'])->name('deck.showUpdatePage');
     Route::patch('/deck/updateTitle/{deck}', [DeckController::class, 'updateTitle'])->name('deck.updateTitle');
     Route::get('/deck/quiz/{deck}', [DeckController::class, 'quiz'])->name('deck.quiz'); 
+    Route::get('/deck/memorygame/{deck}', [DeckController::class, 'memoryGame'])->name('deck.memoryGame'); 
+    Route::get('/deck/matchinggame/{deck}', [DeckController::class, 'matchingGame'])->name('deck.matchingGame'); 
 });
 
 

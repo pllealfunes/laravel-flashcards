@@ -175,4 +175,15 @@ class DeckController extends Controller
              $flashcards = Flashcard::where('deck_id', $deck->id)->get();
              return Inertia::render('Quiz/Quiz', ['deck' => $deck, 'flashcards' => $flashcards]);
         }
+
+
+
+         /**
+     * GET the Memory Game Page
+     */
+
+        public function memoryGame(Deck $deck){
+             $flashcards = Flashcard::where('deck_id', $deck->id)->get();
+             return Inertia::render('MemoryGame/MemoryGame', ['deck' => $deck, 'flashcards' => $flashcards]);
+        }
 }
