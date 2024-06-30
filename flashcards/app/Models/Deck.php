@@ -12,9 +12,10 @@ class Deck extends Model
     use HasFactory;
 
     protected $fillable = [
-    "title",
-    "user_id"
+    "title"
     ];
+
+    protected $guarded = ["user_id","timestamp","timestamps"];
 
 
     public function user(): BelongsTo
