@@ -10,8 +10,7 @@ class Flashcard extends Model
 {
     use HasFactory;
 
-    protected $fillable = ["question", "answer", "hint", "difficulty","points"];
-    protected $guarded = ["deck_id", "user_id"];
+     protected $fillable = ["question", "answer", "hint", "difficulty","points","deck_id", "user_id"];
    
         public function user(): BelongsTo
     

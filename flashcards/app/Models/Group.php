@@ -10,8 +10,8 @@ class Group extends Model
 {
     use HasFactory;
  
-    protected $fillable = ['title'];
-    protected $guarded = ['user_id'];
+    protected $fillable = ['title','user_id'];
+   
 
     public function decks(): HasMany
     {

@@ -1,68 +1,90 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 const { deck, flashcards } = defineProps({ deck: Object, flashcards: Object });
 
+const currentCards = ref([]);
+const flippedStates = ref([]);
 const answersArray = ref([]);
 const questionsArray = ref([]);
 const pickedCards = ref([]);
 const newGame = ref(true);
 const startTimer = ref(false);
 const finalTime = ref(false);
+const results = ref(false);
+const gameCards = ref([]);
+const numCardsNeeded = 6;
 
-answersArray.value = flashcards.map(function (flashcard) {
-    return { type: "answer", value: flashcard.answer };
+onMounted(() => {
+    startGame();
 });
 
-questionsArray.value = flashcards.map(function (flashcard) {
-    return { type: "question", value: flashcard.question };
-});
+const startRound = () => {
+    if (flashcards.length >= numCardsNeeded) {
+        // If there are enough cards, select 10 random cards
+        for (let i = 0; i < numCardsNeeded; i++) {
+            gameCards.value.push(
+                flashcards[Math.floor(Math.random() * flashcards.length)]
+            );
+        }
+        return gameCards.value;
+    } else {
+        // If there are not enough cards, repeat cards to reach 10
+        let selectedCards = [];
+        const availableCards = [...flashcards]; // Copy the available cards
 
-const currentCards = ref([...answersArray.value, ...questionsArray.value]);
+        while (selectedCards.length < numCardsNeeded) {
+            const remainingCards = numCardsNeeded - selectedCards.length;
+            // Shuffle the available cards to ensure randomness
+            availableCards.sort(() => 0.5 - Math.random());
+            selectedCards = [
+                ...selectedCards,
+                ...availableCards.slice(0, remainingCards),
+            ];
+        }
+        return (gameCards.value = selectedCards);
+    }
+};
+
+const isGameOver = computed(() => {
+    return flippedStates.value.every((card) => card.style === "hidden");
+});
 
 const startGame = () => {
-    shuffleCards();
+    gameCards.value = [];
+    pickedCards.value = [];
+    startRound();
+    results.value = false;
+    finalTime.value = false;
     newGame.value = true;
-};
+    startTimer.value = true;
 
-const shuffleCards = () => {
-    const originalDeck = [...currentCards.value]; // Create a copy of the original deck
-    let shuffledDeck = shuffleDeck([...originalDeck]); // Initialize shuffled deck
+    answersArray.value = gameCards.value.map(function (flashcard) {
+        return { type: "answer", value: flashcard.answer };
+    });
 
-    // Shuffle the deck until it's different from the original
-    while (isSameDeck(originalDeck, shuffledDeck)) {
-        shuffledDeck = shuffleDeck([...originalDeck]);
-    }
-    // Update the prop with the shuffled cards
-    currentCards.value = shuffledDeck;
-    return shuffledDeck;
-};
+    questionsArray.value = gameCards.value.map(function (flashcard) {
+        return { type: "question", value: flashcard.question };
+    });
 
-// Function to check if two cards are the same
-const isSameDeck = (card1, card2) => {
-    if (card1.length !== card2.length) return false;
-    for (let i = 0; i < card1.length; i++) {
-        if (card1[i] !== card2[i]) return false;
-    }
-    return true;
-};
+    currentCards.value = [...answersArray.value, ...questionsArray.value];
 
-// Function to shuffle a deck
-const shuffleDeck = (deck) => {
-    for (let i = deck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-    return deck;
-};
-
-const flippedStates = ref(
-    currentCards.value.map(() => ({
+    flippedStates.value = currentCards.value.map(() => ({
         flipped: false,
-        style: "hidden",
-    }))
-);
+        style: "bg-sky-950",
+    }));
+};
+
+const checkGameOver = () => {
+    if (isGameOver.value) {
+        console.log("Game Over");
+        newGame.value = false;
+        startTimer.value = false;
+        finalTime.value = true;
+        results.value = true;
+    }
+};
 
 const toggleFlip = (index, type) => {
     // Update the flipped state of the clicked card
@@ -82,17 +104,15 @@ function pickedCard(index, type) {
     if (pickedCards.value.length === 2) {
         compareCards();
     }
-    console.log(pickedCards.value);
 }
 
 function compareCards() {
     const [firstCard, secondCard] = pickedCards.value;
 
     if (firstCard.type === secondCard.type) {
-        // Clear selected cards for next round
-
         flippedStates.value[firstCard.index].style = "bg-red-500";
         flippedStates.value[secondCard.index].style = "bg-red-500";
+
         setTimeout(function () {
             flippedStates.value[firstCard.index].flipped =
                 !flippedStates.value[firstCard.index].flipped;
@@ -120,10 +140,10 @@ function compareCards() {
         setTimeout(function () {
             flippedStates.value[firstCard.index].style = "hidden";
             flippedStates.value[secondCard.index].style = "hidden";
-            currentCards.value.splice(firstCard);
-            currentCards.value.splice(secondCard);
             pickedCards.value = [];
         }, 2000);
+
+        checkGameOver();
         return;
     } else {
         flippedStates.value[firstCard.index].style = "bg-red-500";
@@ -142,14 +162,6 @@ function compareCards() {
         return;
     }
 }
-
-const gameOver = () => {
-    currentCards.value.length === 0;
-    winMessage.value = true;
-    newGame.value = false;
-    startTimer.value = false;
-    finalTime.value = false;
-};
 </script>
 
 <template>
@@ -170,13 +182,9 @@ const gameOver = () => {
             >
                 New Game
             </button>
-            <div>
-                Studied: {{ currentCards.length / 2 }} /
-                {{ flashcards.length }} Flashcards
-            </div>
         </div>
 
-        <div class="flex justify-center items-center mt-5">
+        <div v-if="results" class="flex justify-center items-center mt-5">
             <div
                 class="w-[400px] h-[400px] py-11 rounded-full flex flex-col items-center justify-center text-white bg-purple-500"
             >
@@ -187,11 +195,7 @@ const gameOver = () => {
             </div>
         </div>
 
-        <section
-            class="grid md:grid-cols-2 lg:grid-cols-4 gap-1"
-            id="flashcardsDeck"
-            v-if="newGame"
-        >
+        <section class="grid md:grid-cols-2 lg:grid-cols-4" id="flashcardsDeck">
             <div
                 v-for="(card, index) in currentCards"
                 :key="card.id"
