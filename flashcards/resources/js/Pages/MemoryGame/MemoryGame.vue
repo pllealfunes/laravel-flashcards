@@ -9,16 +9,15 @@ const flippedStates = ref([]);
 const answersArray = ref([]);
 const questionsArray = ref([]);
 const pickedCards = ref([]);
-const newGame = ref(true);
-const startTimer = ref(false);
-const finalTime = ref(false);
+const timer = ref(null);
+const newGame = ref(false);
+const startTime = ref(0);
+const elapsedTime = ref(0);
+const isRunning = ref(false);
+const displayTime = ref("");
 const results = ref(false);
 const gameCards = ref([]);
 const numCardsNeeded = 6;
-
-onMounted(() => {
-    startGame();
-});
 
 const startRound = () => {
     if (flashcards.length >= numCardsNeeded) {
@@ -47,18 +46,58 @@ const startRound = () => {
     }
 };
 
+const startWatch = () => {
+    if (!isRunning.value) {
+        startTime.value = Date.now() - elapsedTime.value;
+        timer.value = setInterval(updateWatch, 10);
+        isRunning.value = true;
+    }
+};
+
+const stopWatch = () => {
+    if (isRunning.value) {
+        clearInterval(timer.value);
+        elapsedTime.value = Date.now() - startTime.value;
+        isRunning.value = false;
+    }
+};
+
+const reset = () => {
+    clearInterval(timer.value);
+    startTime.value = 0;
+    elapsedTime.value = 0;
+    isRunning.value = false;
+    displayTime.value = "00:00:00:00";
+};
+
+const updateWatch = () => {
+    const currentTime = Date.now();
+    elapsedTime.value = currentTime - startTime.value;
+
+    let hours = Math.floor(elapsedTime.value / (1000 * 60 * 60));
+    let minutes = Math.floor((elapsedTime.value / (1000 * 60)) % 60);
+    let seconds = Math.floor((elapsedTime.value / 1000) % 60);
+    let milliseconds = Math.floor((elapsedTime.value % 1000) % 10);
+
+    hours = String(hours).padStart(2, "0");
+    minutes = String(minutes).padStart(2, "0");
+    seconds = String(seconds).padStart(2, "0");
+    milliseconds = String(milliseconds).padStart(2, "0");
+
+    displayTime.value = `${hours}:${minutes}:${seconds}:${milliseconds}`;
+};
+
 const isGameOver = computed(() => {
     return flippedStates.value.every((card) => card.style === "hidden");
 });
 
 const startGame = () => {
+    results.value = false;
     gameCards.value = [];
     pickedCards.value = [];
-    startRound();
-    results.value = false;
-    finalTime.value = false;
     newGame.value = true;
-    startTimer.value = true;
+    startRound();
+    reset();
 
     answersArray.value = gameCards.value.map(function (flashcard) {
         return { type: "answer", value: flashcard.answer };
@@ -74,15 +113,15 @@ const startGame = () => {
         flipped: false,
         style: "bg-sky-950",
     }));
+
+    startWatch();
 };
 
 const checkGameOver = () => {
     if (isGameOver.value) {
-        console.log("Game Over");
         newGame.value = false;
-        startTimer.value = false;
-        finalTime.value = true;
         results.value = true;
+        stopWatch();
     }
 };
 
@@ -141,9 +180,9 @@ function compareCards() {
             flippedStates.value[firstCard.index].style = "hidden";
             flippedStates.value[secondCard.index].style = "hidden";
             pickedCards.value = [];
+            checkGameOver();
         }, 2000);
 
-        checkGameOver();
         return;
     } else {
         flippedStates.value[firstCard.index].style = "bg-red-500";
@@ -182,6 +221,7 @@ function compareCards() {
             >
                 New Game
             </button>
+            <div v-if="newGame">{{ displayTime }}</div>
         </div>
 
         <div v-if="results" class="flex justify-center items-center mt-5">
@@ -192,35 +232,56 @@ function compareCards() {
                     You Did It {{ $page.props.auth.user.name }}!
                 </p>
                 <p class="text-2xl font-bold m-5">Your Final Time Was :</p>
+                <p class="text-2xl font-bold m-5">
+                    {{ displayTime }}
+                </p>
             </div>
         </div>
 
-        <section class="grid md:grid-cols-2 lg:grid-cols-4" id="flashcardsDeck">
+        <section class="flex flex-col justify-center items-center">
             <div
-                v-for="(card, index) in currentCards"
-                :key="card.id"
-                class="m-5 font-semibold flex flex-row justify-center items-center transition-transform duration-500 ease-in-out"
+                v-if="newGame"
+                class="grid md:grid-cols-2 lg:grid-cols-4"
+                id="flashcardsDeck"
             >
                 <div
-                    class="w-[350px] h-[250px] dark:text-slate-200 border border-gray-200 rounded-lg shadow mb-2 flex flex-row justify-between cursor-pointer group perspective relative preserve-3d duration-1000"
-                    :class="[
-                        { 'flip-card': flippedStates[index].flipped },
-                        flippedStates[index].style,
-                    ]"
-                    @click.stop="toggleFlip(index, card.type)"
+                    v-for="(card, index) in currentCards"
+                    :key="card.id"
+                    class="m-5 font-semibold flex flex-row justify-center items-center transition-transform duration-500 ease-in-out"
                 >
                     <div
-                        class="flip-card backface-hidden w-full h-full rounded-lg"
+                        class="w-[350px] h-[250px] dark:text-slate-200 border border-gray-200 rounded-lg shadow mb-2 flex flex-row justify-between cursor-pointer group perspective relative preserve-3d duration-1000"
+                        :class="[
+                            { 'flip-card': flippedStates[index].flipped },
+                            flippedStates[index].style,
+                        ]"
+                        @click.stop="toggleFlip(index, card.type)"
                     >
                         <div
-                            class="text-center text-md flex flex-col items-center justify-center h-full"
+                            class="flip-card backface-hidden w-full h-full rounded-lg"
                         >
-                            <p class="text-small">
-                                {{ card.value }}
-                            </p>
+                            <div
+                                class="text-center text-md flex flex-col items-center justify-center h-full"
+                            >
+                                <p class="text-small">
+                                    {{ card.value }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div
+                v-if="!newGame && !results"
+                class="w-[400px] h-[400px] mt-7 rounded-full flex flex-col items-center justify-center text-white bg-purple-500"
+            >
+                <p class="text-justify p-14 font-bold">
+                    <b class="text-black">Rules of The Game :</b> Click on the
+                    New Game button to start a new game. Click on each card to
+                    try and match the questions to their answers. At the end of
+                    the game the total time it took you to finish will be
+                    displayed.
+                </p>
             </div>
         </section>
     </AuthenticatedLayout>

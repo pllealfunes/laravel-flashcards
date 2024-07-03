@@ -26,6 +26,7 @@ Watch the Video for a Glimpse!:
 - Can Remove Deck from Group
 - Can Delete Group and Keep Decks
 - Can Delete Group along with all Decks inside
+- Memory Game
 
 ## Project Tasks :
 
@@ -44,3 +45,4 @@ Next Task: Quiz
 - ChatGPT For Problem Solving
 - Code A Program YT - Animated 3D Crad Design Using Tailwind CSS | tailwind css advanced tutorial
 - Heroicons - for logo and icons
+- BroCode YT Video - Build this JS STOPWATCH in 18 minutes! 2024
