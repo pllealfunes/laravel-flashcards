@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
-const { deck, flashcards } = defineProps({ deck: Object, flashcards: Object });
+const { deck, flashcards } = defineProps({ deck: Object, flashcards: Array });
 
 const currentCards = ref([]);
 const flippedStates = ref([]);
@@ -92,12 +92,12 @@ const isGameOver = computed(() => {
 });
 
 const startGame = () => {
-    results.value = false;
+    reset();
     gameCards.value = [];
     pickedCards.value = [];
+    results.value = false;
     newGame.value = true;
     startRound();
-    reset();
 
     answersArray.value = gameCards.value.map(function (flashcard) {
         return { type: "answer", value: flashcard.answer };
