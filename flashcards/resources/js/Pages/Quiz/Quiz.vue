@@ -3,7 +3,7 @@ import { ref, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 
-const { deck, flashcards } = defineProps({ deck: Object, flashcards: Object });
+const { deck, flashcards } = defineProps({ deck: Object, flashcards: Array });
 const startQuiz = ref(false);
 const currentCards = ref([]);
 const currentAnswers = ref([]);
