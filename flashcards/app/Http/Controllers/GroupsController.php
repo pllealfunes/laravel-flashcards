@@ -151,15 +151,16 @@ class GroupsController extends Controller
  */
 public function removeDeck($deckId)
 {
-    try {
-         Deck::where('id', $deckId)->update(['group_id' => null]);
-
-        return back()->with('success', 'Deck removed from group successfully.');
-    } catch (ModelNotFoundException $e) {
-        abort(404, 'Deck not found');
-    } catch (\Exception $e) {
-        return back()->with('error', 'An error occurred while removing the deck.');
-    }
+    try { 
+        Deck::where('id', $deckId)->update(['group_id' => NULL]);
+            return back()->with('success', 'Deck removed from group successfully.');
+        } catch (ModelNotFoundException $e) {
+            // Handle the case where the deck is not found with a 404 status code
+            abort(404, 'Deck not found');
+        } catch (\Exception $e) {
+            // Handle other potential exceptions with a generic error message
+            return back()->with('error', 'An error occurred while removing the deck.');
+        }
 }
 
 

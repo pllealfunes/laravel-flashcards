@@ -9,11 +9,11 @@ import SearchBar from "@/Components/SearchBar.vue";
 import SearchPagination from "@/Components/Pagination.vue";
 import UsersPagination from "@/Components/Pagination.vue";
 
-const { decks, groups, successMessage } = defineProps([
-    "decks",
-    "groups",
-    "successMessage",
-]);
+const { decks, flashcards, groups, successLogin } = defineProps({
+    decks: Array,
+    groups: Array,
+    successLogin: String,
+});
 const items = ref([]);
 const searchInput = ref("");
 
@@ -56,7 +56,6 @@ const searchResults = computed(() => {
             </div>
         </template>
 
-        <SuccessLogin v-if="successMessage" :message="successMessage" />
         <SuccessToast
             v-if="$page.props.flash.success"
             :message="$page.props.flash.success"
@@ -64,19 +63,29 @@ const searchResults = computed(() => {
 
         <div
             v-if="searchInput"
-            class="mt-6 flex flex-col flex-wrap justify-center items-center gap-4"
+            class="flex flex-wrap justify-center items-center gap-4"
         >
-            <Index v-for="item in searchResults" :key="item.id" :item="item" />
-            <UsersPagination :results="searchResults" class="mt-5" />
+            <div>
+                <Index
+                    v-for="item in searchResults"
+                    :key="item.id"
+                    :item="item"
+                />
+                <UsersPagination
+                    v-if="searchResults.length > 10"
+                    :results="searchResults"
+                    class="mt-5"
+                />
+            </div>
         </div>
 
-        <div v-else>
-            <div
-                class="mt-6 flex flex-col flex-wrap justify-center items-center gap-4"
-            >
-                <Index v-for="item in items" :key="item.id" :item="item" />
-                <SearchPagination results="items" class="mt-5" />
-            </div>
+        <div v-else class="flex flex-wrap justify-center items-center gap-4">
+            <Index v-for="item in items" :key="item.id" :item="item" />
+            <SearchPagination
+                v-if="items.length > 10"
+                results="items"
+                class="mt-5"
+            />
         </div>
     </AuthenticatedLayout>
 </template>

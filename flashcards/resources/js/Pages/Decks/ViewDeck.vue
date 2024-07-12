@@ -101,7 +101,7 @@ const totalPages = computed(() =>
 </script>
 
 <template>
-    <Head title="deck.title" />
+    <Head :title="deck.title" />
     <AuthenticatedLayout>
         <template #header>
             <div class="flex flex-row justify-between items-center">
@@ -113,7 +113,7 @@ const totalPages = computed(() =>
                         :href="route('deck.quiz', { deck: deck.id })"
                         as="button"
                         type="button"
-                        class="font-bold flex gap-2 justify-center items-center focus:outline-none dfont-bold ark:text-black bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
+                        class="font-bold flex gap-2 justify-center items-center focus:outline-none dfont-bold ark:text-black bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-4 py-2 me-2 mb-2 dark:focus:ring-yellow-900"
                     >
                         Quiz
                         <svg
@@ -202,7 +202,7 @@ const totalPages = computed(() =>
                         :href="route('deck.showUpdatePage', { deck: deck.id })"
                         as="button"
                         type="button"
-                        class="font-bold flex gap-2 justify-center items-center focus:outline-none dfont-bold ark:text-black bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
+                        class="font-bold flex gap-2 justify-center items-center focus:outline-none dfont-bold ark:text-black bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-4 py-2 me-2 mb-2 dark:focus:ring-yellow-900"
                     >
                         Edit Deck
                         <svg

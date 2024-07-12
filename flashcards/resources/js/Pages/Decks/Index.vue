@@ -20,7 +20,7 @@ dayjs.extend(relativeTime);
 
 <template>
     <div
-        class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between"
+        class="mt-6 max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between"
     >
         <div class="flex flex-row justify-between">
             <span class="dark:text-white"

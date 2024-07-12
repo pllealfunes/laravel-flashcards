@@ -38,7 +38,7 @@ Route::get('/dashboard', function () {
      $data = [
         'decks' => $decks,
         'groups' => $groups,
-        'successMessage' => "You're logged in!",
+        'successLogin' => session('success')
     ];
     return Inertia::render('Dashboard', $data);
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -52,9 +52,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/deck/{deck}', [DeckController::class, 'destroy'])->name('deck.destroy');
     Route::get('/deck/updateDeck/{deck}', [DeckController::class, 'showUpdatePage'])->name('deck.showUpdatePage');
     Route::patch('/deck/updateTitle/{deck}', [DeckController::class, 'updateTitle'])->name('deck.updateTitle');
-    Route::get('/deck/quiz/{deck}', [DeckController::class, 'quiz'])->name('deck.quiz'); 
-    Route::get('/deck/memorygame/{deck}', [DeckController::class, 'memoryGame'])->name('deck.memoryGame'); 
-    Route::get('/deck/matchinggame/{deck}', [DeckController::class, 'matchingGame'])->name('deck.matchingGame'); 
 });
 
 
@@ -73,6 +70,18 @@ Route::middleware('auth')->group(function () {
     Route::put('/group/removeDeck/{deck}', [GroupsController::class, 'removeDeck'])->name('group.removeDeck');
     Route::delete('/group/keepDecks/{group}', [GroupsController::class, 'keepDecks'])->name('group.keepDecks');
     Route::delete('/group/delete/{group}', [GroupsController::class, 'destroy'])->name('group.destroy');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/deck/quiz/{deck}', [DeckController::class, 'quiz'])->name('deck.quiz');  
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/deck/matchinggame/{deck}', [DeckController::class, 'matchingGame'])->name('deck.matchingGame'); 
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/deck/memorygame/{deck}', [DeckController::class, 'memoryGame'])->name('deck.memoryGame'); 
 });
 
 Route::middleware('auth')->group(function () {

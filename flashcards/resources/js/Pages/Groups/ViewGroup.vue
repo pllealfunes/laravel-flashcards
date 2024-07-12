@@ -29,12 +29,10 @@ const deleteKeepDecksModal = ref(false);
 const deleteGroupModal = ref(false);
 const removeDeckModal = ref(false);
 const handleSearch = (input) => {
-    console.log(input);
     searchInput.value = input;
 };
 
 const searchResults = computed(() => {
-    console.log(searchInput.value);
     return userDecks.filter((item) => {
         return item.title
             .toLowerCase()
@@ -330,7 +328,7 @@ const removeDeck = async () => {
             :message="$page.props.flash.error"
         />
 
-        <div class="mt-6 flex flex-row flex-wrap justify-center items-center">
+        <div class="mt-6 flex flex-wrap justify-center items-center">
             <div
                 v-if="searchInput"
                 class="flex flex-col flex-wrap justify-center items-center gap-4"
@@ -380,8 +378,12 @@ const removeDeck = async () => {
                             >Not Viewed</span
                         >
                     </div>
-                    <SearchPagination results="userDecks" class="mt-5" />
                 </div>
+                <SearchPagination
+                    v-if="userDecks.length > 10"
+                    results="userDecks"
+                    class="mt-5"
+                />
             </div>
             <div
                 v-else
@@ -433,7 +435,11 @@ const removeDeck = async () => {
                         >
                     </div>
                 </div>
-                <UsersPagination results="userDecks" class="mt-5" />
+                <UsersPagination
+                    v-if="userDecks.length > 10"
+                    results="userDecks"
+                    class="mt-5"
+                />
             </div>
         </div>
     </AuthenticatedLayout>

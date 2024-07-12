@@ -2,6 +2,7 @@
 import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
+import { VueDraggableNext } from "vue-draggable-next";
 
 const { deck, flashcards } = defineProps({ deck: Object, flashcards: Array });
 
@@ -11,14 +12,16 @@ const answersArray = ref([]);
 const questionsArray = ref([]);
 const pickedCards = ref([]);
 const timer = ref(null);
-const newGame = ref(false);
+const newGame = ref(true);
 const startTime = ref(0);
 const elapsedTime = ref(0);
 const isRunning = ref(false);
 const displayTime = ref("");
 const results = ref(false);
 const gameCards = ref([]);
-const numCardsNeeded = 6;
+const numCardsNeeded = 4;
+const arrayFirstHalf = ref([]);
+const arraySecondHalf = ref([]);
 
 const startRound = () => {
     gameCards.value =
@@ -102,55 +105,110 @@ const startGame = () => {
     startRound();
 
     answersArray.value = gameCards.value.map(function (flashcard) {
-        return { type: "answer", value: flashcard.answer };
+        return { id: flashcard.id, type: "answer", value: flashcard.answer };
     });
 
     questionsArray.value = gameCards.value.map(function (flashcard) {
-        return { type: "question", value: flashcard.question };
+        return {
+            id: flashcard.id,
+            type: "question",
+            value: flashcard.question,
+        };
     });
 
-    currentCards.value = [...answersArray.value, ...questionsArray.value];
+    currentCards.value = [];
+    for (let i = 0; i < gameCards.value.length; i++) {
+        currentCards.value.push({
+            ...questionsArray.value[i],
+            matched: false,
+            style: "bg-sky-950",
+        });
+        currentCards.value.push({
+            ...answersArray.value[i],
+            matched: false,
+            style: "bg-sky-950",
+        });
+    }
 
-    flippedStates.value = currentCards.value.map(() => ({
-        flipped: false,
-        style: "bg-sky-950",
-    }));
+    const half = Math.ceil(currentCards.value.length / 2);
+    arrayFirstHalf.value = currentCards.value.slice(0, half);
+    arraySecondHalf.value = currentCards.value.slice(half);
 
-    startWatch();
+    //startWatch();
 };
 
 const checkGameOver = () => {
     if (isGameOver.value) {
         newGame.value = false;
         results.value = true;
-        stopWatch();
+        //stopWatch();
     }
 };
 
-const toggleFlip = (index, type) => {
-    // Update the flipped state of the clicked card
-    if (flippedStates.value[index].flipped || pickedCards.value.length === 2) {
+const draggedCard = ref(null);
+
+const startDrag = (event, card) => {
+    if (card.matched) return; // Prevent dragging of matched cards
+    draggedCard.value = card;
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("cardId", card.id);
+    console.log("Drag started:", card);
+};
+
+const onDrop = (event, droppedId) => {
+    event.preventDefault();
+
+    const cardId = event.dataTransfer.getData("cardId");
+    if (!cardId) {
+        console.error("No cardId found in dataTransfer");
         return;
     }
 
-    flippedStates.value[index].flipped = !flippedStates.value[index].flipped;
-    pickedCard(index, type);
+    console.log("Dropped cardId:", cardId);
+    console.log("Dropped on cardId:", droppedId);
+
+    const draggedCardElement = document.getElementById(`card-${cardId}`);
+    const droppedCardElement = document.getElementById(`card-${droppedId}`);
+
+    console.log("Dragged card element:", draggedCardElement);
+    console.log("Dropped card element:", droppedCardElement);
+
+    if (!draggedCardElement || !droppedCardElement) {
+        console.error("Dragged or dropped card element not found");
+        return;
+    }
+
+    // Find the card objects in arraySecondHalf and arrayFirstHalf
+    const draggedCard = arraySecondHalf.value.find(
+        (card) => card.id === Number(cardId)
+    );
+    const droppedCard = arrayFirstHalf.value.find(
+        (card) => card.id === droppedId
+    );
+    console.log(draggedCard);
+    console.log(droppedCard);
+    if (!draggedCard || !droppedCard) {
+        console.error("Dragged or dropped card object not found");
+        return;
+    }
+
+    // Append the dragged card to the dropped card element
+    if (!droppedCardElement.contains(draggedCardElement)) {
+        droppedCardElement.appendChild(draggedCardElement);
+        console.log("Card appended successfully");
+    } else {
+        console.error("Dropped card already contains the dragged card");
+    }
+
+    droppedCardElement.style.position = "relative";
+    draggedCardElement.style.position = "absolute";
+    draggedCardElement.style.top = "200px"; // Adjust as needed
 };
 
-function pickedCard(index, type) {
-    if (pickedCards.value.length < 2) {
-        pickedCards.value.push({ index, type });
-    }
-
-    if (pickedCards.value.length === 2) {
-        compareCards();
-    }
-}
-
-const compareCards = () => {
-    const [firstCard, secondCard] = pickedCards.value;
+const compareCards = (draggedCard, droppedCard) => {
+    const [firstCard, secondCard] = [draggedCard, droppedCard];
     if (firstCard.type === secondCard.type) {
-        setCardStyles(firstCard.index, secondCard.index, "bg-red-500", 2000);
+        setCardStyles(draggedCard, droppedCard, "bg-red-500", 2000);
         return;
     }
 
@@ -162,52 +220,37 @@ const compareCards = () => {
     const answer = answersArray.value[answerCard.index];
 
     if (question.answer === answer.value) {
-        setCardStyles(
-            firstCard.index,
-            secondCard.index,
-            "bg-green-500",
-            2000,
-            "hidden"
-        );
+        console.log("cards matched");
     } else {
-        setCardStyles(firstCard.index, secondCard.index, "bg-red-500", 2000);
+        console.log("cards didnt matched");
     }
 
-    checkGameOver();
+    //checkGameOver();
 };
 
 const setCardStyles = (
-    firstIndex,
-    secondIndex,
+    draggedCard,
+    droppedCard,
     style,
     timeout,
     hiddenStyle = "bg-sky-950"
 ) => {
-    flippedStates.value[firstIndex].style = style;
-    flippedStates.value[secondIndex].style = style;
+    droppedCard.style = style;
+    draggedCard.style = style;
     setTimeout(() => {
-        flippedStates.value[firstIndex].style = hiddenStyle;
-        flippedStates.value[secondIndex].style = hiddenStyle;
-        flippedStates.value[firstIndex].flipped =
-            hiddenStyle === "bg-sky-950"
-                ? false
-                : flippedStates.value[firstIndex].flipped;
-        flippedStates.value[secondIndex].flipped =
-            hiddenStyle === "bg-sky-950"
-                ? false
-                : flippedStates.value[secondIndex].flipped;
-        pickedCards.value = [];
+        draggedCard.style = hiddenStyle;
+        droppedCard.style = hiddenStyle;
     }, timeout);
 };
 </script>
 
 <template>
-    <Head title="Memory Game" />
+    <Head title="Matching Game" />
     <AuthenticatedLayout>
         <h1
             class="mt-6 mb-6 text-4xl font-extrabold leading-none tracking-tight text-gray-800 flex justify-center items-center"
         >
-            Memory Game: {{ deck.title }}
+            Matching Game: {{ deck.title }}
         </h1>
         <div class="flex flex-col justify-center items-center">
             <button
@@ -217,21 +260,6 @@ const setCardStyles = (
             >
                 New Game
             </button>
-            <div v-if="newGame">{{ displayTime }}</div>
-        </div>
-
-        <div v-if="results" class="flex justify-center items-center mt-5">
-            <div
-                class="w-[400px] h-[400px] py-11 rounded-full flex flex-col items-center justify-center text-white bg-purple-500"
-            >
-                <p class="text-2xl font-bold m-5">
-                    You Did It {{ $page.props.auth.user.name }}!
-                </p>
-                <p class="text-2xl font-bold m-5">Your Final Time Was :</p>
-                <p class="text-2xl font-bold m-5">
-                    {{ displayTime }}
-                </p>
-            </div>
         </div>
 
         <section class="flex flex-col justify-center items-center">
@@ -241,21 +269,41 @@ const setCardStyles = (
                 id="flashcardsDeck"
             >
                 <div
-                    v-for="(card, index) in currentCards"
+                    v-for="(card, index) in arrayFirstHalf"
                     :key="card.id"
-                    class="m-5 font-semibold flex flex-row justify-center items-center transition-transform duration-500 ease-in-out"
+                    :id="`card-${card.id}`"
+                    @drop="onDrop($event, card.id)"
+                    @dragenter.prevent
+                    @dragover.prevent
+                    class="m-5 font-semibold flex flex-row justify-center items-center first-half-card column"
                 >
                     <div
-                        class="w-[350px] h-[250px] dark:text-slate-200 border border-gray-200 rounded-lg shadow mb-2 flex flex-row justify-between cursor-pointer group perspective relative preserve-3d duration-1000"
-                        :class="[
-                            { 'flip-card': flippedStates[index].flipped },
-                            flippedStates[index].style,
-                        ]"
-                        @click.stop="toggleFlip(index, card.type)"
+                        class="w-[350px] h-[250px] bg-sky-950 dark:text-slate-200 border border-gray-200 rounded-lg shadow mb-2 flex flex-row justify-between cursor-pointer card"
                     >
-                        <div
-                            class="flip-card backface-hidden w-full h-full rounded-lg"
-                        >
+                        <div class="w-full h-full rounded-lg">
+                            <div
+                                class="text-center text-md flex flex-col items-center justify-center h-full"
+                            >
+                                <p class="text-smal">
+                                    {{ card.value }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    v-for="(card, index) in arraySecondHalf"
+                    :key="card.id"
+                    class="m-5 font-semibold flex flex-row justify-center items-center first-half-card colum"
+                >
+                    <div
+                        :id="`card-${card.id}`"
+                        class="w-[350px] h-[250px] bg-sky-950 dark:text-slate-200 border border-gray-200 rounded-lg shadow mb-2 flex flex-row justify-between cursor-pointer"
+                        draggable="true"
+                        @dragstart="startDrag($event, card)"
+                    >
+                        <div class="w-full h-full rounded-lg">
                             <div
                                 class="text-center text-md flex flex-col items-center justify-center h-full"
                             >
@@ -273,10 +321,8 @@ const setCardStyles = (
             >
                 <p class="text-justify p-14 font-bold">
                     <b class="text-black">Rules of The Game :</b> Click on the
-                    New Game button to start a new game. Click on each card to
-                    try and match the questions to their answers. At the end of
-                    the game the total time it took you to finish will be
-                    displayed.
+                    New Game button to start a new game. Drag cards from the
+                    second row to match them to cards from the first row.
                 </p>
             </div>
         </section>

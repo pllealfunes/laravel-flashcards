@@ -176,7 +176,14 @@ class DeckController extends Controller
              return Inertia::render('Quiz/Quiz', ['deck' => $deck, 'flashcards' => $flashcards]);
         }
 
+  /**
+     * GET the Matching Game Page
+     */
 
+        public function matchingGame(Deck $deck){
+             $flashcards = Flashcard::where('deck_id', $deck->id)->get();
+             return Inertia::render('MatchingGame/MatchingGame', ['deck' => $deck, 'flashcards' => $flashcards]);
+        }
 
          /**
      * GET the Memory Game Page
