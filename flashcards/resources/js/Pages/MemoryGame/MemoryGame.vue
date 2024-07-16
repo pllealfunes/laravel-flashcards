@@ -30,35 +30,43 @@ const startRound = () => {
 
 // Function to get random cards from the flashcards array
 const getRandomCards = (cards, count) => {
+    // Separate cards into question and answer categories
     const questionCards = cards.filter((card) => card.question);
     const answerCards = cards.filter((card) => card.answer);
 
-    console.log("Question Cards:", questionCards); // Debugging log
-    console.log("Answer Cards:", answerCards); // Debugging log
+    // Debugging logs to show filtered cards
+    console.log("Question Cards:", questionCards);
+    console.log("Answer Cards:", answerCards);
 
+    // Randomly select half of the required count from each category
     const selectedQuestions = getRandomItems(questionCards, count / 2);
     const selectedAnswers = getRandomItems(answerCards, count / 2);
 
+    // Combine selected questions and answers, then shuffle them
     const combinedCards = [...selectedQuestions, ...selectedAnswers];
-    console.log("Selected Questions:", selectedQuestions); // Debugging log
-    console.log("Selected Answers:", selectedAnswers); // Debugging log
+    console.log("Selected Questions:", selectedQuestions);
+    console.log("Selected Answers:", selectedAnswers);
     return shuffleArray(combinedCards);
 };
 
 // Function to get repeated cards when flashcards are insufficient
 const getRepeatedCards = (cards, count) => {
+    // Separate cards into question and answer categories
     const questionCards = cards.filter((card) => card.question);
     const answerCards = cards.filter((card) => card.answer);
 
-    console.log("Question Cards:", questionCards); // Debugging log
-    console.log("Answer Cards:", answerCards); // Debugging log
+    // Debugging logs to show filtered cards
+    console.log("Question Cards:", questionCards);
+    console.log("Answer Cards:", answerCards);
 
+    // Randomly select half of the required count from each category
     const selectedQuestions = getRandomItems(questionCards, count / 2);
     const selectedAnswers = getRandomItems(answerCards, count / 2);
 
+    // Combine selected questions and answers, then shuffle them
     const combinedCards = [...selectedQuestions, ...selectedAnswers];
-    console.log("Selected Questions:", selectedQuestions); // Debugging log
-    console.log("Selected Answers:", selectedAnswers); // Debugging log
+    console.log("Selected Questions:", selectedQuestions);
+    console.log("Selected Answers:", selectedAnswers);
     return shuffleArray(combinedCards);
 };
 
@@ -68,9 +76,12 @@ const getRandomItems = (array, count) => {
     const totalItems = array.length;
     const indices = Array.from({ length: totalItems }, (_, i) => i);
 
+    // Select 'count' random items from the array
     for (let i = 0; i < count; i++) {
         const randomIndex = Math.floor(Math.random() * (totalItems - i));
         result.push(array[indices[randomIndex]]);
+
+        // Swap selected index with the last index to avoid duplicates
         [indices[randomIndex], indices[totalItems - i - 1]] = [
             indices[totalItems - i - 1],
             indices[randomIndex],
