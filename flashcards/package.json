@@ -19,6 +19,6 @@
     },
     "dependencies": {
         "dayjs": "^1.11.10",
-        "vue-draggable-next": "^2.2.1"
+        "vuedraggable": "^4.1.0"
     }
 }
