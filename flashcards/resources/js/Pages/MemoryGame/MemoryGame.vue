@@ -19,6 +19,7 @@ const displayTime = ref("");
 const results = ref(false);
 const gameCards = ref([]);
 const numCardsNeeded = 6;
+const incorrectAttempts = ref(0);
 
 const startRound = () => {
     gameCards.value =
@@ -27,24 +28,65 @@ const startRound = () => {
             : getRepeatedCards(flashcards, numCardsNeeded);
 };
 
+// Function to get random cards from the flashcards array
 const getRandomCards = (cards, count) => {
-    return Array.from(
-        { length: count },
-        () => cards[Math.floor(Math.random() * cards.length)]
-    );
+    const questionCards = cards.filter((card) => card.question);
+    const answerCards = cards.filter((card) => card.answer);
+
+    console.log("Question Cards:", questionCards); // Debugging log
+    console.log("Answer Cards:", answerCards); // Debugging log
+
+    const selectedQuestions = getRandomItems(questionCards, count / 2);
+    const selectedAnswers = getRandomItems(answerCards, count / 2);
+
+    const combinedCards = [...selectedQuestions, ...selectedAnswers];
+    console.log("Selected Questions:", selectedQuestions); // Debugging log
+    console.log("Selected Answers:", selectedAnswers); // Debugging log
+    return shuffleArray(combinedCards);
 };
 
+// Function to get repeated cards when flashcards are insufficient
 const getRepeatedCards = (cards, count) => {
-    let selectedCards = [];
-    const availableCards = [...cards];
-    while (selectedCards.length < count) {
-        availableCards.sort(() => 0.5 - Math.random());
-        selectedCards = [
-            ...selectedCards,
-            ...availableCards.slice(0, count - selectedCards.length),
+    const questionCards = cards.filter((card) => card.question);
+    const answerCards = cards.filter((card) => card.answer);
+
+    console.log("Question Cards:", questionCards); // Debugging log
+    console.log("Answer Cards:", answerCards); // Debugging log
+
+    const selectedQuestions = getRandomItems(questionCards, count / 2);
+    const selectedAnswers = getRandomItems(answerCards, count / 2);
+
+    const combinedCards = [...selectedQuestions, ...selectedAnswers];
+    console.log("Selected Questions:", selectedQuestions); // Debugging log
+    console.log("Selected Answers:", selectedAnswers); // Debugging log
+    return shuffleArray(combinedCards);
+};
+
+// Function to get random items from an array
+const getRandomItems = (array, count) => {
+    const result = [];
+    const totalItems = array.length;
+    const indices = Array.from({ length: totalItems }, (_, i) => i);
+
+    for (let i = 0; i < count; i++) {
+        const randomIndex = Math.floor(Math.random() * (totalItems - i));
+        result.push(array[indices[randomIndex]]);
+        [indices[randomIndex], indices[totalItems - i - 1]] = [
+            indices[totalItems - i - 1],
+            indices[randomIndex],
         ];
     }
-    return selectedCards;
+
+    return result;
+};
+
+// Function to shuffle an array
+const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 };
 
 const startWatch = () => {
@@ -63,7 +105,7 @@ const stopWatch = () => {
     }
 };
 
-const reset = () => {
+const resetWatch = () => {
     clearInterval(timer.value);
     startTime.value = 0;
     elapsedTime.value = 0;
@@ -94,12 +136,13 @@ const isGameOver = computed(() => {
 });
 
 const startGame = () => {
-    reset();
+    resetWatch();
     gameCards.value = [];
     pickedCards.value = [];
     results.value = false;
     newGame.value = true;
     startRound();
+    incorrectAttempts.value = 0;
 
     answersArray.value = gameCards.value.map(function (flashcard) {
         return { type: "answer", value: flashcard.answer };
@@ -151,6 +194,7 @@ const compareCards = () => {
     const [firstCard, secondCard] = pickedCards.value;
     if (firstCard.type === secondCard.type) {
         setCardStyles(firstCard.index, secondCard.index, "bg-red-500", 2000);
+        incorrectAttempts.value++;
         return;
     }
 
@@ -171,9 +215,8 @@ const compareCards = () => {
         );
     } else {
         setCardStyles(firstCard.index, secondCard.index, "bg-red-500", 2000);
+        incorrectAttempts.value++;
     }
-
-    checkGameOver();
 };
 
 const setCardStyles = (
@@ -197,6 +240,7 @@ const setCardStyles = (
                 ? false
                 : flippedStates.value[secondIndex].flipped;
         pickedCards.value = [];
+        checkGameOver();
     }, timeout);
 };
 </script>
@@ -230,6 +274,12 @@ const setCardStyles = (
                 <p class="text-2xl font-bold m-5">Your Final Time Was :</p>
                 <p class="text-2xl font-bold m-5">
                     {{ displayTime }}
+                </p>
+                <p class="text-2xl font-bold m-5">
+                    Number of Failed Attempts :
+                </p>
+                <p class="text-2xl font-bold m-5">
+                    {{ incorrectAttempts }}
                 </p>
             </div>
         </div>

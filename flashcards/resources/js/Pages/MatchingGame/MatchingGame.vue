@@ -2,26 +2,24 @@
 import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
-import { VueDraggableNext } from "vue-draggable-next";
+import draggable from "vuedraggable";
 
 const { deck, flashcards } = defineProps({ deck: Object, flashcards: Array });
 
-const currentCards = ref([]);
-const flippedStates = ref([]);
 const answersArray = ref([]);
 const questionsArray = ref([]);
-const pickedCards = ref([]);
-const timer = ref(null);
-const newGame = ref(true);
-const startTime = ref(0);
-const elapsedTime = ref(0);
-const isRunning = ref(false);
-const displayTime = ref("");
-const results = ref(false);
+const newGame = ref(false);
 const gameCards = ref([]);
 const numCardsNeeded = 4;
 const arrayFirstHalf = ref([]);
 const arraySecondHalf = ref([]);
+const results = ref(false);
+const timer = ref(null);
+const startTime = ref(0);
+const elapsedTime = ref(0);
+const isRunning = ref(false);
+const displayTime = ref("");
+const incorrectAttempts = ref(0);
 
 const startRound = () => {
     gameCards.value =
@@ -30,6 +28,7 @@ const startRound = () => {
             : getRepeatedCards(flashcards, numCardsNeeded);
 };
 
+// Function to get random cards from the flashcards array
 const getRandomCards = (cards, count) => {
     return Array.from(
         { length: count },
@@ -37,6 +36,7 @@ const getRandomCards = (cards, count) => {
     );
 };
 
+// Function to get repeated cards when flashcards are insufficient
 const getRepeatedCards = (cards, count) => {
     let selectedCards = [];
     const availableCards = [...cards];
@@ -66,7 +66,7 @@ const stopWatch = () => {
     }
 };
 
-const reset = () => {
+const resetWatch = () => {
     clearInterval(timer.value);
     startTime.value = 0;
     elapsedTime.value = 0;
@@ -92,67 +92,102 @@ const updateWatch = () => {
     displayTime.value = `${hours}:${minutes}:${seconds}:${milliseconds}`;
 };
 
-const isGameOver = computed(() => {
-    return flippedStates.value.every((card) => card.style === "hidden");
-});
-
 const startGame = () => {
-    reset();
-    gameCards.value = [];
-    pickedCards.value = [];
     results.value = false;
     newGame.value = true;
     startRound();
+    resetWatch();
+    incorrectAttempts.value = 0;
 
-    answersArray.value = gameCards.value.map(function (flashcard) {
-        return { id: flashcard.id, type: "answer", value: flashcard.answer };
+    // Use a Set to track unique questions and answers
+    const uniqueQuestions = new Set();
+    const uniqueAnswers = new Set();
+
+    // Filter gameCards to ensure unique questions and answers
+    let uniqueGameCards = gameCards.value.filter((flashcard) => {
+        if (
+            !uniqueQuestions.has(flashcard.question) &&
+            !uniqueAnswers.has(flashcard.answer)
+        ) {
+            uniqueQuestions.add(flashcard.question);
+            uniqueAnswers.add(flashcard.answer);
+            return true;
+        }
+        return false;
     });
 
-    questionsArray.value = gameCards.value.map(function (flashcard) {
+    // Ensure we have exactly numCardsNeeded unique flashcards
+    if (uniqueGameCards.length < numCardsNeeded) {
+        const additionalCardsNeeded = numCardsNeeded - uniqueGameCards.length;
+        const additionalCards = getRandomCards(
+            flashcards,
+            additionalCardsNeeded
+        );
+        uniqueGameCards = uniqueGameCards.concat(additionalCards);
+    }
+
+    let idCounter = 0;
+    answersArray.value = uniqueGameCards.map((flashcard) => {
         return {
-            id: flashcard.id,
-            type: "question",
-            value: flashcard.question,
+            id: idCounter++,
+            type: "answer",
+            value: flashcard.answer,
+            style: "bg-sky-950",
         };
     });
 
-    currentCards.value = [];
-    for (let i = 0; i < gameCards.value.length; i++) {
-        currentCards.value.push({
-            ...questionsArray.value[i],
-            matched: false,
+    questionsArray.value = uniqueGameCards.map((flashcard) => {
+        return {
+            id: idCounter++,
+            type: "question",
+            value: flashcard.question,
             style: "bg-sky-950",
-        });
-        currentCards.value.push({
-            ...answersArray.value[i],
-            matched: false,
-            style: "bg-sky-950",
-        });
+        };
+    });
+
+    // Shuffle answersArray to randomize order
+    answersArray.value = shuffleArray(answersArray.value);
+
+    // Clear arrays before updating
+    arrayFirstHalf.value = [];
+    arraySecondHalf.value = [];
+
+    // Assign questions to arrayFirstHalf and shuffled answers to arraySecondHalf
+    for (let i = 0; i < numCardsNeeded; i++) {
+        arrayFirstHalf.value.push(questionsArray.value[i]);
+        arraySecondHalf.value.push(answersArray.value[i]);
     }
 
-    const half = Math.ceil(currentCards.value.length / 2);
-    arrayFirstHalf.value = currentCards.value.slice(0, half);
-    arraySecondHalf.value = currentCards.value.slice(half);
-
-    //startWatch();
+    startWatch();
 };
+
+// Function to shuffle an array
+const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+};
+
+const isGameOver = computed(() => {
+    return (
+        arrayFirstHalf.value.every((card) => card.style === "hidden") &&
+        arraySecondHalf.value.every((card) => card.style === "hidden")
+    );
+});
 
 const checkGameOver = () => {
     if (isGameOver.value) {
         newGame.value = false;
         results.value = true;
-        //stopWatch();
+        stopWatch();
+        setTimeout(startGame, 2000);
     }
 };
 
-const draggedCard = ref(null);
-
-const startDrag = (event, card) => {
-    if (card.matched) return; // Prevent dragging of matched cards
-    draggedCard.value = card;
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("cardId", card.id);
-    console.log("Drag started:", card);
+const onDragStart = (event, cardId) => {
+    event.dataTransfer.setData("cardId", cardId);
 };
 
 const onDrop = (event, droppedId) => {
@@ -164,82 +199,58 @@ const onDrop = (event, droppedId) => {
         return;
     }
 
-    console.log("Dropped cardId:", cardId);
-    console.log("Dropped on cardId:", droppedId);
+    // Find the dragged card and dropped card in arraySecondHalf or arrayFirstHalf
+    const draggedCard =
+        arraySecondHalf.value.find((card) => card.id === Number(cardId)) ||
+        arrayFirstHalf.value.find((card) => card.id === Number(cardId));
+    const droppedCard =
+        arraySecondHalf.value.find((card) => card.id === droppedId) ||
+        arrayFirstHalf.value.find((card) => card.id === droppedId);
 
-    const draggedCardElement = document.getElementById(`card-${cardId}`);
-    const droppedCardElement = document.getElementById(`card-${droppedId}`);
-
-    console.log("Dragged card element:", draggedCardElement);
-    console.log("Dropped card element:", droppedCardElement);
-
-    if (!draggedCardElement || !droppedCardElement) {
-        console.error("Dragged or dropped card element not found");
-        return;
-    }
-
-    // Find the card objects in arraySecondHalf and arrayFirstHalf
-    const draggedCard = arraySecondHalf.value.find(
-        (card) => card.id === Number(cardId)
-    );
-    const droppedCard = arrayFirstHalf.value.find(
-        (card) => card.id === droppedId
-    );
-    console.log(draggedCard);
-    console.log(droppedCard);
     if (!draggedCard || !droppedCard) {
         console.error("Dragged or dropped card object not found");
         return;
     }
 
-    // Append the dragged card to the dropped card element
-    if (!droppedCardElement.contains(draggedCardElement)) {
-        droppedCardElement.appendChild(draggedCardElement);
-        console.log("Card appended successfully");
-    } else {
-        console.error("Dropped card already contains the dragged card");
-    }
-
-    droppedCardElement.style.position = "relative";
-    draggedCardElement.style.position = "absolute";
-    draggedCardElement.style.top = "200px"; // Adjust as needed
+    compareCards(draggedCard, droppedCard);
 };
 
 const compareCards = (draggedCard, droppedCard) => {
     const [firstCard, secondCard] = [draggedCard, droppedCard];
+
     if (firstCard.type === secondCard.type) {
-        setCardStyles(draggedCard, droppedCard, "bg-red-500", 2000);
+        setCardStyles(firstCard, secondCard, "bg-red-500", 2000);
+        incorrectAttempts.value++;
         return;
     }
 
     const questionCard = firstCard.type === "question" ? firstCard : secondCard;
     const answerCard = firstCard.type === "answer" ? firstCard : secondCard;
+
     const question = flashcards.find(
-        (card) => card.question === currentCards.value[questionCard.index].value
+        (card) => card.question === questionCard.value
     );
-    const answer = answersArray.value[answerCard.index];
 
-    if (question.answer === answer.value) {
-        console.log("cards matched");
+    const answer = answersArray.value.find(
+        (card) => card.value === answerCard.value
+    );
+
+    if (question && answer && question.answer === answer.value) {
+        setCardStyles(firstCard, secondCard, "bg-green-500", 2000, "hidden");
     } else {
-        console.log("cards didnt matched");
+        setCardStyles(firstCard, secondCard, "bg-red-500", 2000, "bg-sky-950");
+        incorrectAttempts.value++;
     }
-
-    //checkGameOver();
 };
 
-const setCardStyles = (
-    draggedCard,
-    droppedCard,
-    style,
-    timeout,
-    hiddenStyle = "bg-sky-950"
-) => {
-    droppedCard.style = style;
-    draggedCard.style = style;
+const setCardStyles = (firstCard, secondCard, style, timeout, hiddenStyle) => {
+    firstCard.style = style;
+    secondCard.style = style;
+
     setTimeout(() => {
-        draggedCard.style = hiddenStyle;
-        droppedCard.style = hiddenStyle;
+        firstCard.style = hiddenStyle;
+        secondCard.style = hiddenStyle;
+        checkGameOver(); // Check if the game is over after cards are compared
     }, timeout);
 };
 </script>
@@ -256,65 +267,70 @@ const setCardStyles = (
             <button
                 type="button"
                 class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-bold rounded-lg px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
-                @click="startGame()"
+                @click="startGame"
             >
                 New Game
             </button>
+            <div v-if="newGame">{{ displayTime }}</div>
         </div>
 
         <section class="flex flex-col justify-center items-center">
-            <div
-                v-if="newGame"
-                class="grid md:grid-cols-2 lg:grid-cols-4"
-                id="flashcardsDeck"
-            >
+            <div v-if="newGame" id="flashcardsDeck">
                 <div
-                    v-for="(card, index) in arrayFirstHalf"
-                    :key="card.id"
-                    :id="`card-${card.id}`"
-                    @drop="onDrop($event, card.id)"
-                    @dragenter.prevent
-                    @dragover.prevent
-                    class="m-5 font-semibold flex flex-row justify-center items-center first-half-card column"
+                    class="m-5 font-semibold flex flex-row justify-center items-center gap-4 first-half-card column card-container"
                 >
-                    <div
-                        class="w-[350px] h-[250px] bg-sky-950 dark:text-slate-200 border border-gray-200 rounded-lg shadow mb-2 flex flex-row justify-between cursor-pointer card"
-                    >
-                        <div class="w-full h-full rounded-lg">
-                            <div
-                                class="text-center text-md flex flex-col items-center justify-center h-full"
-                            >
-                                <p class="text-smal">
-                                    {{ card.value }}
-                                </p>
+                    <div v-for="element in arrayFirstHalf" :key="element.id">
+                        <div
+                            :id="element.id"
+                            :class="[
+                                'w-[350px] h-[250px] dark:text-slate-200 border border-gray-200 rounded-lg shadow mb-2 flex flex-row justify-between cursor-pointer card',
+                                element.style,
+                            ]"
+                            @dragover.prevent
+                            @drop="onDrop($event, element.id)"
+                        >
+                            <div class="w-full h-full rounded-lg">
+                                <div
+                                    class="text-center text-md flex flex-col items-center justify-center h-full"
+                                >
+                                    <p class="text-smal">{{ element.value }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div
-                    v-for="(card, index) in arraySecondHalf"
-                    :key="card.id"
-                    class="m-5 font-semibold flex flex-row justify-center items-center first-half-card colum"
+                <draggable
+                    :list="arraySecondHalf"
+                    itemKey="id"
+                    group="cards"
+                    class="m-5 font-semibold flex flex-row justify-center items-center gap-4 first-half-card column card-container"
                 >
-                    <div
-                        :id="`card-${card.id}`"
-                        class="w-[350px] h-[250px] bg-sky-950 dark:text-slate-200 border border-gray-200 rounded-lg shadow mb-2 flex flex-row justify-between cursor-pointer"
-                        draggable="true"
-                        @dragstart="startDrag($event, card)"
-                    >
-                        <div class="w-full h-full rounded-lg">
-                            <div
-                                class="text-center text-md flex flex-col items-center justify-center h-full"
-                            >
-                                <p class="text-small">
-                                    {{ card.value }}
-                                </p>
+                    <template #item="{ element }">
+                        <div
+                            :key="element.id"
+                            :id="element.id"
+                            :class="[
+                                'w-[350px] h-[250px] dark:text-slate-200 border border-gray-200 rounded-lg shadow mb-2 flex flex-row justify-between cursor-pointer card',
+                                element.style,
+                            ]"
+                            @dragstart="onDragStart($event, element.id)"
+                            @dragover.prevent
+                        >
+                            <div class="w-full h-full rounded-lg">
+                                <div
+                                    class="text-center text-md flex flex-col items-center justify-center h-full"
+                                >
+                                    <p class="text-small">
+                                        {{ element.value }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </template>
+                </draggable>
             </div>
+
             <div
                 v-if="!newGame && !results"
                 class="w-[400px] h-[400px] mt-7 rounded-full flex flex-col items-center justify-center text-white bg-purple-500"
@@ -324,6 +340,25 @@ const setCardStyles = (
                     New Game button to start a new game. Drag cards from the
                     second row to match them to cards from the first row.
                 </p>
+            </div>
+            <div v-if="results" class="flex justify-center items-center mt-5">
+                <div
+                    class="w-[400px] h-[400px] py-11 rounded-full flex flex-col items-center justify-center text-white bg-purple-500"
+                >
+                    <p class="text-2xl font-bold mt-5">
+                        You Did It {{ $page.props.auth.user.name }}!
+                    </p>
+                    <p class="text-2xl font-bold m-5">Your Final Time Was :</p>
+                    <p class="text-2xl font-bold m-5">
+                        {{ displayTime }}
+                    </p>
+                    <p class="text-2xl font-bold m-5">
+                        Number of Failed Attempts :
+                    </p>
+                    <p class="text-2xl font-bold m-5">
+                        {{ incorrectAttempts }}
+                    </p>
+                </div>
             </div>
         </section>
     </AuthenticatedLayout>
