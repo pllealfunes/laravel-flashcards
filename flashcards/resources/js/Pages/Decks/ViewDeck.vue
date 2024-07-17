@@ -5,7 +5,7 @@ import { Link, Head } from "@inertiajs/vue3";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
 
-const { deck, flashcards } = defineProps({ deck: Object, flashcards: Object });
+const { deck, flashcards } = defineProps({ deck: Object, flashcards: Array });
 
 const showingNavigationDropdown = ref(false);
 

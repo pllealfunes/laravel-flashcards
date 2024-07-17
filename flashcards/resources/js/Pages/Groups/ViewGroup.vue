@@ -16,8 +16,8 @@ import UsersPagination from "@/Components/Pagination.vue";
 
 const { group, userDecks, availableDecks } = defineProps({
     group: Object,
-    userDecks: Object,
-    availableDecks: Object,
+    userDecks: Array,
+    availableDecks: Array,
 });
 
 dayjs.extend(relativeTime);

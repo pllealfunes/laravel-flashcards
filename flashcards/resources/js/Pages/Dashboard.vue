@@ -8,9 +8,9 @@ import SearchBar from "@/Components/SearchBar.vue";
 import SearchPagination from "@/Components/Pagination.vue";
 import UsersPagination from "@/Components/Pagination.vue";
 
-const { decks, flashcards, groups } = defineProps({
-    decks: Object,
-    groups: Object,
+const { decks, groups } = defineProps({
+    decks: Array,
+    groups: Array,
 });
 
 const items = ref([]);
