@@ -1,15 +1,14 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeckController;
 use App\Http\Controllers\FlashcardsController;
 use App\Http\Controllers\GroupsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Models\Deck;
-use App\Models\Group;
-use Illuminate\Support\Facades\Auth;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -31,17 +30,9 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    $user = Auth::user(); 
-    $decks = Deck::where('user_id', $user->id)->orderByDesc('lastviewed')->get();
-    $groups = Group::where('user_id', $user->id)->orderByDesc('lastviewed')->get();
-     $data = [
-        'decks' => $decks,
-        'groups' => $groups,
-        'successLogin' => session('success')
-    ];
-    return Inertia::render('Dashboard', $data);
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 
 Route::middleware('auth')->group(function () {

@@ -4,7 +4,8 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Link, Head } from "@inertiajs/vue3";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
-const { deck, flashcards } = defineProps(["deck", "flashcards"]);
+
+const { deck, flashcards } = defineProps({ deck: Object, flashcards: Object });
 
 const showingNavigationDropdown = ref(false);
 

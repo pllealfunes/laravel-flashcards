@@ -1,11 +1,10 @@
 <script setup>
 import { useForm, Head, usePage } from "@inertiajs/vue3";
 import { ref, computed } from "vue";
-import InputError from "@/Components/InputError.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import ErrorToast from "@/Components/ErrorToast.vue";
 
-const { decks } = defineProps(["decks"]);
+const { decks } = defineProps({ decks: Object });
 
 const pageSize = 10;
 const currentPage = ref(1);

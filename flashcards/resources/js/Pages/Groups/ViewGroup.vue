@@ -14,11 +14,12 @@ import SearchBar from "@/Components/SearchBar.vue";
 import SearchPagination from "@/Components/Pagination.vue";
 import UsersPagination from "@/Components/Pagination.vue";
 
-const { group, userDecks, availableDecks } = defineProps([
-    "group",
-    "userDecks",
-    "availableDecks",
-]);
+const { group, userDecks, availableDecks } = defineProps({
+    group: Object,
+    userDecks: Object,
+    availableDecks: Object,
+});
+
 dayjs.extend(relativeTime);
 
 const page = usePage();

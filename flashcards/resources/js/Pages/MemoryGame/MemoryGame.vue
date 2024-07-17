@@ -55,18 +55,12 @@ const getRepeatedCards = (cards, count) => {
     const questionCards = cards.filter((card) => card.question);
     const answerCards = cards.filter((card) => card.answer);
 
-    // Debugging logs to show filtered cards
-    console.log("Question Cards:", questionCards);
-    console.log("Answer Cards:", answerCards);
-
     // Randomly select half of the required count from each category
     const selectedQuestions = getRandomItems(questionCards, count / 2);
     const selectedAnswers = getRandomItems(answerCards, count / 2);
 
     // Combine selected questions and answers, then shuffle them
     const combinedCards = [...selectedQuestions, ...selectedAnswers];
-    console.log("Selected Questions:", selectedQuestions);
-    console.log("Selected Answers:", selectedAnswers);
     return shuffleArray(combinedCards);
 };
 

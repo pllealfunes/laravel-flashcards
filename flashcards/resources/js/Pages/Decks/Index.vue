@@ -4,7 +4,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { Link } from "@inertiajs/vue3";
 import { computed } from "vue";
 
-const { item } = defineProps(["item"]);
+const { item } = defineProps({ item: Object });
+
 const itemRoute = computed(() => {
     if (item.type === "deck") {
         return route("deck.show", { deck: item.id });

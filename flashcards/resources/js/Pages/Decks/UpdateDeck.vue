@@ -6,7 +6,8 @@ import SuccessToast from "@/Components/SuccessToast.vue";
 import ErrorToast from "@/Components/ErrorToast.vue";
 import CreateCardModal from "@/Components/CreateCardModal.vue";
 import DeleteModal from "@/Components/DeleteModal.vue";
-const { deck, flashcards } = defineProps(["deck", "flashcards"]);
+
+const { deck, flashcards } = defineProps({ deck: Object, flashcards: Object });
 
 const page = usePage();
 const pageSize = 10;

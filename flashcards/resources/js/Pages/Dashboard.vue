@@ -4,16 +4,15 @@ import { Head } from "@inertiajs/vue3";
 import { ref, onMounted, computed } from "vue";
 import Index from "@/Pages/Decks/Index.vue";
 import SuccessToast from "@/Components/SuccessToast.vue";
-import SuccessLogin from "@/Components/SuccessToast.vue";
 import SearchBar from "@/Components/SearchBar.vue";
 import SearchPagination from "@/Components/Pagination.vue";
 import UsersPagination from "@/Components/Pagination.vue";
 
-const { decks, flashcards, groups, successLogin } = defineProps({
-    decks: Array,
-    groups: Array,
-    successLogin: String,
+const { decks, flashcards, groups } = defineProps({
+    decks: Object,
+    groups: Object,
 });
+
 const items = ref([]);
 const searchInput = ref("");
 
