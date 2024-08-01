@@ -4,21 +4,27 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Link, Head } from "@inertiajs/vue3";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
+import NewPagination from "@/Components/NewPagination.vue";
 
-const { deck, flashcards } = defineProps({ deck: Object, flashcards: Array });
+const { deck, flashcards } = defineProps({ deck: Object, flashcards: Object });
 
 const showingNavigationDropdown = ref(false);
 
 // Create an array to store the flipped state for each card
-const currentCards = ref([...flashcards]);
+const currentCards = ref([...flashcards.data]);
 
 const flippedStates = ref(new Array(currentCards.length).fill(false));
 const activeCardIndex = ref(0); // Keep track of the index of the currently active card
 const isActive = ref(false);
 const showHint = ref(false);
 
-const pageSize = 10;
-const currentPage = ref(1);
+const fetchDecks = (url) => {
+    router.visit(url, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+};
 
 const toggleFlip = (index) => {
     // Update the flipped state of the clicked card
@@ -80,25 +86,6 @@ const shuffleDeck = (deck) => {
     }
     return deck;
 };
-
-// Function to paginate the deck
-const paginateDeck = () => {
-    const startIndex = (currentPage.value - 1) * pageSize;
-    return currentCards.value.slice(startIndex, startIndex + pageSize);
-};
-
-// Computed property to get the current page's cards
-const paginatedCards = computed(() => paginateDeck());
-
-// Function to handle page change
-const onPageChange = (page) => {
-    currentPage.value = page;
-};
-
-// Computed property to get total number of pages
-const totalPages = computed(() =>
-    Math.ceil(currentCards.value.length / pageSize)
-);
 </script>
 
 <template>
@@ -333,11 +320,14 @@ const totalPages = computed(() =>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
-                fill="currentColor"
+                fill="purple"
                 class="w-12 h-12"
                 @click="showPrevCard"
                 :disabled="isPrevButtonDisabled"
-                :class="{ 'fill-gray-400 cursor-not-allowed': !isActive }"
+                :class="{
+                    'fill-gray-400 cursor-not-allowed': !isActive,
+                    'cursor-pointer': isActive,
+                }"
             >
                 <path
                     fill-rule="evenodd"
@@ -352,7 +342,7 @@ const totalPages = computed(() =>
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                class="w-12 h-12"
+                class="w-12 h-12 cursor-pointer"
                 @click="showNextCard"
             >
                 <path
@@ -381,31 +371,31 @@ const totalPages = computed(() =>
                             <tr>
                                 <th
                                     scope="col"
-                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                    class="px-6 py-3 bg-sky-950 text-slate-50"
                                 >
                                     Question
                                 </th>
                                 <th
                                     scope="col"
-                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                    class="px-6 py-3 bg-sky-950 text-slate-50"
                                 >
                                     Answer
                                 </th>
                                 <th
                                     scope="col"
-                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                    class="px-6 py-3 bg-sky-950 text-slate-50"
                                 >
                                     Hint
                                 </th>
                                 <th
                                     scope="col"
-                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                    class="px-6 py-3 bg-sky-950 text-slate-50"
                                 >
                                     Level
                                 </th>
                                 <th
                                     scope="col"
-                                    class="px-6 py-3 bg-gray-800 text-slate-50"
+                                    class="px-6 py-3 bg-sky-950 text-slate-50"
                                 >
                                     Points
                                 </th>
@@ -413,7 +403,7 @@ const totalPages = computed(() =>
                         </thead>
                         <tbody>
                             <tr
-                                v-for="flashcard in paginatedCards"
+                                v-for="flashcard in flashcards.data"
                                 :key="flashcard.id"
                                 class="border-b border-gray-200 dark:border-gray-700 text-black"
                             >
@@ -435,71 +425,16 @@ const totalPages = computed(() =>
                             </tr>
                         </tbody>
                     </table>
-
-                    <nav
-                        class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4"
-                        aria-label="Table navigation"
-                    >
-                        <span
-                            class="text-sm font-normal mb-4 md:mb-0 block w-full md:inline md:w-auto"
-                        >
-                            Showing
-                            <span class="font-semibold">{{
-                                (currentPage - 1) * pageSize + 1
-                            }}</span>
-                            -
-                            <span class="font-semibold">{{
-                                Math.min(currentPage * pageSize, totalPages)
-                            }}</span>
-                            of
-                            <span class="font-semibold">{{
-                                currentCards.length
-                            }}</span>
-                        </span>
-                        <!-- Previous page button -->
-                        <button
-                            @click="onPageChange(currentPage - 1)"
-                            :disabled="currentPage === 1"
-                            :class="{
-                                'text-black cursor-pointer': currentPage !== 1,
-                                'cursor-not-allowed text-black':
-                                    currentPage === 1,
-                            }"
-                        >
-                            &laquo; Previous
-                        </button>
-
-                        <!-- Page buttons -->
-                        <ul class="inline-flex -space-x-px rtl:space-x-reverse">
-                            <li
-                                v-for="page in Math.min(totalPages, pageSize)"
-                                :key="page"
-                            >
-                                <a
-                                    @click="onPageChange(page)"
-                                    class="text-white bg-gray-800 font-bold mt-3 mr-2 py-1 px-2 rounded-lg"
-                                    :class="{
-                                        'bg-yellow-800': currentPage === page,
-                                    }"
-                                    >{{ page }}</a
-                                >
-                            </li>
-                        </ul>
-
-                        <!-- Next page button -->
-                        <button
-                            @click="onPageChange(currentPage + 1)"
-                            :disabled="currentPage === totalPages"
-                            :class="{
-                                'text-black cursor-pointer':
-                                    currentPage !== totalPages,
-                                'text-black cursor-not-allowed':
-                                    currentPage === totalPages,
-                            }"
-                        >
-                            Next &raquo;
-                        </button>
-                    </nav>
+                    <!-- Pagination Links -->
+                    <div class="flex justify-center items-center">
+                        <NewPagination
+                            :links="flashcards.links"
+                            @navigate="fetchDecks"
+                            :from="flashcards.from"
+                            :to="flashcards.to"
+                            :total="flashcards.total"
+                        />
+                    </div>
                 </div>
             </div>
         </section>

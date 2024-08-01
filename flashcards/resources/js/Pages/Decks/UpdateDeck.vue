@@ -6,34 +6,46 @@ import SuccessToast from "@/Components/SuccessToast.vue";
 import ErrorToast from "@/Components/ErrorToast.vue";
 import CreateCardModal from "@/Components/CreateCardModal.vue";
 import DeleteModal from "@/Components/DeleteModal.vue";
+import NewPagination from "@/Components/NewPagination.vue";
+import SearchBar from "@/Components/SearchBar.vue";
 
-const { deck, flashcards } = defineProps({ deck: Object, flashcards: Array });
+const { deck, flashcards } = defineProps({ deck: Object, flashcards: Object });
 
 const page = usePage();
-const pageSize = 10;
-const currentPage = ref(1);
 const deleteDeckModal = ref(false);
 const deleteCardModal = ref(false);
 const updateCardModal = ref(false);
 const addCardModal = ref(false);
 const currentCard = ref(null);
+const searchInput = ref("");
 
-// Function to paginate the deck
-const paginateDeck = () => {
-    const startIndex = (currentPage.value - 1) * pageSize;
-    return flashcards.slice(startIndex, startIndex + pageSize);
+const fetchDecks = (url) => {
+    router.visit(url, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
 };
 
-// Computed property to get the current page's cards
-const paginatedCards = computed(() => paginateDeck());
-
-// Function to handle page change
-const onPageChange = (page) => {
-    currentPage.value = page;
+const handleSearch = (input) => {
+    searchInput.value = input.trim();
 };
 
-// Computed property to get total number of pages
-const totalPages = computed(() => Math.ceil(flashcards.length / pageSize));
+const searchResults = computed(() => {
+    return flashcards.data.filter((card) => {
+        return card.question
+            .toLowerCase()
+            .includes(searchInput.value.toLowerCase());
+    });
+});
+
+const paginationProperties = computed(() => {
+    const from = 1;
+    const to = searchResults.value.length;
+    const total = searchResults.value.length;
+
+    return { from, to, total };
+});
 
 const showAddCard = () => {
     addCardModal.value = !addCardModal.value;
@@ -153,7 +165,7 @@ const deleteCard = async () => {
     </Head>
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex flex-row flex-wrap justify-between">
+            <div class="flex flex-row flex-wrap justify-between items-center">
                 <div class="flex flex-col">
                     <div
                         class="flex flex-row justify-center items-center gap-2"
@@ -257,9 +269,16 @@ const deleteCard = async () => {
                     </div>
                 </div>
 
+                <div class="md:w-80">
+                    <SearchBar
+                        @search="handleSearch"
+                        :value="searchInput.value"
+                    />
+                </div>
+
                 <div class="flex flex-row justify-evenly items-center">
                     <button
-                        class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-green-700 hover:bg-red-800 focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-900"
+                        class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-purple-700 focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-purple-700 dark:hover:bg-purple-500 dark:focus:ring-purple-900"
                         @click.stop="showAddCard"
                     >
                         <svg
@@ -339,424 +358,775 @@ const deleteCard = async () => {
                 <div
                     class="relative overflow-x-auto shadow-md rounded-lg mb-10"
                 >
-                    <table
-                        class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 p-10"
-                    >
-                        <thead
-                            class="text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 p-10"
+                    <!-- Display All Cards Matching Search-->
+                    <div v-if="searchInput && searchResults.length > 0">
+                        <table
+                            class="w-full text-sm text-left rtl:text-right p-10"
                         >
-                            <tr>
-                                <th
-                                    scope="col"
-                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
-                                >
-                                    Question
-                                </th>
-                                <th
-                                    scope="col"
-                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
-                                >
-                                    Answer
-                                </th>
-                                <th
-                                    scope="col"
-                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
-                                >
-                                    Hint
-                                </th>
-                                <th
-                                    scope="col"
-                                    class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
-                                >
-                                    Level
-                                </th>
-                                <th
-                                    scope="col"
-                                    class="px-6 py-3 bg-gray-800 text-slate-50"
-                                >
-                                    Points
-                                </th>
-                                <th
-                                    scope="col"
-                                    class="px-6 py-3 bg-gray-800 text-slate-50"
-                                >
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr
-                                v-for="flashcard in paginatedCards"
-                                :key="flashcard.id"
-                                class="border-b border-gray-200 dark:border-gray-700 text-black"
+                            <thead
+                                class="text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 p-10"
                             >
-                                <td class="px-6 py-4">
-                                    {{ flashcard.question }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    {{ flashcard.answer }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    {{ flashcard.hint }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    {{ flashcard.difficulty }}
-                                </td>
-                                <td class="px-11">
-                                    {{ flashcard.points }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex space-x-2">
-                                        <button
-                                            class="flex p-4 flex-row justify-center items-center focus:outline-none text-white font-dark bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-3 py-1.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-                                            @click.stop="
-                                                showDeleteCard(flashcard)
-                                            "
-                                        >
-                                            <span>Delete Card</span>
-                                            <span class="ml-1">
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 24 24"
-                                                    fill="currentColor"
-                                                    class="w-4 h-4"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            @click.stop="
-                                                showUpdateCard(flashcard)
-                                            "
-                                            class="flex p-4 flex-row justify-center items-center focus:outline-none text-black font-dark bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
-                                        >
-                                            <span>Update Card</span>
-                                            <span class="ml-1">
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 24 24"
-                                                    fill="black"
-                                                    class="w-5 h-5 cursor-pointer"
-                                                >
-                                                    <path
-                                                        d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z"
-                                                    />
-                                                    <path
-                                                        d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z"
-                                                    />
-                                                </svg>
-                                            </span>
-                                        </button>
-                                    </div>
-                                </td>
-                                <!-- Update Card Modal-->
-                                <div
-                                    v-if="updateCardModal"
-                                    class="fixed inset-0 z-50 overflow-y-auto"
-                                >
-                                    <div
-                                        class="flex items-center justify-center min-h-screen"
+                                <tr>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
                                     >
-                                        <!-- Modal content -->
-                                        <div
-                                            class="relative bg-white rounded-lg shadow-lg w-full max-w-md"
-                                        >
-                                            <!-- Modal header -->
-                                            <div
-                                                class="flex justify-between items-center p-4 border-b"
+                                        Question
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                    >
+                                        Answer
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                    >
+                                        Hint
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                    >
+                                        Level
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 bg-gray-800 text-slate-50"
+                                    >
+                                        Points
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 bg-gray-800 text-slate-50"
+                                    >
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    v-for="flashcard in searchResults"
+                                    :key="flashcard.id"
+                                    class="border-b border-gray-200 dark:border-gray-700 text-black"
+                                >
+                                    <td class="px-6 py-4">
+                                        {{ flashcard.question }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ flashcard.answer }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ flashcard.hint }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ flashcard.difficulty }}
+                                    </td>
+                                    <td class="px-11">
+                                        {{ flashcard.points }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex space-x-2">
+                                            <button
+                                                class="flex p-4 flex-row justify-center items-center focus:outline-none text-white font-dark bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-3 py-1.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+                                                @click.stop="
+                                                    showDeleteCard(flashcard)
+                                                "
                                             >
-                                                <h3
-                                                    class="text-lg font-semibold text-gray-900"
-                                                >
-                                                    Edit Card :
-                                                </h3>
-                                                <button
-                                                    @click.stop="
-                                                        showUpdateCard(
-                                                            flashcard
-                                                        )
-                                                    "
-                                                    type="button"
-                                                    class="text-gray-400 hover:text-gray-900"
-                                                >
+                                                <span>Delete Card</span>
+                                                <span class="ml-1">
                                                     <svg
-                                                        class="w-5 h-5"
-                                                        aria-hidden="true"
-                                                        fill="currentColor"
-                                                        viewBox="0 0 20 20"
                                                         xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24"
+                                                        fill="currentColor"
+                                                        class="w-4 h-4"
                                                     >
                                                         <path
                                                             fill-rule="evenodd"
-                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                            d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z"
                                                             clip-rule="evenodd"
-                                                        ></path>
+                                                        />
                                                     </svg>
-                                                    <span class="sr-only"
-                                                        >Close modal</span
-                                                    >
-                                                </button>
-                                            </div>
-                                            <!-- Modal body -->
-                                            <form
-                                                class="p-4"
-                                                @submit.prevent="
-                                                    updateCard(currentCard)
+                                                </span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click.stop="
+                                                    showUpdateCard(flashcard)
                                                 "
+                                                class="flex p-4 flex-row justify-center items-center focus:outline-none text-black font-dark bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
                                             >
+                                                <span>Update Card</span>
+                                                <span class="ml-1">
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24"
+                                                        fill="black"
+                                                        class="w-5 h-5 cursor-pointer"
+                                                    >
+                                                        <path
+                                                            d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z"
+                                                        />
+                                                        <path
+                                                            d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z"
+                                                        />
+                                                    </svg>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <!-- Update Card Modal-->
+                                    <div
+                                        v-if="updateCardModal"
+                                        class="fixed inset-0 z-50 overflow-y-auto"
+                                    >
+                                        <div
+                                            class="flex items-center justify-center min-h-screen"
+                                        >
+                                            <!-- Modal content -->
+                                            <div
+                                                class="relative bg-white rounded-lg shadow-lg w-full max-w-md"
+                                            >
+                                                <!-- Modal header -->
                                                 <div
-                                                    class="grid gap-4 mb-4 grid-cols-2"
+                                                    class="flex justify-between items-center p-4 border-b"
                                                 >
-                                                    <div class="col-span-2">
-                                                        <label
-                                                            for="question"
-                                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                                            >* Question :
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            class="mb-2 w-full text-black"
-                                                            v-model="
-                                                                updateForm.question
-                                                            "
-                                                        />
-                                                        <p
-                                                            v-if="
-                                                                updateForm
-                                                                    .errors
-                                                                    .question
-                                                            "
-                                                            class="text-red-500 mb-2"
+                                                    <h3
+                                                        class="text-lg font-semibold text-gray-900"
+                                                    >
+                                                        Edit Card :
+                                                    </h3>
+                                                    <button
+                                                        @click.stop="
+                                                            showUpdateCard(
+                                                                flashcard
+                                                            )
+                                                        "
+                                                        type="button"
+                                                        class="text-gray-400 hover:text-gray-900"
+                                                    >
+                                                        <svg
+                                                            class="w-5 h-5"
+                                                            aria-hidden="true"
+                                                            fill="currentColor"
+                                                            viewBox="0 0 20 20"
+                                                            xmlns="http://www.w3.org/2000/svg"
                                                         >
-                                                            {{
-                                                                updateForm
-                                                                    .errors
-                                                                    .question
-                                                            }}
-                                                        </p>
-                                                        <label
-                                                            for="points"
-                                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                                            >* Answer :
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            class="mb-2 w-full text-black"
-                                                            v-model="
-                                                                updateForm.answer
-                                                            "
-                                                        />
-                                                        <p
-                                                            v-if="
-                                                                updateForm
-                                                                    .errors
-                                                                    .answer
-                                                            "
-                                                            class="text-red-500 mb-2"
+                                                            <path
+                                                                fill-rule="evenodd"
+                                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                clip-rule="evenodd"
+                                                            ></path>
+                                                        </svg>
+                                                        <span class="sr-only"
+                                                            >Close modal</span
                                                         >
-                                                            {{
-                                                                updateForm
-                                                                    .errors
-                                                                    .answer
-                                                            }}
-                                                        </p>
-                                                        <label
-                                                            for="hint"
-                                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                                            >Hint :</label
-                                                        >
-                                                        <input
-                                                            type="text"
-                                                            class="mb-2 w-full text-black"
-                                                            v-model="
-                                                                updateForm.hint
-                                                            "
-                                                        />
-                                                        <p
-                                                            v-if="
-                                                                updateForm
-                                                                    .errors.hint
-                                                            "
-                                                            class="text-red-500 mb-2"
-                                                        >
-                                                            {{
-                                                                updateForm
-                                                                    .errors.hint
-                                                            }}
-                                                        </p>
-                                                        <label
-                                                            for="difficulty"
-                                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                                            >Difficulty level
-                                                            :</label
-                                                        >
-                                                        <select
-                                                            v-model="
-                                                                updateForm.difficulty
-                                                            "
-                                                            name="difficulty"
-                                                            class="mb-2 text-black"
-                                                        >
-                                                            <option
-                                                                disabled
-                                                                value=""
-                                                            >
-                                                                Please select
-                                                                one
-                                                            </option>
-                                                            <option>
-                                                                easy
-                                                            </option>
-                                                            <option>
-                                                                medium
-                                                            </option>
-                                                            <option>
-                                                                hard
-                                                            </option>
-                                                        </select>
-                                                        <p
-                                                            v-if="
-                                                                updateForm
-                                                                    .errors
-                                                                    .difficulty
-                                                            "
-                                                            class="text-red-500 mb-2"
-                                                        >
-                                                            {{
-                                                                updateForm
-                                                                    .errors
-                                                                    .difficulty
-                                                            }}
-                                                        </p>
-                                                        <label
-                                                            for="points"
-                                                            class="block mb-2 text-sm font-medium text-gray-900 text-black"
-                                                            >Points :</label
-                                                        >
-                                                        <select
-                                                            v-model="
-                                                                updateForm.points
-                                                            "
-                                                            name="difficultylevel"
-                                                            class="text-black"
-                                                        >
-                                                            <option
-                                                                disabled
-                                                                value=""
-                                                            >
-                                                                Please select
-                                                                one
-                                                            </option>
-                                                            <option>1</option>
-                                                            <option>3</option>
-                                                            <option>5</option>
-                                                        </select>
-                                                        <p
-                                                            v-if="
-                                                                updateForm
-                                                                    .errors
-                                                                    .points
-                                                            "
-                                                            class="text-red-500 mb-2"
-                                                        >
-                                                            {{
-                                                                updateForm
-                                                                    .errors
-                                                                    .points
-                                                            }}
-                                                        </p>
-                                                    </div>
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    type="submit"
-                                                    :disabled="
-                                                        updateForm.processing
+                                                <!-- Modal body -->
+                                                <form
+                                                    class="p-4"
+                                                    @submit.prevent="
+                                                        updateCard(currentCard)
                                                     "
-                                                    class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                                 >
-                                                    Submit
-                                                </button>
-                                            </form>
+                                                    <div
+                                                        class="grid gap-4 mb-4 grid-cols-2"
+                                                    >
+                                                        <div class="col-span-2">
+                                                            <label
+                                                                for="question"
+                                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                                >* Question :
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                class="mb-2 w-full text-black"
+                                                                v-model="
+                                                                    updateForm.question
+                                                                "
+                                                            />
+                                                            <p
+                                                                v-if="
+                                                                    updateForm
+                                                                        .errors
+                                                                        .question
+                                                                "
+                                                                class="text-red-500 mb-2"
+                                                            >
+                                                                {{
+                                                                    updateForm
+                                                                        .errors
+                                                                        .question
+                                                                }}
+                                                            </p>
+                                                            <label
+                                                                for="points"
+                                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                                >* Answer :
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                class="mb-2 w-full text-black"
+                                                                v-model="
+                                                                    updateForm.answer
+                                                                "
+                                                            />
+                                                            <p
+                                                                v-if="
+                                                                    updateForm
+                                                                        .errors
+                                                                        .answer
+                                                                "
+                                                                class="text-red-500 mb-2"
+                                                            >
+                                                                {{
+                                                                    updateForm
+                                                                        .errors
+                                                                        .answer
+                                                                }}
+                                                            </p>
+                                                            <label
+                                                                for="hint"
+                                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                                >Hint :</label
+                                                            >
+                                                            <input
+                                                                type="text"
+                                                                class="mb-2 w-full text-black"
+                                                                v-model="
+                                                                    updateForm.hint
+                                                                "
+                                                            />
+                                                            <p
+                                                                v-if="
+                                                                    updateForm
+                                                                        .errors
+                                                                        .hint
+                                                                "
+                                                                class="text-red-500 mb-2"
+                                                            >
+                                                                {{
+                                                                    updateForm
+                                                                        .errors
+                                                                        .hint
+                                                                }}
+                                                            </p>
+                                                            <label
+                                                                for="difficulty"
+                                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                                >Difficulty
+                                                                level :</label
+                                                            >
+                                                            <select
+                                                                v-model="
+                                                                    updateForm.difficulty
+                                                                "
+                                                                name="difficulty"
+                                                                class="mb-2 text-black"
+                                                            >
+                                                                <option
+                                                                    disabled
+                                                                    value=""
+                                                                >
+                                                                    Please
+                                                                    select one
+                                                                </option>
+                                                                <option>
+                                                                    easy
+                                                                </option>
+                                                                <option>
+                                                                    medium
+                                                                </option>
+                                                                <option>
+                                                                    hard
+                                                                </option>
+                                                            </select>
+                                                            <p
+                                                                v-if="
+                                                                    updateForm
+                                                                        .errors
+                                                                        .difficulty
+                                                                "
+                                                                class="text-red-500 mb-2"
+                                                            >
+                                                                {{
+                                                                    updateForm
+                                                                        .errors
+                                                                        .difficulty
+                                                                }}
+                                                            </p>
+                                                            <label
+                                                                for="points"
+                                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                                >Points :</label
+                                                            >
+                                                            <select
+                                                                v-model="
+                                                                    updateForm.points
+                                                                "
+                                                                name="difficultylevel"
+                                                                class="text-black"
+                                                            >
+                                                                <option
+                                                                    disabled
+                                                                    value=""
+                                                                >
+                                                                    Please
+                                                                    select one
+                                                                </option>
+                                                                <option>
+                                                                    1
+                                                                </option>
+                                                                <option>
+                                                                    3
+                                                                </option>
+                                                                <option>
+                                                                    5
+                                                                </option>
+                                                            </select>
+                                                            <p
+                                                                v-if="
+                                                                    updateForm
+                                                                        .errors
+                                                                        .points
+                                                                "
+                                                                class="text-red-500 mb-2"
+                                                            >
+                                                                {{
+                                                                    updateForm
+                                                                        .errors
+                                                                        .points
+                                                                }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        type="submit"
+                                                        :disabled="
+                                                            updateForm.processing
+                                                        "
+                                                        class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                                    >
+                                                        Submit
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                    <nav
-                        class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4"
-                        aria-label="Table navigation"
-                    >
-                        <span
-                            class="text-sm font-normal mb-4 md:mb-0 block w-full md:inline md:w-auto"
-                        >
-                            Showing
-                            <span class="font-semibold">{{
-                                (currentPage - 1) * pageSize + 1
-                            }}</span>
-                            -
-                            <span class="font-semibold">{{
-                                Math.min(
-                                    currentPage * pageSize,
-                                    flashcards.length
-                                )
-                            }}</span>
-                            of
-                            <span class="font-semibold">{{
-                                flashcards.length
-                            }}</span>
-                        </span>
-                        <!-- Previous page button -->
-                        <button
-                            @click="onPageChange(currentPage - 1)"
-                            :disabled="currentPage === 1"
-                            :class="{
-                                'text-black cursor-pointer': currentPage !== 1,
-                                'cursor-not-allowed text-black':
-                                    currentPage === 1,
-                            }"
-                        >
-                            &laquo; Previous
-                        </button>
+                        <!-- Pagination Links -->
+                        <div class="flex justify-center items-center">
+                            <NewPagination
+                                :links="flashcards.links"
+                                @navigate="fetchDecks"
+                                :from="paginationProperties.from"
+                                :to="paginationProperties.to"
+                                :total="paginationProperties.total"
+                            />
+                        </div>
+                    </div>
 
-                        <!-- Page buttons -->
-                        <ul class="inline-flex -space-x-px rtl:space-x-reverse">
-                            <li
-                                v-for="page in Math.min(totalPages, pageSize)"
-                                :key="page"
+                    <!-- Display All Cards-->
+                    <div v-if="!searchInput && flashcards.data.length > 0">
+                        <table
+                            class="w-full text-sm text-left rtl:text-right p-10"
+                        >
+                            <thead
+                                class="text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 p-10"
                             >
-                                <a
-                                    @click="onPageChange(page)"
-                                    class="text-white bg-gray-800 font-bold mt-3 mr-2 py-1 px-2 rounded-lg"
-                                    :class="{
-                                        'bg-yellow-800': currentPage === page,
-                                    }"
-                                    >{{ page }}</a
+                                <tr>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                    >
+                                        Question
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                    >
+                                        Answer
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                    >
+                                        Hint
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 bg-gray-800 bg-gray-800 text-slate-50"
+                                    >
+                                        Level
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 bg-gray-800 text-slate-50"
+                                    >
+                                        Points
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 bg-gray-800 text-slate-50"
+                                    >
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    v-for="flashcard in flashcards.data"
+                                    :key="flashcard.id"
+                                    class="border-b border-gray-200 dark:border-gray-700 text-black"
                                 >
-                            </li>
-                        </ul>
+                                    <td class="px-6 py-4">
+                                        {{ flashcard.question }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ flashcard.answer }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ flashcard.hint }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ flashcard.difficulty }}
+                                    </td>
+                                    <td class="px-11">
+                                        {{ flashcard.points }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex space-x-2">
+                                            <button
+                                                class="flex p-4 flex-row justify-center items-center focus:outline-none text-white font-dark bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-3 py-1.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+                                                @click.stop="
+                                                    showDeleteCard(flashcard)
+                                                "
+                                            >
+                                                <span>Delete Card</span>
+                                                <span class="ml-1">
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24"
+                                                        fill="currentColor"
+                                                        class="w-4 h-4"
+                                                    >
+                                                        <path
+                                                            fill-rule="evenodd"
+                                                            d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z"
+                                                            clip-rule="evenodd"
+                                                        />
+                                                    </svg>
+                                                </span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click.stop="
+                                                    showUpdateCard(flashcard)
+                                                "
+                                                class="flex p-4 flex-row justify-center items-center focus:outline-none text-black font-dark bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
+                                            >
+                                                <span>Update Card</span>
+                                                <span class="ml-1">
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24"
+                                                        fill="black"
+                                                        class="w-5 h-5 cursor-pointer"
+                                                    >
+                                                        <path
+                                                            d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z"
+                                                        />
+                                                        <path
+                                                            d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z"
+                                                        />
+                                                    </svg>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <!-- Update Card Modal-->
+                                    <div
+                                        v-if="updateCardModal"
+                                        class="fixed inset-0 z-50 overflow-y-auto"
+                                    >
+                                        <div
+                                            class="flex items-center justify-center min-h-screen"
+                                        >
+                                            <!-- Modal content -->
+                                            <div
+                                                class="relative bg-white rounded-lg shadow-lg w-full max-w-md"
+                                            >
+                                                <!-- Modal header -->
+                                                <div
+                                                    class="flex justify-between items-center p-4 border-b"
+                                                >
+                                                    <h3
+                                                        class="text-lg font-semibold text-gray-900"
+                                                    >
+                                                        Edit Card :
+                                                    </h3>
+                                                    <button
+                                                        @click.stop="
+                                                            showUpdateCard(
+                                                                flashcard
+                                                            )
+                                                        "
+                                                        type="button"
+                                                        class="text-gray-400 hover:text-gray-900"
+                                                    >
+                                                        <svg
+                                                            class="w-5 h-5"
+                                                            aria-hidden="true"
+                                                            fill="currentColor"
+                                                            viewBox="0 0 20 20"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                            <path
+                                                                fill-rule="evenodd"
+                                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                clip-rule="evenodd"
+                                                            ></path>
+                                                        </svg>
+                                                        <span class="sr-only"
+                                                            >Close modal</span
+                                                        >
+                                                    </button>
+                                                </div>
+                                                <!-- Modal body -->
+                                                <form
+                                                    class="p-4"
+                                                    @submit.prevent="
+                                                        updateCard(currentCard)
+                                                    "
+                                                >
+                                                    <div
+                                                        class="grid gap-4 mb-4 grid-cols-2"
+                                                    >
+                                                        <div class="col-span-2">
+                                                            <label
+                                                                for="question"
+                                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                                >* Question :
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                class="mb-2 w-full text-black"
+                                                                v-model="
+                                                                    updateForm.question
+                                                                "
+                                                            />
+                                                            <p
+                                                                v-if="
+                                                                    updateForm
+                                                                        .errors
+                                                                        .question
+                                                                "
+                                                                class="text-red-500 mb-2"
+                                                            >
+                                                                {{
+                                                                    updateForm
+                                                                        .errors
+                                                                        .question
+                                                                }}
+                                                            </p>
+                                                            <label
+                                                                for="points"
+                                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                                >* Answer :
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                class="mb-2 w-full text-black"
+                                                                v-model="
+                                                                    updateForm.answer
+                                                                "
+                                                            />
+                                                            <p
+                                                                v-if="
+                                                                    updateForm
+                                                                        .errors
+                                                                        .answer
+                                                                "
+                                                                class="text-red-500 mb-2"
+                                                            >
+                                                                {{
+                                                                    updateForm
+                                                                        .errors
+                                                                        .answer
+                                                                }}
+                                                            </p>
+                                                            <label
+                                                                for="hint"
+                                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                                >Hint :</label
+                                                            >
+                                                            <input
+                                                                type="text"
+                                                                class="mb-2 w-full text-black"
+                                                                v-model="
+                                                                    updateForm.hint
+                                                                "
+                                                            />
+                                                            <p
+                                                                v-if="
+                                                                    updateForm
+                                                                        .errors
+                                                                        .hint
+                                                                "
+                                                                class="text-red-500 mb-2"
+                                                            >
+                                                                {{
+                                                                    updateForm
+                                                                        .errors
+                                                                        .hint
+                                                                }}
+                                                            </p>
+                                                            <label
+                                                                for="difficulty"
+                                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                                >Difficulty
+                                                                level :</label
+                                                            >
+                                                            <select
+                                                                v-model="
+                                                                    updateForm.difficulty
+                                                                "
+                                                                name="difficulty"
+                                                                class="mb-2 text-black"
+                                                            >
+                                                                <option
+                                                                    disabled
+                                                                    value=""
+                                                                >
+                                                                    Please
+                                                                    select one
+                                                                </option>
+                                                                <option>
+                                                                    easy
+                                                                </option>
+                                                                <option>
+                                                                    medium
+                                                                </option>
+                                                                <option>
+                                                                    hard
+                                                                </option>
+                                                            </select>
+                                                            <p
+                                                                v-if="
+                                                                    updateForm
+                                                                        .errors
+                                                                        .difficulty
+                                                                "
+                                                                class="text-red-500 mb-2"
+                                                            >
+                                                                {{
+                                                                    updateForm
+                                                                        .errors
+                                                                        .difficulty
+                                                                }}
+                                                            </p>
+                                                            <label
+                                                                for="points"
+                                                                class="block mb-2 text-sm font-medium text-gray-900 text-black"
+                                                                >Points :</label
+                                                            >
+                                                            <select
+                                                                v-model="
+                                                                    updateForm.points
+                                                                "
+                                                                name="difficultylevel"
+                                                                class="text-black"
+                                                            >
+                                                                <option
+                                                                    disabled
+                                                                    value=""
+                                                                >
+                                                                    Please
+                                                                    select one
+                                                                </option>
+                                                                <option>
+                                                                    1
+                                                                </option>
+                                                                <option>
+                                                                    3
+                                                                </option>
+                                                                <option>
+                                                                    5
+                                                                </option>
+                                                            </select>
+                                                            <p
+                                                                v-if="
+                                                                    updateForm
+                                                                        .errors
+                                                                        .points
+                                                                "
+                                                                class="text-red-500 mb-2"
+                                                            >
+                                                                {{
+                                                                    updateForm
+                                                                        .errors
+                                                                        .points
+                                                                }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        type="submit"
+                                                        :disabled="
+                                                            updateForm.processing
+                                                        "
+                                                        class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                                    >
+                                                        Submit
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- Pagination Links -->
+                        <div class="flex justify-center items-center">
+                            <NewPagination
+                                :links="flashcards.links"
+                                @navigate="fetchDecks"
+                                :from="flashcards.from"
+                                :to="flashcards.to"
+                                :total="flashcards.total"
+                            />
+                        </div>
+                    </div>
+                </div>
 
-                        <!-- Next page button -->
-                        <button
-                            @click="onPageChange(currentPage + 1)"
-                            :disabled="currentPage === totalPages"
-                            :class="{
-                                'text-black cursor-pointer':
-                                    currentPage !== totalPages,
-                                'text-black cursor-not-allowed':
-                                    currentPage === totalPages,
-                            }"
-                        >
-                            Next &raquo;
-                        </button>
-                    </nav>
+                <!-- Search but No Search Results-->
+                <div
+                    v-if="searchInput && searchResults.length === 0"
+                    class="flex flex-col justify-center items-center mt-36"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="purple"
+                        class="size-40"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z"
+                        />
+                    </svg>
+
+                    <p class="mt-11 text-2xl font-bold">
+                        No matching Results for "{{ searchInput }}"
+                    </p>
                 </div>
             </div>
         </section>

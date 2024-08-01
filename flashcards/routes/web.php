@@ -55,10 +55,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/group/{group}', [GroupsController::class, 'show'])->name('group.show');
     Route::get('/createGroup', [GroupsController::class, 'create'])->name('group.create');
+    Route::get('/group/{group}/addDecks', [GroupsController::class, 'showAddDeck'])->name('group.showAddDeck');
     Route::post('/createGroup', [GroupsController::class, 'store'])->name('group.store');
     Route::patch('/group/updateTitle/{group}', [GroupsController::class, 'updateTitle'])->name('group.updateTitle');
     Route::put('/group/addDeck/{group}', [GroupsController::class, 'addDeck'])->name('group.addDeck');
-    Route::put('/group/removeDeck/{deck}', [GroupsController::class, 'removeDeck'])->name('group.removeDeck');
+    Route::patch('/group/removeDeck/{deck}', [GroupsController::class, 'removeDeck'])->name('group.removeDeck');
     Route::delete('/group/keepDecks/{group}', [GroupsController::class, 'keepDecks'])->name('group.keepDecks');
     Route::delete('/group/delete/{group}', [GroupsController::class, 'destroy'])->name('group.destroy');
 });

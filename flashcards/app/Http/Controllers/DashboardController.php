@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\Deck;
 use App\Models\Group;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 
 class DashboardController extends Controller
@@ -27,10 +29,48 @@ class DashboardController extends Controller
             ->orderByDesc('lastviewed')
             ->get();
 
+        // Merge and paginate
+        $deckAndGroupItems = collect($decks->map(function ($deck) {
+            return [
+                'id' => $deck->id,
+                'title' => $deck->title,
+                'lastviewed' => $deck->lastviewed,
+                'created_at' => $deck->created_at,
+                'updated_at' => $deck->updated_at,
+                'type' => 'deck'
+            ];
+        })->merge($groups->map(function ($group) {
+            return [
+                'id' => $group->id,
+                'title' => $group->title,
+                'lastviewed' => $group->lastviewed,
+                'created_at' => $group->created_at,
+                'updated_at' => $group->updated_at,
+                'type' => 'group'
+            ];
+        })));
+
+             // Sort by lastviewed and then by created_at
+        $deckAndGroupItems = $deckAndGroupItems->sort(function ($a, $b) {
+            if ($a['lastviewed'] == $b['lastviewed']) {
+                return $b['created_at'] <=> $a['created_at'];
+            }
+            return $b['lastviewed'] <=> $a['lastviewed'];
+        })->values();
+        
+        $page = Paginator::resolveCurrentPage('page');
+        $perPage = 10;
+        $paginatedDeckAndGroupItems = new LengthAwarePaginator(
+            $deckAndGroupItems->forPage($page, $perPage),
+            $deckAndGroupItems->count(),
+            $perPage,
+            $page,
+            ['path' => Paginator::resolveCurrentPath()]
+        );
+
         // Prepare the data array
         $data = [
-            'decks' => $decks,
-            'groups' => $groups,
+            'deckGroupItems' => $paginatedDeckAndGroupItems,
             'successLogin' => session('success')
         ];
 

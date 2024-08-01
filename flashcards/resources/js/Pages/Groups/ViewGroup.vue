@@ -3,7 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, usePage, useForm, router } from "@inertiajs/vue3";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import SuccessToast from "@/Components/SuccessToast.vue";
 import ErrorToast from "@/Components/ErrorToast.vue";
 import AddDeckModal from "@/Components/AddDeckModal.vue";
@@ -11,41 +11,47 @@ import DeleteModal from "@/Components/DeleteModal.vue";
 import DeleteGroupModal from "@/Components/DeleteModal.vue";
 import RemoveDeckModal from "@/Components/DeleteModal.vue";
 import SearchBar from "@/Components/SearchBar.vue";
-import SearchPagination from "@/Components/Pagination.vue";
-import UsersPagination from "@/Components/Pagination.vue";
+import NewPagination from "@/Components/NewPagination.vue";
 
-const { group, userDecks, availableDecks } = defineProps({
+const { group, userDecks } = defineProps({
     group: Object,
-    userDecks: Array,
-    availableDecks: Array,
+    userDecks: Object,
 });
 
 dayjs.extend(relativeTime);
 
 const page = usePage();
 const currentDeck = ref();
-const searchInput = ref("");
+const showEditTitle = ref(false);
 const addDeckModal = ref(false);
 const deleteKeepDecksModal = ref(false);
 const deleteGroupModal = ref(false);
 const removeDeckModal = ref(false);
-const handleSearch = (input) => {
-    searchInput.value = input;
-};
+const searchInput = ref("");
 
-const searchResults = computed(() => {
-    return userDecks.filter((item) => {
-        return item.title
-            .toLowerCase()
-            .includes(searchInput.value.toLowerCase());
+const fetchDecks = (url) => {
+    router.visit(url, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
     });
-});
+};
 
 const form = useForm({
     title: group.title,
 });
 
-const showEditTitle = ref(false);
+const handleSearch = (input) => {
+    searchInput.value = input.trim();
+};
+
+const searchResults = computed(() => {
+    return userDecks.data.filter((item) => {
+        return item.title
+            .toLowerCase()
+            .includes(searchInput.value.toLowerCase());
+    });
+});
 
 const showEditTitleModal = () => {
     showEditTitle.value = !showEditTitle.value;
@@ -100,13 +106,12 @@ const showRemoveDeck = (deck) => {
 
 const removeDeck = async () => {
     try {
-        await router.put(
-            route("group.removeDeck", {
-                deck: currentDeck.value,
-            })
+        await router.patch(
+            route("group.removeDeck", { deck: currentDeck.value })
         );
+        page.props.flash.success = null;
     } catch (error) {
-        page.props.flash.error = `Unable to delete deck. Error: ${error}`;
+        page.props.flash.error = `Unable to remove deck. Error: ${error}`;
     }
 };
 </script>
@@ -220,13 +225,17 @@ const removeDeck = async () => {
                 </div>
 
                 <div class="md:w-80">
-                    <SearchBar @search="handleSearch" />
+                    <SearchBar
+                        @search="handleSearch"
+                        :value="searchInput.value"
+                    />
                 </div>
 
                 <div class="flex flex-row justify-evenly items-center">
-                    <button
+                    <Link
+                        :href="route('group.showAddDeck', { group: group.id })"
+                        as="button"
                         class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-green-700 hover:bg-red-800 focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-2 py-1 md:mt-0 md:px-5 md:py-2.5 me-2 mt-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-900"
-                        @click.stop="showAddDeck"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -243,8 +252,8 @@ const removeDeck = async () => {
                             />
                         </svg>
 
-                        Add Deck
-                    </button>
+                        Add Deck</Link
+                    >
                     <div class="flex flex-row justify-evenly items-center">
                         <button
                             class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-2 py-1 md:mt-0 md:px-5 md:py-2.5 me-2 mt-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
@@ -289,13 +298,6 @@ const removeDeck = async () => {
             </div>
         </template>
 
-        <AddDeckModal
-            :show="addDeckModal"
-            @close="showAddDeck"
-            :groupId="group.id"
-            :availableDecks="availableDecks"
-        />
-
         <!-- Delete Group Keep Decks Modal-->
         <DeleteModal
             :show="deleteKeepDecksModal"
@@ -330,8 +332,9 @@ const removeDeck = async () => {
         />
 
         <div class="mt-6 flex flex-wrap justify-center items-center">
+            <!-- Search Results -->
             <div
-                v-if="searchInput"
+                v-if="searchInput && searchResults.length > 0"
                 class="flex flex-col flex-wrap justify-center items-center gap-4"
             >
                 <div
@@ -380,67 +383,126 @@ const removeDeck = async () => {
                         >
                     </div>
                 </div>
-                <SearchPagination
-                    v-if="userDecks.length > 10"
-                    results="userDecks"
-                    class="mt-5"
+                <!-- Pagination Links -->
+                <NewPagination
+                    :links="userDecks.links"
+                    @navigate="fetchDecks"
+                ></NewPagination>
+            </div>
+
+            <!-- Search but No Search Results-->
+            <div
+                v-if="searchInput && searchResults.length === 0"
+                class="flex flex-col justify-center items-center mt-36"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="purple"
+                    class="size-40"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z"
+                    />
+                </svg>
+
+                <p class="mt-11 text-2xl font-bold">
+                    No matching Results for "{{ searchInput }}"
+                </p>
+            </div>
+
+            <!-- All Decks (when no search input) -->
+            <div
+                v-if="!searchInput && userDecks.data.length > 0"
+                class="flex flex-col flex-wrap justify-center items-center gap-4"
+            >
+                <div
+                    class="flex flex-row flex-wrap justify-center items-center gap-4"
+                >
+                    <div
+                        v-for="deck in userDecks.data"
+                        :key="deck.id"
+                        class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between"
+                    >
+                        <div class="flex flex-row justify-between">
+                            <span class="dark:text-white"
+                                >Created:
+                                {{ dayjs(deck.created_at).fromNow() }}</span
+                            >
+                            <button @click.stop="showRemoveDeck(deck.id)">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="red"
+                                    class="w-6 h-6"
+                                >
+                                    <path
+                                        fill-rule="evenodd"
+                                        d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z"
+                                        clip-rule="evenodd"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <Link
+                            :href="route('deck.show', { deck: deck.id })"
+                            as="button"
+                            class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+                            >{{ deck.title }}</Link
+                        >
+                        <span
+                            class="text-right text-gray-900 dark:text-slate-200"
+                            v-if="deck.lastviewed !== null"
+                            >Last Viewed:
+                            {{ dayjs(deck.lastviewed).fromNow() }}</span
+                        >
+                        <span class="text-right dark:text-white" v-else
+                            >Not Viewed</span
+                        >
+                    </div>
+                </div>
+                <!-- Pagination Links -->
+                <NewPagination
+                    :links="userDecks.links"
+                    @navigate="fetchDecks"
+                    :from="userDecks.from"
+                    :to="userDecks.to"
+                    :total="userDecks.total"
                 />
             </div>
-            <div
-                v-else
-                class="flex flex-col flex-wrap justify-center items-center gap-4"
-            >
-                <div
-                    class="flex flex-row flex-wrap justify-center items-center gap-4"
-                >
-                    <div
-                        v-for="deck in searchResults"
-                        :key="deck.id"
-                        class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between"
-                    >
-                        <div class="flex flex-row justify-between">
-                            <span class="dark:text-white"
-                                >Created:
-                                {{ dayjs(deck.created_at).fromNow() }}</span
-                            >
-                            <button @click.stop="showRemoveDeck(deck.id)">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="red"
-                                    class="w-6 h-6"
-                                >
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
 
-                        <Link
-                            :href="route('deck.show', { deck: deck.id })"
-                            as="button"
-                            class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-                            >{{ deck.title }}</Link
-                        >
-                        <span
-                            class="text-right text-gray-900 dark:text-slate-200"
-                            v-if="deck.lastviewed !== null"
-                            >Last Viewed:
-                            {{ dayjs(deck.lastviewed).fromNow() }}</span
-                        >
-                        <span class="text-right dark:text-white" v-else
-                            >Not Viewed</span
-                        >
-                    </div>
-                </div>
-                <UsersPagination
-                    v-if="userDecks.length > 10"
-                    results="userDecks"
-                    class="mt-5"
-                />
+            <!-- Empty Group Add Decks-->
+            <div
+                v-if="
+                    !searchInput &&
+                    searchResults.length === 0 &&
+                    userDecks.data.length === 0
+                "
+                class="flex flex-col justify-center items-center mt-36"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="purple"
+                    class="size-40"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
+                    />
+                </svg>
+
+                <p class="mt-11 text-2xl font-bold">
+                    Add Decks To Your Group To Get Started!
+                </p>
             </div>
         </div>
     </AuthenticatedLayout>

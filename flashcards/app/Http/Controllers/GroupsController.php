@@ -63,25 +63,37 @@ class GroupsController extends Controller
         }
     }
 
-    /**
-     * Display the specified group.
-     */
-    public function show(Group $group)
-    {
-         // Format Carbon instance to Laravel's default datetime format
-    $lastViewed = Carbon::now() -> toIso8601String();
-    $group->lastviewed = $lastViewed;
+   
+ /**
+ * Display the specified group.
+ */
+public function show(Group $group)
+{
+    // Update the group's last viewed timestamp
+    $group->lastviewed = Carbon::now()->toIso8601String();
     $group->save();
 
-        $userDecks = Deck::where('group_id', $group->id)->get();
-        $availableDecks = Deck::where('group_id', null)->get();
+   // Retrieve user's decks assigned to the group with pagination
+    $userDecks = Deck::where('group_id', $group->id)
+                     ->where('user_id', auth()->id()) // Ensure it's the authenticated user's decks
+                     ->paginate(10); // 10 decks per page
 
-        return Inertia('Groups/ViewGroup', [
-            'group' => $group,
-            'userDecks' => $userDecks,
-            'availableDecks'=>$availableDecks,
-        ]);
-    }
+    // Transform the paginated decks to include only specified details
+    $userDecks->getCollection()->transform(function ($deck) {
+        return [
+            'id' => $deck->id,
+            'title' => $deck->title,
+            'lastviewed' => $deck->lastviewed,
+            'created_at' => $deck->created_at,
+            'updated_at' => $deck->updated_at,
+        ];
+    });
+
+    return Inertia::render('Groups/ViewGroup', [
+        'group' => $group,
+        'userDecks' => $userDecks
+    ]);
+}
 
 
          /**
@@ -112,15 +124,44 @@ class GroupsController extends Controller
     }
 
 
+public function showAddDeck($groupId)
+{
+       $availableDecks = Deck::whereNull('group_id')
+                     ->where('user_id', auth()->id()) // Ensure it's the authenticated user's decks
+                     ->paginate(10); // 10 decks per page
 
+      $availableDecks->getCollection()->transform(function ($deck) {
+        return [
+            'id' => $deck->id,
+            'title' => $deck->title,
+            'lastviewed' => $deck->lastviewed,
+            'created_at' => $deck->created_at,
+            'updated_at' => $deck->updated_at,
+        ];
+    });
+
+    return Inertia::render('Groups/AddDeck', [
+        'availableDecks' => $availableDecks,
+        'groupId' => $groupId
+    ]);
+}
            /**
      * Add new Decks to the Group
      */
-    public function addDeck(Request $request, Group $group)
+    public function addDeck(Request $request, $groupId)
     {
         $validated = $request->validate([
              'decks' => 'required|array', // Assuming 'decks' is an array of deck IDs
         ]);
+
+
+        // Fetch the Group model
+        $group = Group::find($groupId);
+
+        // Check if the group exists
+        if (!$group) {
+            abort(404, 'Group not found');
+        }
     
         try {
             if ($group->user_id === $request->user()->id) {
@@ -140,7 +181,7 @@ class GroupsController extends Controller
             abort(404, 'Deck not found');
         } catch (\Exception $e) {
             // Handle other potential exceptions with a generic error message
-            return back()->with('error', 'An error occurred while adding a new deck to the group.');
+            return back()->with('error', $e);
         }
     }
 
@@ -152,15 +193,19 @@ class GroupsController extends Controller
 public function removeDeck($deckId)
 {
     try { 
-        Deck::where('id', $deckId)->update(['group_id' => NULL]);
-            return back()->with('success', 'Deck removed from group successfully.');
-        } catch (ModelNotFoundException $e) {
-            // Handle the case where the deck is not found with a 404 status code
-            abort(404, 'Deck not found');
-        } catch (\Exception $e) {
-            // Handle other potential exceptions with a generic error message
-            return back()->with('error', 'An error occurred while removing the deck.');
-        }
+        $deck = Deck::findOrFail($deckId);
+        $deck->group_id = null;
+        $deck->save();
+
+        return back()->with('success', 'Deck Removed From Group Successfully.');
+        
+    } catch (ModelNotFoundException $e) {
+        // Handle the case where the deck is not found with a 404 status code
+        abort(404, 'Deck not found');
+    } catch (\Exception $e) {
+        // Handle other potential exceptions with a generic error message
+        return back()->with('error', 'An error occurred while removing the deck.');
+    }
 }
 
 

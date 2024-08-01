@@ -4,7 +4,7 @@ import "../css/app.css";
 import { createApp, h } from "vue";
 import { createInertiaApp } from "@inertiajs/vue3";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
-import { ZiggyVue } from "../../vendor/tightenco/ziggy/dist/vue.m";
+import { ZiggyVue } from "../../vendor/tightenco/ziggy";
 import { router } from "@inertiajs/vue3";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
@@ -27,36 +27,16 @@ createInertiaApp({
     },
 });
 
-// let stale = false;
+let stale = false;
 
-// // Listen for popstate event (back button)
-// window.addEventListener("popstate", () => {
-//     stale = true;
-//     refreshDashboard();
-// });
+window.addEventListener("popstate", () => {
+    stale = true;
+});
 
-// // Listen for navigation events triggered by Inertia Links
-// router.on("navigate", (event) => {
-//     if (stale) {
-//         router.get(
-//             event.detail.page.url,
-//             {},
-//             { replace: true, preserveState: false }
-//         );
-//         stale = false;
-//     }
-// });
-
-// // Function to refresh the dashboard and reorder decks
-// function refreshDashboard() {
-//     // Perform an Inertia visit to reload the dashboard page
-//     router.visit(route("dashboard"), {
-//         replace: true,
-//         preserveScroll: true,
-//     });
-// }
-
-// // Call refreshDashboard function when the page initially loads
-// window.addEventListener("load", () => {
-//     refreshDashboard();
-// });
+router.on("navigate", (event) => {
+    const page = event.detail.page;
+    if (stale) {
+        router.get(page.url, {}, { replace: true, preserveState: false });
+    }
+    stale = false;
+});

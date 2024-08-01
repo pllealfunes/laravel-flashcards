@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Carbon;
@@ -86,12 +87,27 @@ class DeckController extends Controller
     public function show(Deck $deck)
     {
 
+
+    // Ensure the authenticated user owns the deck
+        if ($deck->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        
     // Format Carbon instance to Laravel's default datetime format
     $lastViewed = Carbon::now() -> toIso8601String();
     $deck->lastviewed = $lastViewed;
     $deck->save();
 
-    $flashcards = Flashcard::where('deck_id', $deck->id)->get();
+    // Hide the user_id attribute
+    $deck->makeHidden('user_id');
+
+    $flashcards = Flashcard::where('deck_id', $deck->id)
+                     ->where('user_id', auth()->id()) // Ensure it's the authenticated user's decks
+                     ->paginate(10); // 10 decks per page
+
+    // Hide the user_id attribute
+    $flashcards->makeHidden('user_id');
 
         return Inertia::render('Decks/ViewDeck', ['deck' => $deck, 'flashcards' => $flashcards, 'isUpdating' => true]);
     }
@@ -103,7 +119,15 @@ class DeckController extends Controller
      */
     public function showUpdatePage(Deck $deck)
     {
-        $flashcards = Flashcard::where('deck_id', $deck->id)->get();
+         // Hide the user_id attribute
+    $deck->makeHidden('user_id');
+
+    $flashcards = Flashcard::where('deck_id', $deck->id)
+                     ->where('user_id', auth()->id()) // Ensure it's the authenticated user's decks
+                     ->paginate(10); // 10 decks per page
+
+    // Hide the user_id attribute
+    $flashcards->makeHidden('user_id');
         return Inertia::render('Decks/UpdateDeck',['deck' => $deck, 'flashcards' => $flashcards]);
     }
 
