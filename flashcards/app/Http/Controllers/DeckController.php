@@ -60,7 +60,8 @@ class DeckController extends Controller
               // Create the deck
     $deck = Deck::create([
         'title' => $validated['title'],
-        'user_id' => $request->user()->id
+        'user_id' => $request->user()->id,
+        'group_id' => NULL,
     ]);
 
     // Create flashcards associated with the deck

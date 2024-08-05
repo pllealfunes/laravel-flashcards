@@ -13,7 +13,8 @@ class Deck extends Model
 
     protected $fillable = [
     "title",
-    "user_id"
+    "user_id",
+    "group_id"
     ];
 
 
