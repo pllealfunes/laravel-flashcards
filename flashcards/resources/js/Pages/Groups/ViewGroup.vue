@@ -53,6 +53,14 @@ const searchResults = computed(() => {
     });
 });
 
+const paginationProperties = computed(() => {
+    const from = 1;
+    const to = searchResults.value.length;
+    const total = searchResults.value.length;
+
+    return { from, to, total };
+});
+
 const showEditTitleModal = () => {
     showEditTitle.value = !showEditTitle.value;
     form.clearErrors();
@@ -385,9 +393,12 @@ const removeDeck = async () => {
                 </div>
                 <!-- Pagination Links -->
                 <NewPagination
-                    :links="userDecks.links"
+                    :links="flashcards.links"
                     @navigate="fetchDecks"
-                ></NewPagination>
+                    :from="paginationProperties.from"
+                    :to="paginationProperties.to"
+                    :total="paginationProperties.total"
+                />
             </div>
 
             <!-- Search but No Search Results-->

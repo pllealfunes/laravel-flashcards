@@ -3,23 +3,21 @@ import { useForm, Head, usePage } from "@inertiajs/vue3";
 import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import ErrorToast from "@/Components/ErrorToast.vue";
+import NewPagination from "@/Components/NewPagination.vue";
 
-const { decks } = defineProps({ decks: Object });
-
-const pageSize = 10;
-const currentPage = ref(1);
-
-// Computed property to get total number of pages
-const totalPages = computed(() => Math.ceil(decks.length / pageSize));
-
-// Function to handle page change
-const onPageChange = (page) => {
-    currentPage.value = page;
-};
+const { availableDecks } = defineProps({ availableDecks: Object });
 
 const page = usePage();
 
 const checkedDecks = ref([]);
+
+const fetchDecks = (url) => {
+    router.visit(url, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+};
 
 const form = useForm({
     title: "",
@@ -145,7 +143,7 @@ const submit = async () => {
                             </thead>
                             <tbody>
                                 <tr
-                                    v-for="deck in decks"
+                                    v-for="deck in availableDecks.data"
                                     :key="deck.id"
                                     class="border-b border-gray-200 dark:border-gray-700 text-black"
                                 >
@@ -169,81 +167,15 @@ const submit = async () => {
                                 </tr>
                             </tbody>
                         </table>
-
-                        <nav
-                            class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4"
-                            aria-label="Table navigation"
-                        >
-                            <span
-                                class="text-sm font-normal mb-4 md:mb-0 block w-full md:inline md:w-auto"
-                            >
-                                Showing
-                                <span class="font-semibold">{{
-                                    (currentPage - 1) * pageSize + 1
-                                }}</span>
-                                -
-                                <span class="font-semibold">{{
-                                    Math.min(
-                                        currentPage * pageSize,
-                                        decks.length
-                                    )
-                                }}</span>
-                                of
-                                <span class="font-semibold">{{
-                                    decks.length
-                                }}</span>
-                            </span>
-                            <!-- Previous page button -->
-                            <button
-                                @click="onPageChange(currentPage - 1)"
-                                :disabled="currentPage === 1"
-                                :class="{
-                                    'text-black cursor-pointer':
-                                        currentPage !== 1,
-                                    'cursor-not-allowed text-black':
-                                        currentPage === 1,
-                                }"
-                            >
-                                &laquo; Previous
-                            </button>
-
-                            <!-- Page buttons -->
-                            <ul
-                                class="inline-flex -space-x-px rtl:space-x-reverse"
-                            >
-                                <li
-                                    v-for="page in Math.min(
-                                        totalPages,
-                                        pageSize
-                                    )"
-                                    :key="page"
-                                >
-                                    <a
-                                        @click="onPageChange(page)"
-                                        class="text-white bg-gray-800 font-bold mt-3 mr-2 py-1 px-2 rounded-lg"
-                                        :class="{
-                                            'bg-yellow-800':
-                                                currentPage === page,
-                                        }"
-                                        >{{ page }}</a
-                                    >
-                                </li>
-                            </ul>
-
-                            <!-- Next page button -->
-                            <button
-                                @click="onPageChange(currentPage + 1)"
-                                :disabled="currentPage === totalPages"
-                                :class="{
-                                    'text-black cursor-pointer':
-                                        currentPage !== totalPages,
-                                    'text-black cursor-not-allowed':
-                                        currentPage === totalPages,
-                                }"
-                            >
-                                Next &raquo;
-                            </button>
-                        </nav>
+                        <div class="flex justify-center items-center">
+                            <NewPagination
+                                :links="availableDecks.links"
+                                @navigate="fetchDecks"
+                                :from="availableDecks.from"
+                                :to="availableDecks.to"
+                                :total="availableDecks.total"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -261,5 +193,3 @@ const submit = async () => {
         </div>
     </AuthenticatedLayout>
 </template>
-
-<script setup lang="ts"></script>
