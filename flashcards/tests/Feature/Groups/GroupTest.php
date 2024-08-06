@@ -26,7 +26,7 @@ use RefreshDatabase;
         $response->assertOk();
     }
 
-    public function it_can_create_update_and_delete_group()
+    public function test_can_create_update_and_delete_group()
     {
         $user = User::factory()->create();
 
@@ -94,7 +94,7 @@ use RefreshDatabase;
     }
 
 
-     public function it_requires_a_title_for_group_creation()
+     public function test_requires_a_title_for_group_creation()
     {
     $user = User::factory()->create();
 
@@ -137,7 +137,7 @@ use RefreshDatabase;
 
 
 
-    public function it_requires_at_least_one_deck()
+    public function test_requires_at_least_one_deck()
     {
       $user = User::factory()->create();
 
@@ -150,7 +150,7 @@ use RefreshDatabase;
     }
 
     
-    public function it_requires_valid_deck_ids_for_group_creation()
+    public function test_requires_valid_deck_ids_for_group_creation()
 {
     $user = User::factory()->create();
 

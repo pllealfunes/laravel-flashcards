@@ -29,9 +29,9 @@ class GroupsController extends Controller
         // Fetch all decks belonging to the current user with NULL group_id
             $decks = Deck::where('user_id', $user->id)
             ->whereNull('group_id')
-            ->get();
+            ->paginate(10);
 
-            return Inertia::render('Groups/CreateGroup', ['decks' => $decks]);
+            return Inertia::render('Groups/CreateGroup', ['availableDecks' => $decks]);
     }
 
     /**

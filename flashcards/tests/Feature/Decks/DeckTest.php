@@ -27,7 +27,7 @@ class DeckTest extends TestCase
     }
 
 
-    public function it_can_create_a_deck_with_flashcards()
+    public function test_can_create_a_deck_with_flashcards()
     {
     $user = User::factory()->create();
 
@@ -74,7 +74,7 @@ class DeckTest extends TestCase
 
 
 
-    public function it_requires_a_title_for_deck_creation()
+    public function test_requires_a_title_for_deck_creation()
     {
     $user = User::factory()->create();
 
@@ -106,7 +106,7 @@ class DeckTest extends TestCase
 
 
 
-    public function it_requires_at_least_two_flashcards()
+    public function test_requires_at_least_two_flashcards()
     {
     $user = User::factory()->create();
 
@@ -131,7 +131,7 @@ class DeckTest extends TestCase
 
 
 
-    public function it_requires_valid_flashcard_data()
+    public function test_requires_valid_flashcard_data()
     {
     $user = User::factory()->create();
 
@@ -162,7 +162,7 @@ class DeckTest extends TestCase
     }
 
 
-        public function it_can_create_update_and_delete_deck()
+        public function test_can_create_update_and_delete_deck()
         {
             $user = User::factory()->create();
 
