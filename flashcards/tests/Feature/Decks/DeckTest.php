@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Decks;
 
-use Tests\TestCase;
 use App\Models\Deck;
-use App\Models\Flashcard;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+
+use Tests\TestCase;
 
 
 
@@ -27,7 +27,7 @@ class DeckTest extends TestCase
     }
 
 
-    public function test_can_create_a_deck_with_flashcards()
+    public function test_can_create_a_deck_with_flashcards(): void
     {
     $user = User::factory()->create();
 
@@ -74,7 +74,7 @@ class DeckTest extends TestCase
 
 
 
-    public function test_requires_a_title_for_deck_creation()
+    public function test_requires_a_title_for_deck_creation(): void
     {
     $user = User::factory()->create();
 
@@ -106,7 +106,7 @@ class DeckTest extends TestCase
 
 
 
-    public function test_requires_at_least_two_flashcards()
+    public function test_requires_at_least_two_flashcards(): void
     {
     $user = User::factory()->create();
 
@@ -131,7 +131,7 @@ class DeckTest extends TestCase
 
 
 
-    public function test_requires_valid_flashcard_data()
+    public function test_requires_valid_flashcard_data(): void
     {
     $user = User::factory()->create();
 
@@ -162,7 +162,7 @@ class DeckTest extends TestCase
     }
 
 
-        public function test_can_create_update_and_delete_deck()
+        public function test_can_create_update_and_delete_deck(): void
         {
             $user = User::factory()->create();
 

@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Decks;
 
-use Tests\TestCase;
 use App\Models\Group;
 use App\Models\Deck;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 
 
@@ -26,7 +26,7 @@ use RefreshDatabase;
         $response->assertOk();
     }
 
-    public function test_can_create_update_and_delete_group()
+    public function test_can_create_update_and_delete_group(): void
     {
         $user = User::factory()->create();
 
@@ -94,7 +94,7 @@ use RefreshDatabase;
     }
 
 
-     public function test_requires_a_title_for_group_creation()
+     public function test_requires_a_title_for_group_creation(): void
     {
     $user = User::factory()->create();
 
@@ -137,7 +137,7 @@ use RefreshDatabase;
 
 
 
-    public function test_requires_at_least_one_deck()
+    public function test_requires_at_least_one_deck(): void
     {
       $user = User::factory()->create();
 
@@ -150,7 +150,7 @@ use RefreshDatabase;
     }
 
     
-    public function test_requires_valid_deck_ids_for_group_creation()
+    public function test_requires_valid_deck_ids_for_group_creation(): void
 {
     $user = User::factory()->create();
 

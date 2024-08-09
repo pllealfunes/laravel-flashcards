@@ -187,20 +187,17 @@ const props = defineProps({
         <div class="mx-auto p-4 md:py-8">
             <div class="sm:flex sm:items-end sm:justify-end">
                 <ul
-                    class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 dark:text-gray-400"
+                    class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 dark:text-gray-400 gap-3"
                 >
+                    <Link
+                        :href="route('about')"
+                        class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500"
+                        >About</Link
+                    >
                     <li>
-                        <a href="#" class="hover:underline me-4 md:me-6"
-                            >About</a
-                        >
-                    </li>
-                    <li>
-                        <a href="#" class="hover:underline me-4 md:me-6"
-                            >Docs</a
-                        >
-                    </li>
-                    <li>
-                        <a href="#" class="hover:underline me-4 md:me-6"
+                        <a
+                            href="https://github.com/pllealfunes/laravel-flashcards"
+                            class="hover:underline me-4 md:me-6"
                             >GitHub</a
                         >
                     </li>

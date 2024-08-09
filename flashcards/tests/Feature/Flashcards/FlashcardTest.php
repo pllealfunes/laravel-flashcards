@@ -13,7 +13,7 @@ class FlashcardTest extends TestCase
     use RefreshDatabase;
 
 
-    public function it_can_create_a_flashcard()
+    public function it_can_create_a_flashcard(): void
     {
         $user = User::factory()->create();
         $deck = Deck::factory()->create(['user_id' => $user->id]);
@@ -54,7 +54,7 @@ class FlashcardTest extends TestCase
         $response->assertOk();
     }
 
-    public function it_can_update_a_flashcard()
+    public function it_can_update_a_flashcard(): void
 {
     $user = User::factory()->create();
     $flashcard = Flashcard::factory()->create(['user_id' => $user->id]);
@@ -76,7 +76,7 @@ class FlashcardTest extends TestCase
 }
 
 
-public function test_cannot_update_flashcard_with_invalid_data()
+public function test_cannot_update_flashcard_with_invalid_data(): void
 {
     $user = User::factory()->create();
     $flashcard = Flashcard::factory()->create(['user_id' => $user->id]);
@@ -91,7 +91,7 @@ public function test_cannot_update_flashcard_with_invalid_data()
     $response->assertSessionHasErrors(['question', 'difficulty', 'points']);
 }
 
-public function test_can_delete_a_flashcard()
+public function test_can_delete_a_flashcard(): void
 {
     $user = User::factory()->create();
     $flashcard = Flashcard::factory()->create(['user_id' => $user->id]);
@@ -103,7 +103,7 @@ public function test_can_delete_a_flashcard()
 }
 
 
-public function test_cannot_delete_flashcard_if_not_owned_by_user()
+public function test_cannot_delete_flashcard_if_not_owned_by_user(): void
 {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();

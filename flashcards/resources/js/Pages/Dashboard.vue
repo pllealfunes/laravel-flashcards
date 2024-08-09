@@ -5,8 +5,6 @@ import { ref, onMounted, computed } from "vue";
 import Index from "@/Pages/Decks/Index.vue";
 import SuccessToast from "@/Components/SuccessToast.vue";
 import SearchBar from "@/Components/SearchBar.vue";
-import SearchPagination from "@/Components/Pagination.vue";
-import UsersPagination from "@/Components/Pagination.vue";
 import NewPagination from "@/Components/NewPagination.vue";
 
 const { deckGroupItems } = defineProps({

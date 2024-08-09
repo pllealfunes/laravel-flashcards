@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Decks;
 
-use Tests\TestCase;
+
 use App\Models\Group;
 use App\Models\Deck;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-
+use Tests\TestCase;
 
 
 class GroupTest extends TestCase
@@ -16,7 +16,7 @@ use RefreshDatabase;
 
 
 
-    public function it_can_remove_all_decks_from_group()
+    public function it_can_remove_all_decks_from_group(): void
     {
         $user = User::factory()->create();
 
