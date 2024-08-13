@@ -130,12 +130,12 @@ const showDeleteCard = (flashcard) => {
 const deleteCard = async () => {
     try {
         // Find the index of the card in flashcards
-        const cardIndex = flashcards.findIndex(
+        const cardIndex = flashcards.data.findIndex(
             (deleteCard) => deleteCard.id === currentCard.value.id
         );
         if (cardIndex !== -1) {
             // Remove the card from the array
-            flashcards.splice(currentCard.value, 1);
+            flashcards.data.splice(currentCard.value, 1);
             // Update the deck in the database with the updated cards array
             await router.delete(
                 route("flashcard.destroy", { flashcard: currentCard.value }),
@@ -175,7 +175,10 @@ const deleteCard = async () => {
                         >
                             {{ deck.title }}
                         </h2>
-                        <div @click.stop="showEditTitleModal">
+                        <div
+                            data-testid="edit-deck-title-icon"
+                            @click.stop="showEditTitleModal"
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
@@ -247,6 +250,8 @@ const deleteCard = async () => {
                                                 type="text"
                                                 class="mb-2 w-full text-black"
                                                 v-model="form.title"
+                                                name="title"
+                                                id="title"
                                             />
                                             <div
                                                 v-if="form.errors.title"
@@ -257,6 +262,7 @@ const deleteCard = async () => {
                                         </div>
                                     </div>
                                     <button
+                                        data-testid="edit-deck-title-btn"
                                         type="submit"
                                         :disabled="form.processing"
                                         class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -300,6 +306,7 @@ const deleteCard = async () => {
                     </button>
 
                     <button
+                        data-testid="delete-deck-btn"
                         class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
                         @click.stop="showDeleteDeck"
                     >
@@ -452,6 +459,7 @@ const deleteCard = async () => {
                                             </button>
                                             <button
                                                 type="button"
+                                                id="updateCardBtn"
                                                 @click.stop="
                                                     showUpdateCard(flashcard)
                                                 "
@@ -542,6 +550,8 @@ const deleteCard = async () => {
                                                             </label>
                                                             <input
                                                                 type="text"
+                                                                name="question"
+                                                                id="question"
                                                                 class="mb-2 w-full text-black"
                                                                 v-model="
                                                                     updateForm.question
@@ -562,12 +572,14 @@ const deleteCard = async () => {
                                                                 }}
                                                             </p>
                                                             <label
-                                                                for="points"
+                                                                for="answer"
                                                                 class="block mb-2 text-sm font-medium text-gray-900 text-black"
                                                                 >* Answer :
                                                             </label>
                                                             <input
                                                                 type="text"
+                                                                name="answer"
+                                                                id="answer"
                                                                 class="mb-2 w-full text-black"
                                                                 v-model="
                                                                     updateForm.answer
@@ -594,6 +606,8 @@ const deleteCard = async () => {
                                                             >
                                                             <input
                                                                 type="text"
+                                                                name="hint"
+                                                                id="hint"
                                                                 class="mb-2 w-full text-black"
                                                                 v-model="
                                                                     updateForm.hint
@@ -624,6 +638,7 @@ const deleteCard = async () => {
                                                                     updateForm.difficulty
                                                                 "
                                                                 name="difficulty"
+                                                                id="difficulty"
                                                                 class="mb-2 text-black"
                                                             >
                                                                 <option
@@ -666,7 +681,8 @@ const deleteCard = async () => {
                                                                 v-model="
                                                                     updateForm.points
                                                                 "
-                                                                name="difficultylevel"
+                                                                name="points"
+                                                                id="points"
                                                                 class="text-black"
                                                             >
                                                                 <option
@@ -781,6 +797,7 @@ const deleteCard = async () => {
                             <tbody>
                                 <tr
                                     v-for="flashcard in flashcards.data"
+                                    data-testid="flashcard-item"
                                     :key="flashcard.id"
                                     class="border-b border-gray-200 dark:border-gray-700 text-black"
                                 >
@@ -802,6 +819,7 @@ const deleteCard = async () => {
                                     <td class="px-6 py-4">
                                         <div class="flex space-x-2">
                                             <button
+                                                data-testid="delete-card-btn"
                                                 class="flex p-4 flex-row justify-center items-center focus:outline-none text-white font-dark bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-3 py-1.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
                                                 @click.stop="
                                                     showDeleteCard(flashcard)
@@ -825,6 +843,8 @@ const deleteCard = async () => {
                                             </button>
                                             <button
                                                 type="button"
+                                                id="updateCardBtn"
+                                                data-testid="update-card-btn"
                                                 @click.stop="
                                                     showUpdateCard(flashcard)
                                                 "
@@ -852,6 +872,7 @@ const deleteCard = async () => {
                                     <!-- Update Card Modal-->
                                     <div
                                         v-if="updateCardModal"
+                                        data-testid="update-card-modal"
                                         class="fixed inset-0 z-50 overflow-y-auto"
                                     >
                                         <div
@@ -877,6 +898,7 @@ const deleteCard = async () => {
                                                             )
                                                         "
                                                         type="button"
+                                                        id="updateCardBtn"
                                                         class="text-gray-400 hover:text-gray-900"
                                                     >
                                                         <svg
@@ -914,7 +936,10 @@ const deleteCard = async () => {
                                                                 >* Question :
                                                             </label>
                                                             <input
+                                                                data-testid="question-input"
                                                                 type="text"
+                                                                id="question"
+                                                                name="question"
                                                                 class="mb-2 w-full text-black"
                                                                 v-model="
                                                                     updateForm.question
@@ -935,12 +960,15 @@ const deleteCard = async () => {
                                                                 }}
                                                             </p>
                                                             <label
-                                                                for="points"
+                                                                for="answer"
                                                                 class="block mb-2 text-sm font-medium text-gray-900 text-black"
                                                                 >* Answer :
                                                             </label>
                                                             <input
+                                                                data-testid="answer-input"
                                                                 type="text"
+                                                                id="answer"
+                                                                name="answer"
                                                                 class="mb-2 w-full text-black"
                                                                 v-model="
                                                                     updateForm.answer
@@ -966,7 +994,10 @@ const deleteCard = async () => {
                                                                 >Hint :</label
                                                             >
                                                             <input
+                                                                data-testid="hint-input"
                                                                 type="text"
+                                                                name="hint"
+                                                                id="hint"
                                                                 class="mb-2 w-full text-black"
                                                                 v-model="
                                                                     updateForm.hint
@@ -997,6 +1028,7 @@ const deleteCard = async () => {
                                                                     updateForm.difficulty
                                                                 "
                                                                 name="difficulty"
+                                                                id="difficulty"
                                                                 class="mb-2 text-black"
                                                             >
                                                                 <option
@@ -1039,7 +1071,8 @@ const deleteCard = async () => {
                                                                 v-model="
                                                                     updateForm.points
                                                                 "
-                                                                name="difficultylevel"
+                                                                name="points"
+                                                                id="points"
                                                                 class="text-black"
                                                             >
                                                                 <option
@@ -1076,6 +1109,7 @@ const deleteCard = async () => {
                                                         </div>
                                                     </div>
                                                     <button
+                                                        data-testid="submit-update-card"
                                                         type="submit"
                                                         :disabled="
                                                             updateForm.processing

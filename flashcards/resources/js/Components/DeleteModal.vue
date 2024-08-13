@@ -102,6 +102,7 @@ const maxWidthClass = computed(() => {
                     leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
                     <div
+                        data-testid="delete-modal"
                         v-show="show"
                         class="mb-6 rounded-lg overflow-hidden transform transition-all sm:w-full sm:mx-auto"
                         :class="maxWidthClass"
@@ -157,6 +158,7 @@ const maxWidthClass = computed(() => {
                                             {{ message }}
                                         </h3>
                                         <button
+                                            data-testid="confirm-delete-btn"
                                             type="button"
                                             @click.stop="handleDelete"
                                             class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center"

@@ -141,7 +141,7 @@ use RefreshDatabase;
     {
       $user = User::factory()->create();
 
-    $response = $this->actingAs($user)->post('/createdeck', [
+    $response = $this->actingAs($user)->post('/createGroup', [
     'title' => 'Sample Group'
     ]);
 
@@ -154,12 +154,16 @@ use RefreshDatabase;
 {
     $user = User::factory()->create();
 
-    $response = $this->actingAs($user)->post('/groups', [
+    $response = $this->actingAs($user)->post('/createGroup', [
         'title' => 'Sample Group',
         'decks' => [999] // Assuming 999 is an invalid deck ID
     ]);
 
-    $response->assertSessionHasErrors('decks');
+     // Assert that the response has validation errors for 'decks'
+    $response->assertSessionHasErrors([
+        'decks.0' => 'One or more selected decks do not exist.'
+    ]);
+
     $this->assertDatabaseCount('groups', 0);
 }
 

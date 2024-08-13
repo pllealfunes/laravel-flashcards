@@ -183,6 +183,7 @@ const createCard = async () => {
                                                     >* Question :</label
                                                 >
                                                 <input
+                                                    data-testid="question-input"
                                                     id="question"
                                                     name="question"
                                                     type="text"
@@ -202,6 +203,7 @@ const createCard = async () => {
                                                     >* Answer :</label
                                                 >
                                                 <input
+                                                    data-testid="answer-input"
                                                     id="answer"
                                                     name="answer"
                                                     type="text"
@@ -221,6 +223,7 @@ const createCard = async () => {
                                                     >Hint :</label
                                                 >
                                                 <input
+                                                    data-testid="hint-input"
                                                     id="hint"
                                                     name="hint"
                                                     type="text"
@@ -241,6 +244,7 @@ const createCard = async () => {
                                                     >Difficulty level :</label
                                                 >
                                                 <select
+                                                    data-testid="difficulty-select"
                                                     v-model="form.difficulty"
                                                     name="difficulty"
                                                     class="mb-2 text-black"
@@ -268,6 +272,7 @@ const createCard = async () => {
                                                     >Points :</label
                                                 >
                                                 <select
+                                                    data-testid="points-select"
                                                     id="points"
                                                     v-model="form.points"
                                                     name="points"

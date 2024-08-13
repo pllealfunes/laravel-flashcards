@@ -27,18 +27,11 @@ const form = useForm({
 const submit = async () => {
     try {
         form.decks = checkedDecks;
-        await form.post(
-            route("group.store"),
-            {
-                preserveState: (page) =>
-                    Object.keys(page.props.errors).length > 0,
-            },
-            {
-                onSuccess: () => form.reset(),
-            }
-        );
-    } catch (error) {
-        page.props.flash.error = `Unable to update card. Error: ${error}`;
+        await form.post(route("group.store"), {
+            onSuccess: () => form.reset(),
+        });
+    } catch (errors) {
+        page.props.flash.error = `Unable to create group. Error: ${errors}`;
     }
 };
 </script>
@@ -51,11 +44,16 @@ const submit = async () => {
                 @submit.prevent="submit"
                 class="mt-8 w-full mx-3 md:w-1/2 lg:w-1/2"
             >
+                <span v-for="(error, index) in $page.props.errors" :key="index">
+                    <ErrorToast v-if="error" :message="error" class="mb-3" />
+                </span>
+
                 <ErrorToast
                     v-if="$page.props.flash.error"
                     :message="$page.props.flash.error"
                     class="mb-3"
                 />
+
                 <div
                     v-if="form.errors.title"
                     class="mt-5 mb-2 bg-red-400 text-black font-bold p-3 border-red-600 border-2 border-solid flex flex-row gap-2 justify-center items-center"

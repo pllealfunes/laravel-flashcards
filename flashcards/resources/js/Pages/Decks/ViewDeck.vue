@@ -187,6 +187,7 @@ const shuffleDeck = (deck) => {
                     </Dropdown>
 
                     <Link
+                        data-testid="edit-deck-btn"
                         :href="route('deck.showUpdatePage', { deck: deck.id })"
                         as="button"
                         type="button"

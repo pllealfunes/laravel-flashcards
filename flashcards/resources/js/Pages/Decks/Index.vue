@@ -30,6 +30,7 @@ dayjs.extend(relativeTime);
         </div>
 
         <Link
+            data-testid="flashcard-title"
             :href="resultRoute"
             as="button"
             class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"

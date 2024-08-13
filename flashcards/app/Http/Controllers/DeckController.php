@@ -88,9 +88,10 @@ class DeckController extends Controller
     public function show(Deck $deck)
     {
 
-
+     $user = Auth::user();
+     
     // Ensure the authenticated user owns the deck
-        if ($deck->user_id !== Auth::id()) {
+        if ($deck->user_id !== $user->id) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -104,7 +105,7 @@ class DeckController extends Controller
     $deck->makeHidden('user_id');
 
     $flashcards = Flashcard::where('deck_id', $deck->id)
-                     ->where('user_id', auth()->id()) // Ensure it's the authenticated user's decks
+                     ->where('user_id', $user->id) // Ensure it's the authenticated user's decks
                      ->paginate(10); // 10 decks per page
 
     // Hide the user_id attribute
@@ -120,11 +121,12 @@ class DeckController extends Controller
      */
     public function showUpdatePage(Deck $deck)
     {
+         $user = Auth::user();
          // Hide the user_id attribute
     $deck->makeHidden('user_id');
 
     $flashcards = Flashcard::where('deck_id', $deck->id)
-                     ->where('user_id', auth()->id()) // Ensure it's the authenticated user's decks
+                     ->where('user_id', $user->id) // Ensure it's the authenticated user's decks
                      ->paginate(10); // 10 decks per page
 
     // Hide the user_id attribute

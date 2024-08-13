@@ -37,31 +37,43 @@ class GroupsController extends Controller
     /**
      * Store a newly created group in storage.
      */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'decks' => 'required|array', // Assuming 'decks' is an array of deck IDs
-        ]);
-    
-        // Ensure that the user is authenticated before creating the group
-        if ($request->user()) {
-            $group = Group::create([
-                'title' => $validated['title'],
-                'user_id' => $request->user()->id,
-            ]);
-    
-        // Associate selected decks with the group by creating Deck records with group_id set to the group's ID
-        foreach ($validated['decks'] as $deckId) {
+ public function store(Request $request): RedirectResponse
+{
+     $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'decks' => 'required|array',
+        'decks.*' => 'exists:decks,id', // Ensure each deck ID exists
+    ], [
+        'decks.required' => 'You must select at least one deck.',
+        'decks.array' => 'The decks field must be an array.',
+        'decks.*.exists' => 'One or more selected decks do not exist.',
+    ]);
 
+    // Ensure the user is authenticated
+    if (!$request->user()) {
+        return redirect()->back()->with('error', 'Unauthorized');
+    }
+
+    try {
+        // Create the group
+        $group = Group::create([
+            'title' => $validated['title'],
+            'user_id' => $request->user()->id,
+        ]);
+
+        // Associate selected decks with the group
+        foreach ($validated['decks'] as $deckId) {
             Deck::where('id', $deckId)->update(['group_id' => $group->id]);
         }
-    
-            return  redirect(route('dashboard'))->with('success', 'Group created successfully.');
-        } else{
-            return redirect()->back()->with('error', 'Unable to create group.');
-        }
+
+        // Redirect with success message
+        return redirect(route('dashboard'))->with('success', 'Group created successfully.');
+        
+    } catch (\Exception $e) {
+        // Handle other exceptions with a generic error message
+        return redirect()->back()->with('error', 'There was an error creating the group.');
     }
+}
 
    
  /**
@@ -69,13 +81,14 @@ class GroupsController extends Controller
  */
 public function show(Group $group)
 {
+     $user = Auth::user();
     // Update the group's last viewed timestamp
     $group->lastviewed = Carbon::now()->toIso8601String();
     $group->save();
 
    // Retrieve user's decks assigned to the group with pagination
     $userDecks = Deck::where('group_id', $group->id)
-                     ->where('user_id', auth()->id()) // Ensure it's the authenticated user's decks
+                     ->where('user_id', $user->id) // Ensure it's the authenticated user's decks
                      ->paginate(10); // 10 decks per page
 
     // Transform the paginated decks to include only specified details
@@ -126,8 +139,10 @@ public function show(Group $group)
 
 public function showAddDeck($groupId)
 {
+     $user = Auth::user();
+
        $availableDecks = Deck::whereNull('group_id')
-                     ->where('user_id', auth()->id()) // Ensure it's the authenticated user's decks
+                     ->where('user_id', $user->id) // Ensure it's the authenticated user's decks
                      ->paginate(10); // 10 decks per page
 
       $availableDecks->getCollection()->transform(function ($deck) {

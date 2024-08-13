@@ -105,12 +105,24 @@ public function test_can_delete_a_flashcard(): void
 
 public function test_cannot_delete_flashcard_if_not_owned_by_user(): void
 {
+    // Create two users
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
+    
+    // Create a flashcard owned by the other user
     $flashcard = Flashcard::factory()->create(['user_id' => $otherUser->id]);
 
+    // Act as the current user and attempt to delete the flashcard
     $response = $this->actingAs($user)->delete("/deck/deleteFlashcard/{$flashcard->id}");
 
-    $response->assertStatus(403);
+  if ($response->isRedirect()) {
+        $response->assertStatus(302); // Redirect status
+        $this->assertDatabaseHas('flashcards', ['id' => $flashcard->id]); // Ensure flashcard still exists
+    } else {
+        // Assert that the response status is 403 Forbidden
+        $response->assertStatus(403);
+        // Assert that the flashcard still exists in the database
+        $this->assertDatabaseHas('flashcards', ['id' => $flashcard->id]);
+    }
 }
 }

@@ -2,6 +2,7 @@
 import { useForm, Head, usePage } from "@inertiajs/vue3";
 import InputError from "@/Components/InputError.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import ErrorToast from "@/Components/ErrorToast.vue";
 
 const page = usePage();
 
@@ -26,16 +27,9 @@ const deleteCard = (index) => {
 
 const submit = async () => {
     try {
-        await form.post(
-            route("deck.store"),
-            {
-                preserveState: (page) =>
-                    Object.keys(page.props.errors).length > 0,
-            },
-            {
-                onSuccess: () => form.reset(),
-            }
-        );
+        await form.post(route("deck.store"), {
+            onSuccess: () => form.reset(),
+        });
     } catch (error) {
         page.props.flash.error = `Unable to update card. Error: ${error}`;
     }
@@ -45,6 +39,16 @@ const submit = async () => {
 <template>
     <Head title="Create Deck" />
     <AuthenticatedLayout>
+        <span v-for="(error, index) in $page.props.errors" :key="index">
+            <ErrorToast v-if="error" :message="error" class="mb-3" />
+        </span>
+
+        <ErrorToast
+            v-if="$page.props.flash.error"
+            :message="$page.props.flash.error"
+            class="mb-3"
+        />
+
         <div
             v-if="form.errors.flashcards"
             class="mt-5 mb-2 bg-red-400 text-black font-bold p-3 border-red-600 border-2 border-solid flex flex-row gap-2 justify-center items-center"
@@ -99,13 +103,16 @@ const submit = async () => {
                         >Deck Title :</label
                     >
                     <input
+                        data-testid="title-input-create"
                         type="text"
                         v-model="form.title"
                         class="w-full text-lg font-medium"
                         name="title"
+                        id="title"
                     />
                 </div>
                 <button
+                    data-testid="add-card-btn-create"
                     type="button"
                     class="font-bold flex gap-2 justify-center items-center focus:outline-none dfont-bold ark:text-black bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
                     @click="addCard"
@@ -157,6 +164,7 @@ const submit = async () => {
                         >Question :</label
                     >
                     <input
+                        data-testid="question-input-create"
                         type="text"
                         v-model="flashcard.question"
                         class="w-full"
@@ -165,6 +173,7 @@ const submit = async () => {
                                 form.errors[`flashcards.${index}.question`],
                         }"
                         name="question"
+                        id="question"
                         :aria-label="`Card $(index+1) question`"
                     />
                     <InputError
@@ -176,6 +185,7 @@ const submit = async () => {
                         >Answer :</label
                     >
                     <input
+                        data-testid="answer-input-create"
                         type="text"
                         v-model="flashcard.answer"
                         class="w-full"
@@ -184,6 +194,7 @@ const submit = async () => {
                                 form.errors[`flashcards.${index}.answer`],
                         }"
                         name="answer"
+                        id="answer"
                         :aria-label="`Card $(index+1) answer`"
                     />
                     <InputError
@@ -195,21 +206,25 @@ const submit = async () => {
                         >Hint :</label
                     >
                     <input
+                        data-testid="hint-input-create"
                         type="text"
                         v-model="flashcard.hint"
                         class="w-full"
                         name="hint"
+                        id="hint"
                         :aria-label="`Card $(index+1) hint`"
                     />
                     <!-- difficulty level -->
 
-                    <label for="difficultylevel" class="block font-bold m-2"
+                    <label for="difficulty" class="block font-bold m-2"
                         >Difficulty Level :</label
                     >
 
                     <select
+                        data-testid="difficulty-select-create"
                         v-model="flashcard.difficulty"
                         name="difficulty"
+                        id="difficulty"
                         :aria-label="`Card $(index+1) difficulty`"
                         :class="{
                             'border-red-400':
@@ -225,13 +240,16 @@ const submit = async () => {
                         :message="form.errors[`flashcards.${index}.difficulty`]"
                         class="text-red-500 text-xs mt-1"
                     />
+
                     <!-- points -->
                     <label for="points" class="block font-bold m-2"
                         >Points :</label
                     >
                     <select
+                        data-testid="points-select-create"
                         v-model="flashcard.points"
-                        name="difficultylevel"
+                        name="points"
+                        id="points"
                         class="mr-2"
                         :aria-label="`Card $(index+1) points`"
                         :class="{
@@ -252,6 +270,7 @@ const submit = async () => {
 
                 <!-- submit -->
                 <button
+                    data-testid="create-deck-btn"
                     type="submit"
                     :disabled="form.processing"
                     class="block mt-5 font-bold uppercase focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
