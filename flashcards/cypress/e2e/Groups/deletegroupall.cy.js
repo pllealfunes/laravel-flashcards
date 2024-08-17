@@ -2,9 +2,9 @@ describe("User login and delete a group while the decks remain", () => {
     beforeEach(() => {
         cy.visit("/login");
         cy.get('[data-testid="email-input-login"]').type(
-            "katesmiles@example.com"
+            "katethomas@example.com"
         );
-        cy.get('[data-testid="password-input-login"]').type("katenate24");
+        cy.get('[data-testid="password-input-login"]').type("katecake94");
         cy.get('[data-testid="login-btn"]').click();
 
         // Wait for successful login

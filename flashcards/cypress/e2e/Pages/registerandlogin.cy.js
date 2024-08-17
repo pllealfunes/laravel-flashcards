@@ -20,7 +20,7 @@ describe("User Registration", () => {
     it("should show validation errors with invalid data", () => {
         cy.visit("/register");
 
-        cy.get('[data-testid="name-input-register"]').type("Kate");
+        cy.get('[data-testid="name-input-register"]').type("Kate Thomas");
         cy.get('[data-testid="email-input-register"]').type("invalid-email");
         cy.get('[data-testid="password-input-register"]').type("short");
         cy.get('[data-testid="password-confirmation-input-register"]').type(
@@ -32,13 +32,13 @@ describe("User Registration", () => {
     it("should register a new user with valid data", () => {
         cy.visit("/register");
 
-        cy.get('[data-testid="name-input-register"]').type("Kate");
+        cy.get('[data-testid="name-input-register"]').type("Kate Thomas");
         cy.get('[data-testid="email-input-register"]').type(
-            "katesmiles@example.com"
+            "katethomas@example.com"
         );
-        cy.get('[data-testid="password-input-register"]').type("katenate24");
+        cy.get('[data-testid="password-input-register"]').type("katecake94");
         cy.get('[data-testid="password-confirmation-input-register"]').type(
-            "katenate24"
+            "katecake24"
         );
         cy.get('[data-testid="register-btn"]').click();
 
@@ -53,11 +53,11 @@ describe("User Registration", () => {
 
         cy.get('[data-testid="name-input-register"]').type("Existing User");
         cy.get('[data-testid="email-input-register"]').type(
-            "katesmiles@example.com"
+            "katethomas@example.com"
         ); // Assuming this email already exists
-        cy.get('[data-testid="password-input-register"]').type("katenate24");
+        cy.get('[data-testid="password-input-register"]').type("katecake94");
         cy.get('[data-testid="password-confirmation-input-register"]').type(
-            "katenate24"
+            "katecake94"
         );
         cy.get('[data-testid="register-btn"]').click();
 
@@ -70,9 +70,9 @@ describe("Login User", () => {
     it("successfully logsin a user", () => {
         cy.visit("/login");
         cy.get('[data-testid="email-input-login"]').type(
-            "katesmiles@example.com"
+            "katethomas@example.com"
         );
-        cy.get('[data-testid="password-input-login"]').type("katenate24");
+        cy.get('[data-testid="password-input-login"]').type("katecake94");
         cy.get('[data-testid="login-btn"]').click();
 
         // Wait for successful login

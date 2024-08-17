@@ -6,6 +6,14 @@ Watch the Video for a Glimpse!:
 
 [![Watch the video](https://img.youtube.com/vi/1VNtswo5Kf8/maxresdefault.jpg)](https://www.youtube.com/watch?v=1VNtswo5Kf8)
 
+## Default User Seed
+
+The default user after running php artisan db:seed will be:
+
+name: Beth Thomas
+emaail: beth99@email.com
+password: bethmary99
+
 ## Current Functionalities :
 
 - Create user account
