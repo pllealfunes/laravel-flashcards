@@ -44,6 +44,7 @@ const showingNavigationDropdown = ref(false);
                                     Create Deck
                                 </NavLink>
                                 <NavLink
+                                    data-testid="create-group-btn"
                                     :href="route('group.create')"
                                     :active="route().current('group.create')"
                                 >
@@ -59,6 +60,7 @@ const showingNavigationDropdown = ref(false);
                                     <template #trigger>
                                         <span class="inline-flex rounded-md">
                                             <button
+                                                data-testid="logout-dropdown-btn"
                                                 type="button"
                                                 class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
                                             >
@@ -87,6 +89,7 @@ const showingNavigationDropdown = ref(false);
                                             Profile
                                         </DropdownLink>
                                         <DropdownLink
+                                            data-testid="logout-btn"
                                             :href="route('logout')"
                                             method="post"
                                             as="button"

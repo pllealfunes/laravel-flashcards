@@ -101,6 +101,7 @@ const addDeck = async () => {
 
                 <div class="flex flex-row justify-evenly items-center">
                     <button
+                        data-testid="add-card-submit"
                         class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-purple-700 focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-purple-700 dark:hover:bg-purple-500 dark:focus:ring-purple-900"
                         @click.stop="showAddDeck"
                     >
@@ -238,6 +239,7 @@ const addDeck = async () => {
                                             class="text-black"
                                         >
                                             <input
+                                                data-testid="checkbox-deck-add"
                                                 type="checkbox"
                                                 :id="'checkbox-' + deck.id"
                                                 v-model="checkedDecks"

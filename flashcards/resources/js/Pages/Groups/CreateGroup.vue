@@ -97,7 +97,7 @@ const submit = async () => {
 
                     {{ form.errors.decks }}
                 </div>
-                <!-- deck title -->
+                <!-- group title -->
                 <div class="rounded-lg border-sky-950 p-5 bg-sky-950 mb-5">
                     <label
                         for="title"
@@ -105,10 +105,12 @@ const submit = async () => {
                         >Group Title :</label
                     >
                     <input
+                        data-testid="title-input-group"
                         type="text"
                         v-model="form.title"
                         class="w-full text-lg font-medium"
                         name="title"
+                        id="title-group"
                     />
                 </div>
 
@@ -154,6 +156,7 @@ const submit = async () => {
                                             class="text-black"
                                         >
                                             <input
+                                                data-testid="checkbox-deck"
                                                 type="checkbox"
                                                 :id="'checkbox-' + deck.id"
                                                 v-model="checkedDecks"
@@ -180,6 +183,8 @@ const submit = async () => {
                 <!-- submit -->
                 <div class="flex justify-center items-center">
                     <button
+                        data-testid="group-submit-btn"
+                        id="submit"
                         type="submit"
                         :disabled="form.processing"
                         class="w-full block mt-5 font-bold uppercase focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"

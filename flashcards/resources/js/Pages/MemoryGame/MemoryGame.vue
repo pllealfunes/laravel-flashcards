@@ -22,67 +22,39 @@ const numCardsNeeded = 6;
 const incorrectAttempts = ref(0);
 
 const startRound = () => {
+    // Ensure the correct number of cards is selected and shuffled
     gameCards.value =
-        flashcards.length >= numCardsNeeded
-            ? getRandomCards(flashcards, numCardsNeeded)
-            : getRepeatedCards(flashcards, numCardsNeeded);
+        flashcards.length <= numCardsNeeded
+            ? flashcards
+            : getRandomCards(flashcards, numCardsNeeded);
+
+    // Shuffle questions and answers together
+    answersArray.value = gameCards.value.map((flashcard) => ({
+        type: "answer",
+        value: flashcard.answer,
+    }));
+
+    questionsArray.value = gameCards.value.map((flashcard) => ({
+        type: "question",
+        value: flashcard.question,
+    }));
+
+    // Combine and shuffle both arrays
+    currentCards.value = shuffleArray([
+        ...answersArray.value,
+        ...questionsArray.value,
+    ]);
+
+    console.log("Game Cards:", currentCards.value);
 };
 
-// Function to get random cards from the flashcards array
+// Function to get random cards for the memory game
 const getRandomCards = (cards, count) => {
-    // Separate cards into question and answer categories
-    const questionCards = cards.filter((card) => card.question);
-    const answerCards = cards.filter((card) => card.answer);
-
-    // Debugging logs to show filtered cards
-    console.log("Question Cards:", questionCards);
-    console.log("Answer Cards:", answerCards);
-
-    // Randomly select half of the required count from each category
-    const selectedQuestions = getRandomItems(questionCards, count / 2);
-    const selectedAnswers = getRandomItems(answerCards, count / 2);
-
-    // Combine selected questions and answers, then shuffle them
-    const combinedCards = [...selectedQuestions, ...selectedAnswers];
-    console.log("Selected Questions:", selectedQuestions);
-    console.log("Selected Answers:", selectedAnswers);
-    return shuffleArray(combinedCards);
-};
-
-// Function to get repeated cards when flashcards are insufficient
-const getRepeatedCards = (cards, count) => {
-    // Separate cards into question and answer categories
-    const questionCards = cards.filter((card) => card.question);
-    const answerCards = cards.filter((card) => card.answer);
-
-    // Randomly select half of the required count from each category
-    const selectedQuestions = getRandomItems(questionCards, count / 2);
-    const selectedAnswers = getRandomItems(answerCards, count / 2);
-
-    // Combine selected questions and answers, then shuffle them
-    const combinedCards = [...selectedQuestions, ...selectedAnswers];
-    return shuffleArray(combinedCards);
-};
-
-// Function to get random items from an array
-const getRandomItems = (array, count) => {
-    const result = [];
-    const totalItems = array.length;
-    const indices = Array.from({ length: totalItems }, (_, i) => i);
-
-    // Select 'count' random items from the array
-    for (let i = 0; i < count; i++) {
-        const randomIndex = Math.floor(Math.random() * (totalItems - i));
-        result.push(array[indices[randomIndex]]);
-
-        // Swap selected index with the last index to avoid duplicates
-        [indices[randomIndex], indices[totalItems - i - 1]] = [
-            indices[totalItems - i - 1],
-            indices[randomIndex],
-        ];
+    if (cards.length <= count) {
+        return cards;
     }
-
-    return result;
+    const shuffled = shuffleArray([...cards]);
+    return shuffled.slice(0, count);
 };
 
 // Function to shuffle an array
@@ -146,18 +118,9 @@ const startGame = () => {
     pickedCards.value = [];
     results.value = false;
     newGame.value = true;
-    startRound();
     incorrectAttempts.value = 0;
 
-    answersArray.value = gameCards.value.map(function (flashcard) {
-        return { type: "answer", value: flashcard.answer };
-    });
-
-    questionsArray.value = gameCards.value.map(function (flashcard) {
-        return { type: "question", value: flashcard.question };
-    });
-
-    currentCards.value = [...answersArray.value, ...questionsArray.value];
+    startRound();
 
     flippedStates.value = currentCards.value.map(() => ({
         flipped: false,
@@ -260,6 +223,7 @@ const setCardStyles = (
         </h1>
         <div class="flex flex-col justify-center items-center">
             <button
+                data-testid="new-game-btn"
                 type="button"
                 class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-bold rounded-lg px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
                 @click="startGame()"
@@ -296,6 +260,7 @@ const setCardStyles = (
                 id="flashcardsDeck"
             >
                 <div
+                    data-testid="memory-cards-display"
                     v-for="(card, index) in currentCards"
                     :key="card.id"
                     class="m-5 font-semibold flex flex-row justify-center items-center transition-transform duration-500 ease-in-out"

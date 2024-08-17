@@ -18,7 +18,7 @@ describe("User login and create deck", () => {
         cy.get('[data-testid="delete-deck-btn"]').click();
 
         // Ensure the modal is open
-        cy.contains("Are you sure you want to delete this deck").should(
+        cy.contains("Are you sure you want to delete this deck?").should(
             "be.visible"
         );
         cy.contains("Yes, I'm sure").should("be.visible").click();

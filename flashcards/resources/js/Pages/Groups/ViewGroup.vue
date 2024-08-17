@@ -138,7 +138,10 @@ const removeDeck = async () => {
                         >
                             {{ group.title }}
                         </h2>
-                        <div @click.stop="showEditTitleModal">
+                        <div
+                            data-testid="edit-group-title-icon"
+                            @click.stop="showEditTitleModal"
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
@@ -207,6 +210,9 @@ const removeDeck = async () => {
                                                 >{{ group.title }}</label
                                             >
                                             <input
+                                                data-testid="edit-group-input"
+                                                name="title"
+                                                id="title"
                                                 type="text"
                                                 class="mb-2 w-full text-black"
                                                 v-model="form.title"
@@ -220,6 +226,7 @@ const removeDeck = async () => {
                                         </div>
                                     </div>
                                     <button
+                                        data-testid="edit-group-title-btn"
                                         type="submit"
                                         :disabled="form.processing"
                                         class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -241,9 +248,10 @@ const removeDeck = async () => {
 
                 <div class="flex flex-row justify-evenly items-center">
                     <Link
+                        data-testid="add-deck"
                         :href="route('group.showAddDeck', { group: group.id })"
                         as="button"
-                        class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-green-700 hover:bg-red-800 focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-2 py-1 md:mt-0 md:px-5 md:py-2.5 me-2 mt-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-900"
+                        class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-purple-700 hover:bg-red-800 focus:ring-4 focus:ring-purple-300 font-bold rounded-lg text-sm px-2 py-1 md:mt-0 md:px-5 md:py-2.5 me-2 mt-2 mb-2 dark:bg-purple-700 dark:hover:bg-purple-500 dark:focus:ring-purple-900"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -264,6 +272,7 @@ const removeDeck = async () => {
                     >
                     <div class="flex flex-row justify-evenly items-center">
                         <button
+                            data-testid="delete-group-modal"
                             class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-2 py-1 md:mt-0 md:px-5 md:py-2.5 me-2 mt-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
                             @click.stop="showKeepDecks"
                         >
@@ -284,6 +293,7 @@ const removeDeck = async () => {
                     </div>
                     <div class="flex flex-row justify-evenly items-center">
                         <button
+                            data-testid="delete-all-modal"
                             class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-bold rounded-lg text-sm px-2 py-1 md:mt-0 md:px-5 md:py-2.5 me-2 mt-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
                             @click.stop="showDeleteGroup"
                         >
@@ -444,7 +454,10 @@ const removeDeck = async () => {
                                 >Created:
                                 {{ dayjs(deck.created_at).fromNow() }}</span
                             >
-                            <button @click.stop="showRemoveDeck(deck.id)">
+                            <button
+                                data-testid="delete-deck-modal"
+                                @click.stop="showRemoveDeck(deck.id)"
+                            >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 24 24"

@@ -98,6 +98,7 @@ const shuffleDeck = (deck) => {
                 </h2>
                 <div class="flex flewx-row justify-between items-center">
                     <Link
+                        data-testid="quiz-btn"
                         :href="route('deck.quiz', { deck: deck.id })"
                         as="button"
                         type="button"
@@ -124,6 +125,7 @@ const shuffleDeck = (deck) => {
                         <template #trigger>
                             <span class="inline-flex rounded-md">
                                 <button
+                                    data-testid="games-dropdown"
                                     type="button"
                                     class="font-bold flex justify-center items-center focus:outline-none font-bold dark:text-black bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-4 py-2 me-2 mb-2 dark:focus:ring-yellow-900"
                                     :class="{
@@ -166,6 +168,7 @@ const shuffleDeck = (deck) => {
 
                         <template #content>
                             <DropdownLink
+                                data-testid="matching-game-btn"
                                 :href="
                                     route('deck.matchingGame', {
                                         deck: deck.id,
@@ -175,6 +178,7 @@ const shuffleDeck = (deck) => {
                                 Matching Game
                             </DropdownLink>
                             <DropdownLink
+                                data-testid="memory-game-btn"
                                 :href="
                                     route('deck.memoryGame', {
                                         deck: deck.id,

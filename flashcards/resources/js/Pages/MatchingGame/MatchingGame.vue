@@ -22,18 +22,17 @@ const displayTime = ref("");
 const incorrectAttempts = ref(0);
 
 const startRound = () => {
+    // If there are 4 or fewer cards, display them all; otherwise, pick 4 random cards
     gameCards.value =
-        flashcards.length >= numCardsNeeded
-            ? getRandomCards(flashcards, numCardsNeeded)
-            : getRepeatedCards(flashcards, numCardsNeeded);
+        flashcards.length <= numCardsNeeded
+            ? flashcards
+            : getRandomCards(flashcards, 4);
 };
 
 // Function to get random cards from the flashcards array
 const getRandomCards = (cards, count) => {
-    return Array.from(
-        { length: count },
-        () => cards[Math.floor(Math.random() * cards.length)]
-    );
+    const shuffled = shuffleArray([...cards]);
+    return shuffled.slice(0, count);
 };
 
 // Function to get repeated cards when flashcards are insufficient
@@ -98,65 +97,29 @@ const startGame = () => {
     startRound();
     resetWatch();
     incorrectAttempts.value = 0;
-
-    // Use a Set to track unique questions and answers
-    const uniqueQuestions = new Set();
-    const uniqueAnswers = new Set();
-
-    // Filter gameCards to ensure unique questions and answers
-    let uniqueGameCards = gameCards.value.filter((flashcard) => {
-        if (
-            !uniqueQuestions.has(flashcard.question) &&
-            !uniqueAnswers.has(flashcard.answer)
-        ) {
-            uniqueQuestions.add(flashcard.question);
-            uniqueAnswers.add(flashcard.answer);
-            return true;
-        }
-        return false;
-    });
-
-    // Ensure we have exactly numCardsNeeded unique flashcards
-    if (uniqueGameCards.length < numCardsNeeded) {
-        const additionalCardsNeeded = numCardsNeeded - uniqueGameCards.length;
-        const additionalCards = getRandomCards(
-            flashcards,
-            additionalCardsNeeded
-        );
-        uniqueGameCards = uniqueGameCards.concat(additionalCards);
-    }
-
     let idCounter = 0;
-    answersArray.value = uniqueGameCards.map((flashcard) => {
-        return {
-            id: idCounter++,
-            type: "answer",
-            value: flashcard.answer,
-            style: "bg-sky-950",
-        };
-    });
 
-    questionsArray.value = uniqueGameCards.map((flashcard) => {
-        return {
-            id: idCounter++,
-            type: "question",
-            value: flashcard.question,
-            style: "bg-sky-950",
-        };
-    });
+    questionsArray.value = gameCards.value.map((flashcard) => ({
+        id: idCounter++,
+        type: "question",
+        value: flashcard.question,
+        style: "bg-sky-950",
+    }));
 
-    // Shuffle answersArray to randomize order
+    answersArray.value = gameCards.value.map((flashcard) => ({
+        id: idCounter++,
+        type: "answer",
+        value: flashcard.answer,
+        style: "bg-sky-950",
+    }));
+
+    // Shuffle both questions and answers to randomize their order
+    questionsArray.value = shuffleArray(questionsArray.value);
     answersArray.value = shuffleArray(answersArray.value);
 
-    // Clear arrays before updating
-    arrayFirstHalf.value = [];
-    arraySecondHalf.value = [];
-
-    // Assign questions to arrayFirstHalf and shuffled answers to arraySecondHalf
-    for (let i = 0; i < numCardsNeeded; i++) {
-        arrayFirstHalf.value.push(questionsArray.value[i]);
-        arraySecondHalf.value.push(answersArray.value[i]);
-    }
+    // Clear and populate the arrays to be displayed
+    arrayFirstHalf.value = questionsArray.value;
+    arraySecondHalf.value = answersArray.value;
 
     startWatch();
 };
@@ -265,6 +228,7 @@ const setCardStyles = (firstCard, secondCard, style, timeout, hiddenStyle) => {
         </h1>
         <div class="flex flex-col justify-center items-center">
             <button
+                data-testid="new-game-btn"
                 type="button"
                 class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-bold rounded-lg px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
                 @click="startGame"
@@ -281,6 +245,7 @@ const setCardStyles = (firstCard, secondCard, style, timeout, hiddenStyle) => {
                 >
                     <div v-for="element in arrayFirstHalf" :key="element.id">
                         <div
+                            data-testid="non-draggable-cards"
                             :id="element.id"
                             :class="[
                                 'w-[350px] h-[250px] dark:text-slate-200 border border-gray-200 rounded-lg shadow mb-2 flex flex-row justify-between cursor-pointer card',
@@ -308,6 +273,7 @@ const setCardStyles = (firstCard, secondCard, style, timeout, hiddenStyle) => {
                 >
                     <template #item="{ element }">
                         <div
+                            data-testid="draggable-cards"
                             :key="element.id"
                             :id="element.id"
                             :class="[

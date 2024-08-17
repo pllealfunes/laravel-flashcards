@@ -158,6 +158,7 @@ const toggleIncorrectAnswers = () => {
                 class="m-5 flex flex-col flex-wrap justify-center items-center"
             >
                 <div
+                    data-testid="quiz-question"
                     class="w-[700px] h-[300px] border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between"
                 >
                     <p class="text-slate-200 flex justify-end mt-3 mr-3">
@@ -196,6 +197,7 @@ const toggleIncorrectAnswers = () => {
                 </div>
             </div>
             <button
+                data-testid="submit-quiz-btn"
                 type="button"
                 class="mt-11 w-1/4 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                 :disabled="showScore"

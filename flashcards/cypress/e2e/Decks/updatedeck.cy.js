@@ -11,7 +11,7 @@ describe("User login and update deck", () => {
         // Wait for successful login
         cy.contains("You are Successfully Logged In").should("exist");
 
-        cy.get('[data-testid="flashcard-title"]').click();
+        cy.get('[data-testid="deck-title"]').click();
         cy.get('[data-testid="edit-deck-btn"]').click();
     });
 
@@ -103,9 +103,9 @@ describe("User login and update deck", () => {
 
     // Unsuccessfully Create Flashcard
     it("should show validation errors with invalid data for creating flashcard", () => {
-        cy.get("button").contains("Add Card").click();
+        cy.get('[data-testid="add-card-deck-btn"]').click();
 
-        cy.get("button").contains("Submit").click();
+        cy.get('[data-testid="new-card-submit"]').click();
 
         cy.contains("The question field is required.");
         cy.contains("The answer field is required.");
@@ -115,7 +115,7 @@ describe("User login and update deck", () => {
 
     // Create Flashcard
     it("Can create a flashcard in the deck", () => {
-        cy.get("button").contains("Add Card").click();
+        cy.get('[data-testid="add-card-deck-btn"]').click();
 
         // Add valid flashcard
         cy.get('[data-testid="question-input"]')
@@ -124,7 +124,7 @@ describe("User login and update deck", () => {
         cy.get('[data-testid="answer-input"]').first().type("a^2 + b^2 = c^2");
         cy.get('[data-testid="difficulty-select"]').first().select("easy");
         cy.get('[data-testid="points-select"]').first().select("1");
-        cy.get("button").contains("Submit").click();
+        cy.get('[data-testid="new-card-submit"]').click();
 
         // Assert success or updated content
         cy.contains("Successfully created a new card.").should("exist");
