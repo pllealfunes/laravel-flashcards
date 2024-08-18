@@ -9,7 +9,7 @@ import DeleteModal from "@/Components/DeleteModal.vue";
 import NewPagination from "@/Components/NewPagination.vue";
 import SearchBar from "@/Components/SearchBar.vue";
 
-const { deck, flashcards } = defineProps({ deck: Object, flashcards: Object });
+const props = defineProps({ deck: Object, flashcards: Object });
 
 const page = usePage();
 const deleteDeckModal = ref(false);
@@ -32,7 +32,7 @@ const handleSearch = (input) => {
 };
 
 const searchResults = computed(() => {
-    return flashcards.data.filter((card) => {
+    return props.flashcards.data.filter((card) => {
         return card.question
             .toLowerCase()
             .includes(searchInput.value.toLowerCase());
@@ -52,7 +52,7 @@ const showAddCard = () => {
 };
 
 const form = useForm({
-    title: deck.title,
+    title: props.deck.title,
 });
 
 const showEditTitle = ref(false);
@@ -65,7 +65,7 @@ const showEditTitleModal = () => {
 
 const editTitle = async () => {
     try {
-        await form.patch(route("deck.updateTitle", { deck: deck.id }), {
+        await form.patch(route("deck.updateTitle", { deck: props.deck.id }), {
             onSuccess: () => {
                 showEditTitle.value = false;
             },
@@ -116,7 +116,7 @@ const showDeleteDeck = () => {
 
 const deleteDeck = async () => {
     try {
-        await router.delete(route("deck.destroy", { deck: deck.id }));
+        await router.delete(route("deck.destroy", { deck: props.deck.id }));
     } catch (error) {
         page.props.flash.error = `Unable to delete deck. Error: ${error}`;
     }
@@ -130,12 +130,12 @@ const showDeleteCard = (flashcard) => {
 const deleteCard = async () => {
     try {
         // Find the index of the card in flashcards
-        const cardIndex = flashcards.data.findIndex(
+        const cardIndex = props.flashcards.data.findIndex(
             (deleteCard) => deleteCard.id === currentCard.value.id
         );
         if (cardIndex !== -1) {
             // Remove the card from the array
-            flashcards.data.splice(currentCard.value, 1);
+            props.flashcards.data.splice(currentCard.value, 1);
             // Update the deck in the database with the updated cards array
             await router.delete(
                 route("flashcard.destroy", { flashcard: currentCard.value }),
@@ -161,7 +161,7 @@ const deleteCard = async () => {
 </script>
 <template>
     <Head>
-        <title>Update {{ deck.title }}</title>
+        <title>Update {{ props.deck.title }}</title>
     </Head>
     <AuthenticatedLayout>
         <template #header>
@@ -173,7 +173,7 @@ const deleteCard = async () => {
                         <h2
                             class="font-semibold text-xl text-gray-800 leading-tight"
                         >
-                            {{ deck.title }}
+                            {{ props.deck.title }}
                         </h2>
                         <div
                             data-testid="edit-deck-title-icon"
@@ -244,7 +244,7 @@ const deleteCard = async () => {
                                             <label
                                                 for="title"
                                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                                >{{ deck.title }}</label
+                                                >{{ props.deck.title }}</label
                                             >
                                             <input
                                                 data-testid="edit-deck-input"
@@ -330,8 +330,8 @@ const deleteCard = async () => {
                 <CreateCardModal
                     :show="addCardModal"
                     @close="showAddCard"
-                    :deckId="deck.id"
-                    :deckUser="deck.user_id"
+                    :deckId="props.deck.id"
+                    :deckUser="props.deck.user_id"
                 />
             </div>
         </template>
@@ -740,7 +740,7 @@ const deleteCard = async () => {
                         <!-- Pagination Links -->
                         <div class="flex justify-center items-center">
                             <NewPagination
-                                :links="flashcards.links"
+                                :links="props.flashcards.links"
                                 @navigate="fetchDecks"
                                 :from="paginationProperties.from"
                                 :to="paginationProperties.to"
@@ -750,7 +750,9 @@ const deleteCard = async () => {
                     </div>
 
                     <!-- Display All Cards-->
-                    <div v-if="!searchInput && flashcards.data.length > 0">
+                    <div
+                        v-if="!searchInput && props.flashcards.data.length > 0"
+                    >
                         <table
                             class="w-full text-sm text-left rtl:text-right p-10"
                         >
@@ -798,7 +800,7 @@ const deleteCard = async () => {
                             </thead>
                             <tbody>
                                 <tr
-                                    v-for="flashcard in flashcards.data"
+                                    v-for="flashcard in props.flashcards.data"
                                     data-testid="flashcard-item"
                                     :key="flashcard.id"
                                     class="border-b border-gray-200 dark:border-gray-700 text-black"
@@ -1130,11 +1132,11 @@ const deleteCard = async () => {
                         <!-- Pagination Links -->
                         <div class="flex justify-center items-center">
                             <NewPagination
-                                :links="flashcards.links"
+                                :links="props.flashcards.links"
                                 @navigate="fetchDecks"
-                                :from="flashcards.from"
-                                :to="flashcards.to"
-                                :total="flashcards.total"
+                                :from="props.flashcards.from"
+                                :to="props.flashcards.to"
+                                :total="props.flashcards.total"
                             />
                         </div>
                     </div>

@@ -5,7 +5,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import ErrorToast from "@/Components/ErrorToast.vue";
 import NewPagination from "@/Components/NewPagination.vue";
 
-const { availableDecks } = defineProps({ availableDecks: Object });
+const props = defineProps({ availableDecks: Object });
 
 const page = usePage();
 
@@ -143,7 +143,7 @@ const submit = async () => {
                             </thead>
                             <tbody>
                                 <tr
-                                    v-for="deck in availableDecks.data"
+                                    v-for="deck in props.availableDecks.data"
                                     :key="deck.id"
                                     class="border-b border-gray-200 dark:border-gray-700 text-black"
                                 >
@@ -170,11 +170,11 @@ const submit = async () => {
                         </table>
                         <div class="flex justify-center items-center">
                             <NewPagination
-                                :links="availableDecks.links"
+                                :links="props.availableDecks.links"
                                 @navigate="fetchDecks"
-                                :from="availableDecks.from"
-                                :to="availableDecks.to"
-                                :total="availableDecks.total"
+                                :from="props.availableDecks.from"
+                                :to="props.availableDecks.to"
+                                :total="props.availableDecks.total"
                             />
                         </div>
                     </div>

@@ -3,17 +3,16 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, usePage, useForm, router } from "@inertiajs/vue3";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
 import SuccessToast from "@/Components/SuccessToast.vue";
 import ErrorToast from "@/Components/ErrorToast.vue";
-import AddDeckModal from "@/Components/AddDeckModal.vue";
 import DeleteModal from "@/Components/DeleteModal.vue";
 import DeleteGroupModal from "@/Components/DeleteModal.vue";
 import RemoveDeckModal from "@/Components/DeleteModal.vue";
 import SearchBar from "@/Components/SearchBar.vue";
 import NewPagination from "@/Components/NewPagination.vue";
 
-const { group, userDecks } = defineProps({
+const props = defineProps({
     group: Object,
     userDecks: Object,
 });
@@ -38,7 +37,7 @@ const fetchDecks = (url) => {
 };
 
 const form = useForm({
-    title: group.title,
+    title: props.group.title,
 });
 
 const handleSearch = (input) => {
@@ -69,11 +68,14 @@ const showEditTitleModal = () => {
 
 const editTitle = async () => {
     try {
-        await form.patch(route("group.updateTitle", { group: group.id }), {
-            onSuccess: () => {
-                showEditTitle.value = false;
-            },
-        });
+        await form.patch(
+            route("group.updateTitle", { group: props.group.id }),
+            {
+                onSuccess: () => {
+                    showEditTitle.value = false;
+                },
+            }
+        );
     } catch (error) {
         page.props.flash.error = `Unable to update card. Error: ${error}`;
     }
@@ -89,7 +91,9 @@ const showKeepDecks = () => {
 
 const deleteKeepDecks = async () => {
     try {
-        await router.delete(route("group.keepDecks", { group: group.id }));
+        await router.delete(
+            route("group.keepDecks", { group: props.group.id })
+        );
     } catch (error) {
         page.props.flash.error = `Unable to delete group and keep decks. Error: ${error}`;
     }
@@ -101,7 +105,7 @@ const showDeleteGroup = () => {
 
 const deleteAll = async () => {
     try {
-        await router.delete(route("group.destroy", { group: group.id }));
+        await router.delete(route("group.destroy", { group: props.group.id }));
     } catch (error) {
         page.props.flash.error = `Unable to delete group. Error: ${error}`;
     }
@@ -125,7 +129,7 @@ const removeDeck = async () => {
 </script>
 
 <template>
-    <Head :title="group.title" />
+    <Head :title="props.group.title" />
     <AuthenticatedLayout>
         <template #header>
             <div class="flex flex-row flex-wrap justify-between items-center">
@@ -136,7 +140,7 @@ const removeDeck = async () => {
                         <h2
                             class="font-semibold text-xl text-gray-800 leading-tight"
                         >
-                            {{ group.title }}
+                            {{ props.group.title }}
                         </h2>
                         <div
                             data-testid="edit-group-title-icon"
@@ -207,7 +211,7 @@ const removeDeck = async () => {
                                             <label
                                                 for="title"
                                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                                >{{ group.title }}</label
+                                                >{{ props.group.title }}</label
                                             >
                                             <input
                                                 data-testid="edit-group-input"
@@ -249,7 +253,11 @@ const removeDeck = async () => {
                 <div class="flex flex-row justify-evenly items-center">
                     <Link
                         data-testid="add-deck"
-                        :href="route('group.showAddDeck', { group: group.id })"
+                        :href="
+                            route('group.showAddDeck', {
+                                group: props.group.id,
+                            })
+                        "
                         as="button"
                         class="flex flex-row gap-2 justify-center items-center focus:outline-none text-white bg-purple-700 hover:bg-red-800 focus:ring-4 focus:ring-purple-300 font-bold rounded-lg text-sm px-2 py-1 md:mt-0 md:px-5 md:py-2.5 me-2 mt-2 mb-2 dark:bg-purple-700 dark:hover:bg-purple-500 dark:focus:ring-purple-900"
                     >
@@ -438,14 +446,14 @@ const removeDeck = async () => {
 
             <!-- All Decks (when no search input) -->
             <div
-                v-if="!searchInput && userDecks.data.length > 0"
+                v-if="!searchInput && props.userDecks.data.length > 0"
                 class="flex flex-col flex-wrap justify-center items-center gap-4"
             >
                 <div
                     class="flex flex-row flex-wrap justify-center items-center gap-4"
                 >
                     <div
-                        v-for="deck in userDecks.data"
+                        v-for="deck in props.userDecks.data"
                         :key="deck.id"
                         class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-sky-950 dark:border-sky-950 mb-2 w-80 h-80 flex flex-col justify-between"
                     >
@@ -492,11 +500,11 @@ const removeDeck = async () => {
                 </div>
                 <!-- Pagination Links -->
                 <NewPagination
-                    :links="userDecks.links"
+                    :links="props.userDecks.links"
                     @navigate="fetchDecks"
-                    :from="userDecks.from"
-                    :to="userDecks.to"
-                    :total="userDecks.total"
+                    :from="props.userDecks.from"
+                    :to="props.userDecks.to"
+                    :total="props.userDecks.total"
                 />
             </div>
 
@@ -505,7 +513,7 @@ const removeDeck = async () => {
                 v-if="
                     !searchInput &&
                     searchResults.length === 0 &&
-                    userDecks.data.length === 0
+                    props.userDecks.data.length === 0
                 "
                 class="flex flex-col justify-center items-center mt-36"
             >

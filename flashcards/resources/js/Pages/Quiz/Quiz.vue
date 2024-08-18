@@ -3,7 +3,7 @@ import { ref, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 
-const { deck, flashcards } = defineProps({ deck: Object, flashcards: Object });
+const props = defineProps({ deck: Object, flashcards: Object });
 
 const startQuiz = ref(false);
 const currentCards = ref([]);
@@ -18,7 +18,7 @@ const numRandomAnswers = 2;
 const showScore = ref(false);
 const showCorrectAnswers = ref(false);
 const showIncorrectAnswers = ref(false);
-//shuffles the flashcards array using shuffleDeck, maps each card to a new object with shuffled answers using getRandomAnswers, & assigns the result to currentCards.value
+
 onMounted(() => {
     newQuiz();
 });
@@ -92,7 +92,7 @@ const scrollToTop = () => {
 };
 
 const newQuiz = () => {
-    currentCards.value = shuffleDeck([...flashcards]).map((card) => ({
+    currentCards.value = shuffleDeck([...props.flashcards]).map((card) => ({
         ...card,
         answers: getRandomAnswers(card.answer, card),
     }));
@@ -123,14 +123,14 @@ const toggleIncorrectAnswers = () => {
 
 <template>
     <Head>
-        <title>Quiz: {{ deck.title }}</title>
+        <title>Quiz: {{ props.deck.title }}</title>
     </Head>
     <AuthenticatedLayout>
         <div class="flex justify-center items-center">
             <h1
                 class="mt-6 mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-800 flex justify-center items-center"
             >
-                Quiz: {{ deck.title }}
+                Quiz: {{ props.deck.title }}
             </h1>
             <div v-if="showScore" class="flex justify-center items-center m-2">
                 <div

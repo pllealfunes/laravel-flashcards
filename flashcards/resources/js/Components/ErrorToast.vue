@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
-const { message } = defineProps(["message"]);
+const props = defineProps(["message"]);
 const isVisible = ref(true);
 
 // Automatically hide the toast after 5 seconds
@@ -32,6 +32,6 @@ onMounted(() => {
             />
         </svg>
 
-        {{ message }}
+        {{ props.message }}
     </div>
 </template>

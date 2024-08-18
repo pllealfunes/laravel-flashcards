@@ -3,7 +3,7 @@ import { ref, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 
-const { deck, flashcards } = defineProps({ deck: Object, flashcards: Array });
+const props = defineProps({ deck: Object, flashcards: Array });
 
 const currentCards = ref([]);
 const flippedStates = ref([]);
@@ -24,9 +24,9 @@ const incorrectAttempts = ref(0);
 const startRound = () => {
     // Ensure the correct number of cards is selected and shuffled
     gameCards.value =
-        flashcards.length <= numCardsNeeded
-            ? flashcards
-            : getRandomCards(flashcards, numCardsNeeded);
+        props.flashcards.length <= numCardsNeeded
+            ? props.flashcards
+            : getRandomCards(props.flashcards, numCardsNeeded);
 
     // Shuffle questions and answers together
     answersArray.value = gameCards.value.map((flashcard) => ({
@@ -168,7 +168,7 @@ const compareCards = () => {
 
     const questionCard = firstCard.type === "question" ? firstCard : secondCard;
     const answerCard = firstCard.type === "answer" ? firstCard : secondCard;
-    const question = flashcards.find(
+    const question = props.flashcards.find(
         (card) => card.question === currentCards.value[questionCard.index].value
     );
     const answer = answersArray.value[answerCard.index];
@@ -219,7 +219,7 @@ const setCardStyles = (
         <h1
             class="mt-6 mb-6 text-4xl font-extrabold leading-none tracking-tight text-gray-800 flex justify-center items-center"
         >
-            Memory Game: {{ deck.title }}
+            Memory Game: {{ props.deck.title }}
         </h1>
         <div class="flex flex-col justify-center items-center">
             <button

@@ -4,7 +4,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import draggable from "vuedraggable";
 
-const { deck, flashcards } = defineProps({ deck: Object, flashcards: Array });
+const props = defineProps({ deck: Object, flashcards: Array });
 
 const answersArray = ref([]);
 const questionsArray = ref([]);
@@ -24,9 +24,9 @@ const incorrectAttempts = ref(0);
 const startRound = () => {
     // If there are 4 or fewer cards, display them all; otherwise, pick 4 random cards
     gameCards.value =
-        flashcards.length <= numCardsNeeded
-            ? flashcards
-            : getRandomCards(flashcards, 4);
+        props.flashcards.length <= numCardsNeeded
+            ? props.flashcards
+            : getRandomCards(props.flashcards, 4);
 };
 
 // Function to get random cards from the flashcards array
@@ -190,7 +190,7 @@ const compareCards = (draggedCard, droppedCard) => {
     const questionCard = firstCard.type === "question" ? firstCard : secondCard;
     const answerCard = firstCard.type === "answer" ? firstCard : secondCard;
 
-    const question = flashcards.find(
+    const question = props.flashcards.find(
         (card) => card.question === questionCard.value
     );
 
@@ -224,7 +224,7 @@ const setCardStyles = (firstCard, secondCard, style, timeout, hiddenStyle) => {
         <h1
             class="mt-6 mb-6 text-4xl font-extrabold leading-none tracking-tight text-gray-800 flex justify-center items-center"
         >
-            Matching Game: {{ deck.title }}
+            Matching Game: {{ props.deck.title }}
         </h1>
         <div class="flex flex-col justify-center items-center">
             <button

@@ -8,7 +8,7 @@ import AddDeckModal from "@/Components/AddDeckModal.vue";
 import NewPagination from "@/Components/NewPagination.vue";
 import SearchBar from "@/Components/SearchBar.vue";
 
-const { availableDecks, groupId } = defineProps({
+const props = defineProps({
     availableDecks: Object,
     groupId: String,
 });
@@ -30,7 +30,7 @@ const handleSearch = (input) => {
 };
 
 const searchResults = computed(() => {
-    return availableDecks.data.filter((deck) => {
+    return props.availableDecks.data.filter((deck) => {
         return deck.title
             .toLowerCase()
             .includes(searchInput.value.toLowerCase());
@@ -59,7 +59,7 @@ const addDeck = async () => {
     try {
         form.decks = checkedDecks;
         await form.put(
-            route("group.addDeck", { group: Number(groupId) }),
+            route("group.addDeck", { group: Number(props.groupId) }),
             {
                 preserveState: (page) =>
                     Object.keys(page.props.errors).length > 0,
@@ -195,7 +195,7 @@ const addDeck = async () => {
                         <!-- Pagination Links -->
                         <div class="flex justify-center items-center">
                             <NewPagination
-                                :links="availableDecks.links"
+                                :links="props.availableDecks.links"
                                 @navigate="fetchDecks"
                                 :from="paginationProperties.from"
                                 :to="paginationProperties.to"
@@ -206,7 +206,9 @@ const addDeck = async () => {
                 </div>
 
                 <!-- Display All Cards-->
-                <div v-if="!searchInput && availableDecks.data.length > 0">
+                <div
+                    v-if="!searchInput && props.availableDecks.data.length > 0"
+                >
                     <form @submit.prevent="submit">
                         <table class="w-full text-sm text-left rtl:text-right">
                             <thead
@@ -226,7 +228,7 @@ const addDeck = async () => {
                             </thead>
                             <tbody>
                                 <tr
-                                    v-for="deck in availableDecks.data"
+                                    v-for="deck in props.availableDecks.data"
                                     :key="deck.id"
                                     class="border-b border-gray-200 dark:border-gray-700 text-black"
                                 >
@@ -254,11 +256,11 @@ const addDeck = async () => {
                         <!-- Pagination Links -->
                         <div class="flex justify-center items-center">
                             <NewPagination
-                                :links="availableDecks.links"
+                                :links="props.availableDecks.links"
                                 @navigate="fetchDecks"
-                                :from="availableDecks.from"
-                                :to="availableDecks.to"
-                                :total="availableDecks.total"
+                                :from="props.availableDecks.from"
+                                :to="props.availableDecks.to"
+                                :total="props.availableDecks.total"
                             />
                         </div>
                     </form>
@@ -293,7 +295,7 @@ const addDeck = async () => {
                 v-if="
                     !searchInput &&
                     searchResults.length === 0 &&
-                    availableDecks.data.length === 0
+                    props.availableDecks.data.length === 0
                 "
                 class="flex flex-col justify-center items-center mt-36"
             >
