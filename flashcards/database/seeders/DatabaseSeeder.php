@@ -15,18 +15,33 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-         // Create a single user
-        $user = User::factory()->create();
+        // Create specific users for testing
+        $specificUsers = [
+            [
+                'name' => 'Beth Thomas',
+                'email' => 'beth99@email.com',
+                'password' => bcrypt('bethmary99'),
+            ],
+            [
+                'name' => 'John Doe',
+                'email' => 'john.doe@example.com',
+                'password' => bcrypt('password123'),
+            ],
+        ];
 
-        // Create a single deck associated with the user
-        $deck = Deck::factory()->create([
-            'user_id' => $user->id,
-        ]);
+        foreach ($specificUsers as $userData) {
+            $user = User::create($userData);
 
-        // Create 20 flashcards associated with the deck and user
-        Flashcard::factory()->count(20)->create([
-            'deck_id' => $deck->id,
-            'user_id' => $user->id,
-        ]);
+            // Create a deck associated with the specific user
+            $deck = Deck::factory()->create([
+                'user_id' => $user->id,
+            ]);
+
+            // Create flashcards associated with the specific user's deck
+            Flashcard::factory(20)->create([
+                'deck_id' => $deck->id,
+                'user_id' => $user->id,
+            ]);
+        }
     }
 }
